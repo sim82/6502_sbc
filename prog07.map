@@ -1,0 +1,32 @@
+Modules list:
+-------------
+prog07.o:
+    CODE              Offs=000000  Size=000016  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000100  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000012  Align=00001  Fill=0000
+    VECTORS           Offs=000000  Size=000002  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+ZEROPAGE              000000  000011  000012  00001
+CODE                  008000  008015  000016  00001
+RODATA                008016  008115  000100  00001
+VECTORS               00FFFC  00FFFD  000002  00001
+
+
+Exports list by name:
+---------------------
+
+
+
+Exports list by value:
+----------------------
+
+
+
+Imports list:
+-------------
+
