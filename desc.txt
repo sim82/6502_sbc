@@ -1,0 +1,32 @@
+prog1: 
+ - reset vector: jmp 0x0000
+ - couple of NOPS
+ - abs jmp back to 0x0000
+
+
+prog2:
+ - reset vector: jmp 0x0200
+ - couple of NOPS, jmp 0x1000
+ - write to 0x6000
+ - couple of NOPS, jmp abs 0x2000
+ - etc
+ - jmp 0x0200
+
+ prog3:
+ - reset vector: jmp 0x8000
+ - various writes to io region (0x6000)
+
+pld change: move io to 0xe000
+ 
+prog4:
+ - reset vector: jmp 0x8000
+ - read / write: ROM, RAM, IO
+
+prog5: 
+ - count up 
+ - reset vector: jmp 0x8000
+ - lda 0x0100
+ - sta 0xe000 (write a to output register)
+ - inc a / ror a or whatever
+ - sta 0x0100
+ - jmp to sta
