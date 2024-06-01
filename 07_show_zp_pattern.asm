@@ -26,4 +26,4 @@ loop:
 
 .RODATA
 pattern:
-.incbin "prog07_pattern.bin"
+.incbin "07_pattern.bin"
