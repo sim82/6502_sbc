@@ -59,9 +59,9 @@ Pin 20 = NC           S0 = 0   S1 = 0
  47  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  48  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 19 = NC           S0 = 0   S1 = 0
- 49  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 50  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+Pin 19 = IOR          S0 = 0   S1 = 1
+ 49  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+ 50  x--- x--- ---- ---- ---- ---- ---- -x-- x--- x--- ----
  51  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  52  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  53  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -131,8 +131,8 @@ Pin 16 = RAM          S0 = 0   S1 = 1
 
 Pin 15 = ROM          S0 = 0   S1 = 1
 111  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-112  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- x---
-113  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+112  ---- ---- ---- ---- ---- ---- ---- ---- -x-- -x-- x---
+113  ---- ---- ---- ---- ---- ---- ---- x--- ---- ---- x---
 114  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 115  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 116  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -142,7 +142,7 @@ Pin 15 = ROM          S0 = 0   S1 = 1
 120  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 121  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 14 = IOS          S0 = 0   S1 = 1
+Pin 14 = IOW          S0 = 0   S1 = 1
 122  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 123  x--- -x-- ---- ---- ---- ---- ---- -x-- x--- x--- x---
 124  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx

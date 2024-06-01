@@ -15,12 +15,12 @@
   11   | A15      | Input
   12   | GND      | GND
   13   | /OE      | Input
-  14   | IOS      | Output
+  14   | IOW      | Output
   15   | ROM      | Output
   16   | RAM      | Output
   17   | MEMOE    | Output
   18   | MEMWE    | Output
-  19   | NC       | NC
+  19   | IOR      | Output
   20   | NC       | NC
   21   | NC       | NC
   22   | NC       | NC

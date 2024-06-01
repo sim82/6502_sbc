@@ -2,12 +2,13 @@ GAL22V10
 CombTest
 
 Clock RWB   NC    NC    NC     NC     NC    A12   A13   A14   A15   GND 
-/OE   IOS  ROM   RAM    MEMOE  MEMWE  NC    NC    NC    NC    NC    VCC
+/OE   IOW  ROM   RAM    MEMOE  MEMWE  IOR   NC    NC    NC    NC    VCC
 
 
 
-/IOS = /RWB * /A12 * A13 * A14 * A15 * Clock
-/ROM = A15
+/IOW = /RWB * /A12 * A13 * A14 * A15 * Clock
+/IOR = RWB * /A12 * A13 * A14 * A14 * Clock
+/ROM = A15 * /A14 * /A13 + A15 * A12
 /RAM = /A15 
 /MEMOE = RWB * Clock
 /MEMWE = /RWB * Clock
