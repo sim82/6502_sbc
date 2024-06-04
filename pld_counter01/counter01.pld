@@ -1,0 +1,26 @@
+GAL22V10
+CombTest
+
+Clock Clear NC    NC    NC     NC     NC    NC    NC    NC    NC    GND 
+/OE   Q7    Q8    Q9    Q6     Q5     Q4    Q3    Q2    Q1    Q0    VCC
+
+
+
+Q0.R =   /Clear * /Q0
+Q1.R =   /Clear * /Q1 * Q0  + /Clear * Q1 * /Q0
+
+Q2.R =   /Clear * Q2 * /Q1  + /Clear * Q2 * /Q0  + /Clear * /Q2 * Q1 * Q0
+
+Q3.R =   /Clear * Q3 * /Q2 + /Clear * Q3 * /Q1 + /Clear * Q3 * /Q0 + /Clear * /Q3 * Q2 * Q1 * Q0
+Q4.R =   /Clear * Q4 * /Q3 + /Clear * Q4 * /Q2 + /Clear * Q4 * /Q1 + /Clear * Q4 * /Q0 + /Clear * /Q4 * Q3 * Q2 * Q1 * Q0
+
+Q5.R =   /Clear * Q5 * /Q4 + /Clear * Q5 * /Q3 + /Clear * Q5 * /Q2 + /Clear * Q5 * /Q1 + /Clear * Q5 * /Q0 + /Clear * /Q5 * Q4 * Q3 * Q2 * Q1 * Q0
+
+Q6.R =   /Clear * Q6 * /Q5 + /Clear * Q6 * /Q4 + /Clear * Q6 * /Q3 + /Clear * Q6 * /Q2 + /Clear * Q6 * /Q1 + /Clear * Q6 * /Q0 + /Clear * /Q6 * Q5 * Q4 * Q3 * Q2 * Q1 * Q0
+Q7.R =   /Clear * Q7 * /Q6 + /Clear * Q7 * /Q5 + /Clear * Q7 * /Q4 + /Clear * Q7 * /Q3 + /Clear * Q7 * /Q2 + /Clear * Q7 * /Q1 + /Clear * Q7 * /Q0 + /Clear * /Q7 * Q6 * Q5 * Q4 * Q3 * Q2 * Q1 * Q0
+
+Q8.R =   /Clear * Q8 * /Q7 + /Clear * Q8 * /Q6 + /Clear * Q8 * /Q5 + /Clear * Q8 * /Q4 + /Clear * Q8 * /Q3 + /Clear * Q8 * /Q2 + /Clear * Q8 * /Q1 + /Clear * Q8 * /Q0 + /Clear * /Q8 * Q7 * Q6 * Q5 * Q4 * Q3 * Q2 * Q1 * Q0
+Q9.R =   /Clear * Q9 * /Q8 + /Clear * Q9 * /Q7 + /Clear * Q9 * /Q6 + /Clear * Q9 * /Q5 + /Clear * Q9 * /Q4 + /Clear * Q9 * /Q3 + /Clear * Q9 * /Q2 + /Clear * Q9 * /Q1 + /Clear * Q9 * /Q0 + /Clear * /Q9 * Q8 * Q7 * Q6 * Q5 * Q4 * Q3 * Q2 * Q1 * Q0
+DESCRIPTION
+
+Simple test of combinatorial logic.
