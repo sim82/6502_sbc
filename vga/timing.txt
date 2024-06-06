@@ -1,0 +1,25 @@
+
+28 MHz:
+
+640 x 400
+hor:
+fporch: 16
+sync: 96
+bporch: 48
+
+vert:
+fproch: 11
+sync: 4
+bporch: 31
+
+Modeline "640x400"   28   640 656 752 800   400 411 415 446  -hsync -vsync
+14 MHz:
+half:
+320
+8
+48
+24
+
+320 328 376 400
+
+

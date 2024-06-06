@@ -1,0 +1,17 @@
+GAL22V10
+CombTest
+
+Clock D0    D1    D2    D3     D4     D5    D6    D7    D8    D9    GND 
+/OE   Q7    Q8    Q9    Q6     Q5     Q4    Q3    Q2    Q1    Q0    VCC
+
+
+Q0 = /D0 * /D1 * /D2 * D3 * /D4 * /D5 * D6 * /D7 * D8 * /D9
+Q1 = /D0 * /D1 * /D2 * D3 * D4 * D5 * D6 * /D7 * D8 * /D9
+Q2 = /D0 * /D1 * /D2 * /D3 * D4 * /D5 * /D6 * D7 * D8 * /D9
+
+/Q4.R = /Q4 * Q0 + Q4 * /Q1  
+
+
+DESCRIPTION
+
+Simple test of combinatorial logic.
