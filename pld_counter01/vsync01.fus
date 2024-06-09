@@ -3,9 +3,9 @@
 AR
   0  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 23 = Q0           S0 = 1   S1 = 1
+Pin 23 = EV           S0 = 1   S1 = 1
   1  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-  2  ---- x--- x--- -x-- x--- -x-- -x-- x--- x--- -x-- -x--
+  2  ---- x--- x--- x--- x--- -x-- -x-- -x-- x--- x--- -x--
   3  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   4  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   5  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -14,9 +14,9 @@ Pin 23 = Q0           S0 = 1   S1 = 1
   8  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   9  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 22 = Q1           S0 = 1   S1 = 1
+Pin 22 = BS           S0 = 1   S1 = 1
  10  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 11  ---- x--- x--- x--- x--- x--- -x-- x--- x--- -x-- -x--
+ 11  ---- -x-- x--- -x-- -x-- -x-- -x-- x--- x--- x--- -x--
  12  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  13  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  14  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -27,9 +27,9 @@ Pin 22 = Q1           S0 = 1   S1 = 1
  19  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  20  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 21 = Q2           S0 = 1   S1 = 1
+Pin 21 = ES           S0 = 1   S1 = 1
  21  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 22  ---- x--- x--- x--- -x-- -x-- -x-- x--- -x-- -x-- x---
+ 22  ---- -x-- x--- x--- -x-- -x-- -x-- x--- x--- x--- -x--
  23  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  24  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  25  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -42,9 +42,9 @@ Pin 21 = Q2           S0 = 1   S1 = 1
  32  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  33  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 20 = Q3           S0 = 0   S1 = 0
- 34  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 35  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+Pin 20 = RES          S0 = 1   S1 = 1
+ 34  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+ 35  ---- -x-- x--- x--- -x-- -x-- -x-- x--- -x-- -x-- x---
  36  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  37  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  38  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -59,10 +59,10 @@ Pin 20 = Q3           S0 = 0   S1 = 0
  47  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  48  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 19 = Q4           S0 = 0   S1 = 0
+Pin 19 = SYNC         S0 = 0   S1 = 0
  49  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 50  --x- ---- ---- ---- --x- ---- ---- ---- ---- ---- ----
- 51  ---- ---x ---- ---- ---x ---- ---- ---- ---- ---- ----
+ 50  ---- --x- ---- ---- --x- ---- ---- ---- ---- ---- ----
+ 51  ---- ---- ---x ---- ---x ---- ---- ---- ---- ---- ----
  52  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  53  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  54  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -78,10 +78,10 @@ Pin 19 = Q4           S0 = 0   S1 = 0
  64  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  65  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 18 = Q5           S0 = 0   S1 = 0
- 66  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 67  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 68  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+Pin 18 = BLANK        S0 = 1   S1 = 0
+ 66  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+ 67  ---- ---- ---- --x- ---- --x- ---- ---- ---- ---- ----
+ 68  ---x ---- ---- ---- ---- ---x ---- ---- ---- ---- ----
  69  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  70  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  71  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -97,9 +97,9 @@ Pin 18 = Q5           S0 = 0   S1 = 0
  81  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  82  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 17 = Q6           S0 = 0   S1 = 0
- 83  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 84  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+Pin 17 = TEST         S0 = 1   S1 = 1
+ 83  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+ 84  ---- ---- ---- ---- x--- ---x ---- ---- ---- ---- ----
  85  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  86  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  87  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
