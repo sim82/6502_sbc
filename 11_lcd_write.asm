@@ -27,16 +27,20 @@ start:
 	jmp start
 
 check_busy:
+	ldy #$0
+busy_loop:
 	lda $e010
+	iny
 	and #$80
-	beq done
-	lda $0001
-	rol
-	adc #$0
-	sta $0001
+	bne busy_loop
+	; lda $0001
+	; rol
+	; adc #$0
+	; sta $0001
+	tya
 	sta $e000
-	jmp check_busy
-done:
+	; jmp check_busy
+; done:
 	rts
 .RODATA
 message:
