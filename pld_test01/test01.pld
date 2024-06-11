@@ -6,7 +6,7 @@ Clock RWB   NC    NC    NC     NC     NC    A12   A13   A14   A15   GND
 
 
 
-/IOW = /RWB * /A12 * A13 * A14 * A15 * Clock
+/IOW =  /A12 * A13 * A14 * A15 * Clock
 /IOR = RWB * /A12 * A13 * A14 * A14 * Clock
 /ROM = A15 * /A14 * /A13 + A15 * A12
 /RAM = /A15 

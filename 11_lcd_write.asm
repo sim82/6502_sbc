@@ -9,22 +9,35 @@
 	lda #$01
 	sta $0001
 reset:
+	jsr check_busy
 	lda #$f
-	sta $e011
+	sta $e010
+
+	jsr check_busy
 	lda #$1
-	sta $e011
+	sta $e010
+
 	ldx #$0
 start:
+	jsr check_busy
 	lda message, X
 	beq reset
-	sta $e012
+	sta $e011
 	inx
+	jmp start
+
+check_busy:
+	lda $e010
+	and #$80
+	beq done
 	lda $0001
 	rol
 	adc #$0
 	sta $0001
 	sta $e000
-	jmp start
+	jmp check_busy
+done:
+	rts
 .RODATA
 message:
 	.asciiz "Hello, World!"

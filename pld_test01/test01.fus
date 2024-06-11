@@ -144,7 +144,7 @@ Pin 15 = ROM          S0 = 0   S1 = 1
 
 Pin 14 = IOW          S0 = 0   S1 = 1
 122  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-123  x--- -x-- ---- ---- ---- ---- ---- -x-- x--- x--- x---
+123  x--- ---- ---- ---- ---- ---- ---- -x-- x--- x--- x---
 124  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 125  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 126  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
