@@ -1,0 +1,19 @@
+GAL22V10
+CombTest
+
+Clock RWB   NC    NC    NC     NC     NC    A12   A13   A14   A15   GND 
+NC    ROM   RAM   IO    OE    WE     NC     NC    NC    NC    NC    VCC
+
+
+
+/ROM = A15 * /A14 * /A13 + A15 * A12
+/RAM = /A15 
+/IO =  /A12 * A13 * A14 * A15 * Clock
+/OE = RWB * Clock
+/WE = /RWB * Clock
+
+
+
+DESCRIPTION
+
+Simple test of combinatorial logic.
