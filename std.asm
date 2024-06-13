@@ -43,16 +43,16 @@ disp_init:
 	sta DISP_POSX
 	sta DISP_POSY
 
- 	jsr check_busy
-	lda #$f             ; display on, cursor blink
+	jsr check_busy
+	lda #%00111000      ; 8bit, two row, default font?
 	sta IO_DISP_CTRL
 
 	jsr check_busy
 	lda #$1             ; clear display
 	sta IO_DISP_CTRL
 
-	jsr check_busy
-	lda #%00111000      ; 8bit, two row, default font?
+ 	jsr check_busy
+	lda #$f             ; display on, cursor blink
 	sta IO_DISP_CTRL
 	rts
 
@@ -114,32 +114,23 @@ disp_linefeed:
 	cmp #$0
 	bne @line1
 @line0:
-	lda #$A8  ; start of line1: 40
+	lda #$A8  ; start of line1: 64
 	sta IO_DISP_CTRL
-	jsr check_busy
-	lda #$40
-	sta IO_DISP_DATA
 	pla
 	rts
 @line1:
 	cmp #$1
-	bne @line2
+	bne @line2 
 	lda #$94 ; start of line2: 20
 	sta IO_DISP_CTRL
-	jsr check_busy
-	lda #$41
-	sta IO_DISP_DATA
 	pla
 	rts
 
 @line2:
 	cmp #$2
 	bne @line3
-	lda #$BC ; start op line3: 60
+	lda #$D4; start op line3: 84
 	sta IO_DISP_CTRL
-	jsr check_busy
-	lda #$42
-	sta IO_DISP_DATA
 	pla
 	rts
 
@@ -148,9 +139,5 @@ disp_linefeed:
 	sta DISP_POSY
 	lda #$1 ; init
 	sta IO_DISP_CTRL
-
-	jsr check_busy
-	lda #$43
-	sta IO_DISP_DATA
 	pla
 	rts
