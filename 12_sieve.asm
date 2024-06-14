@@ -70,6 +70,7 @@ hello:
 
 	sta WORK     ; eliminate 0 & 1
 	sta WORK+1
+	lda #$FF
 	pha ; sentiel for output
 
 	ldx #$02
@@ -115,21 +116,22 @@ dump_stack:
 	lda #$00
 	sta NUM1+1
 	pla
+	cmp #$FF
 	; txa
 	beq end_loop
 	sta IO_GPIO0
 	sta NUM1
-	; jsr out_dec
-	; jsr check_busy
-	; lda #$20
-	; lda IO_DISP_DATA
+	jsr out_dec
+	jsr check_busy
+	lda #$20
+	lda IO_DISP_DATA
 
 	inx
-	; txa
-	; and #$3
-	; cmp #$3
-	; bne @dump_loop
-	; jsr disp_linefeed
+	txa
+	and #$3
+	cmp #$3
+	bne @dump_loop
+	jsr disp_linefeed
 	jmp @dump_loop
 
 end_loop: ; end
