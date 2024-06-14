@@ -6,15 +6,19 @@
 .SEGMENT "IO"
 	.BYTE $55
 	
-WORK = $0300
+WORK = $1000
 ; NUM1 = $0000
 ; NUM2 = $0002
 ; REM = $0004
 CUR_PRIME = $0080
+CHECK_SUM = $0082
+NUM_PRIMES = $0084
 
 .CODE
-	lda #$01
-	sta $0001
+	lda #$00
+	sta CHECK_SUM
+	sta NUM_PRIMES
+
 reset:
 	jsr disp_init
 	
@@ -48,6 +52,9 @@ reset:
 ; 	dex
 ; 	bne @test_loop
 	
+	lda #$00
+	tax
+	tay
 hello:
 	jsr check_busy
 	lda message, X
@@ -74,6 +81,12 @@ elim_loop:
 	beq @skip ; skip eliminated value
 
 	txa ; a = current (prime * n) to filter forward
+	clc
+	adc CHECK_SUM
+	sta CHECK_SUM
+	inc NUM_PRIMES
+
+	txa ; restore a	
 	pha ; store output (testing)
 	sta IO_GPIO0
 	sta CUR_PRIME ; CUR_PRIME = current prime (for * n increments)
@@ -94,24 +107,30 @@ elim_loop:
 	jmp elim_loop
 	
 
-	ldx #$00
 dump_stack:
+	ldx #$01
+	lda CHECK_SUM
+	sta IO_GPIO0
+@dump_loop:
 	lda #$00
 	sta NUM1+1
 	pla
+	; txa
 	beq end_loop
+	sta IO_GPIO0
 	sta NUM1
-	jsr out_dec
-	lda #$20
-	lda IO_DISP_DATA
+	; jsr out_dec
+	; jsr check_busy
+	; lda #$20
+	; lda IO_DISP_DATA
 
 	inx
-	txa
-	and #$3
-	cmp #$3
-	bne dump_stack
-	jsr disp_linefeed
-	jmp dump_stack
+	; txa
+	; and #$3
+	; cmp #$3
+	; bne @dump_loop
+	; jsr disp_linefeed
+	jmp @dump_loop
 
 end_loop: ; end
 	nop

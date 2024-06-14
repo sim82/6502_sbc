@@ -85,7 +85,7 @@ out_dec:
 	sta NUM2+1
 
 	jsr div16
-	jsr check_busy
+	; jsr check_busy
 	lda REM
 	clc
 	adc #$30
@@ -95,9 +95,9 @@ out_dec:
 	ora NUM1+1
 	bne @loop
 @revloop:
-	jsr check_busy
 	pla
 	beq @end
+	jsr check_busy
 	sta IO_DISP_DATA
 	jmp @revloop
 	
