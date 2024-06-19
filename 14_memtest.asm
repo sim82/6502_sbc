@@ -9,9 +9,9 @@
 	
 .RODATA
 BEGADR:
-	.WORD $1000
+	.WORD $0200
 ENDADR:
-	.WORD $4000
+	.WORD $7f00
 		
 .CODE
 	; ORG	$0000
@@ -24,6 +24,7 @@ ACTUAL	=	$E6
 PATTERN =	$E5
 MEMPTR	=	$FA
 	jsr disp_init
+start:
 ;
 ; TEST MEMORY, STARTING AT BEGADR UPTO ENDADR
 ;
@@ -54,6 +55,7 @@ TSTFWD:
 	LDX	ENDADR+1
 	STX	ACTUAL+1
 TSTBWD:
+	STA IO_GPIO0
 	JSR	WALKBIT		;CHECK CELL
 	BNE	REPERR		;ERRORS?
 	LDA	#$FF  		;SET CELL TO $FF (DOUBLE ADDRESSING CHECK)
@@ -166,10 +168,17 @@ OUTXAH:
 	txa
 	sta NUM1
 	jsr out_dec
+	jsr disp_linefeed
 	
-	; lda #$55
+	bne end
+	jmp start
+end:
+		; lda #$55
 	; sta IO_GPIO0
 
+	lda #$55
 @loop:
+	
+	sta $00
 	jmp @loop
 
