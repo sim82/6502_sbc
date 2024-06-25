@@ -13,7 +13,7 @@
                           |                 |
                        NC |  5           20 | NC
                           |                 |
-                       NC |  6           19 | NC
+                       NC |  6           19 | SysClk
                           |                 |
                        NC |  7           18 | WE
                           |                 |

@@ -2,7 +2,7 @@ GAL22V10
 CombTest
 
 Clock RWB   NC    NC    NC     NC     NC    A12   A13   A14   A15   GND 
-NC    ROM   RAM   IO    OE    WE     NC     NC    NC    NC    NC    VCC
+NC    ROM   RAM   IO    OE    WE     SysClk NC    NC    NC    NC    VCC
 
 
 
@@ -11,6 +11,7 @@ NC    ROM   RAM   IO    OE    WE     NC     NC    NC    NC    NC    VCC
 /IO =  /A12 * A13 * A14 * A15 * Clock
 /OE = RWB * Clock
 /WE = /RWB * Clock
+SysClk = Clock
 
 
 

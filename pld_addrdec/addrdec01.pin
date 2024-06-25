@@ -20,7 +20,7 @@
   16   | IO       | Output
   17   | OE       | Output
   18   | WE       | Output
-  19   | NC       | NC
+  19   | SysClk   | Output
   20   | NC       | NC
   21   | NC       | NC
   22   | NC       | NC
