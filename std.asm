@@ -102,6 +102,10 @@ out_dec:
 	jmp @revloop
 	
 @end:
+	lda #$20
+	jsr check_busy
+	sta IO_DISP_DATA
+	
 	pla
 	rts
 
