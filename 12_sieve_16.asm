@@ -9,6 +9,7 @@
 WORK = $1000
 LOW_PRIMES = $1100
 NEXT_START = $1200
+HIGH_PRIMES = $1300
 ; NUM1 = $0000
 ; NUM2 = $0002
 ; REM = $0004
@@ -16,44 +17,17 @@ CUR_PRIME = $0080
 CHECK_SUM = $0082
 NUM_PRIMES = $0084
 TMP1 = $0086
+NUM_HIGH = $0088
+HIGH_BYTE = $008a
 
 .CODE
 	lda #$00
 	sta CHECK_SUM
 	sta NUM_PRIMES
 
+
 reset:
 	jsr disp_init
-	
-; 	; display addressing debug
-; 	ldx #80
-; 	lda #$30
-; @test_loop:
-; 	; pha
-; 	; txa
-; 	; ora #$80
-; 	; jsr check_busy
-; 	; sta IO_DISP_CTRL
-; 	; jsr check_busy
-; 	; pla
-; 	sta IO_DISP_DATA
-; 	clc
-; 	adc #1
-; 	cmp #$3A
-; 	bne @skip
-; 	lda #$30
-; @skip: 
-; 	ldy #$FF
-; @delay:
-; 	dey
-; 	bne @delay
-; 	jsr check_busy
-; 	pha
-; 	lda IO_DISP_CTRL
-; 	sta IO_GPIO0
-; 	pla
-; 	dex
-; 	bne @test_loop
 	
 	lda #$00
 	tax
@@ -67,10 +41,11 @@ hello:
 	jmp hello
 @after_hello:
 	jsr disp_linefeed
+
+
+calc_low:
 	jsr fill_work
-
 	lda #$00
-
 	sta WORK     ; eliminate 0 & 1
 	sta WORK+1
 	lda #$FF
@@ -79,8 +54,8 @@ hello:
 	ldx #$02
 	; stx LOW_PRIMES ; store 2 directly as first prime
 	; sta CUR_PRIME
-elim_loop:
-	beq dump_primes; end on x wrap around
+@elim_loop:
+	beq @break; end on x wrap around
 	lda WORK,X
 
 	beq @skip ; skip eliminated value
@@ -119,10 +94,69 @@ elim_loop:
 	ldx TMP1
 @skip:
 	inx
-	jmp elim_loop
+	jmp @elim_loop
 	
+@break:
+	jsr dump_primes
+	; jmp end_loop
+
+	lda #$00
+	sta HIGH_BYTE
+calc_high:
+	lda #$00
+	sta NUM_HIGH
+	inc HIGH_BYTE
+	jsr fill_work
+	ldy #$00
+	
+@elim_loop:
+	cpy NUM_PRIMES
+	beq @break
+
+	lda LOW_PRIMES,Y
+	sta CUR_PRIME
+	lda NEXT_START,Y
+@loop:
+	tax
+	lda #$00
+	sta WORK, X
+	txa
+	clc
+	adc CUR_PRIME
+	bcc @loop
+	sta NEXT_START, Y
+
+	iny
+	jmp @elim_loop
+@break:
+
+gen_high_primes:
+	ldy #$00
+@loop:
+	lda WORK,Y
+	beq @skip
+
+	ldx NUM_HIGH
+	tya
+	sta HIGH_PRIMES,X
+	inx
+	stx NUM_HIGH
+
+@skip:
+	iny
+	beq @break
+	jmp @loop
+@break:
+	jsr dump_primes_high
+	jmp end_loop
+
 
 dump_primes:
+	pha
+	txa
+	pha
+	tya
+	pha
 	ldx #$00
 	
 	lda #$00
@@ -149,14 +183,68 @@ dump_primes:
 	
 	inx
 	cpx NUM_PRIMES
-	beq end_loop
+	beq @break
 	txa
-	and #$3
-	cmp #$3
+	and #$1
+	cmp #$1
 	bne @dump_loop
 	jsr disp_linefeed
 	jmp @dump_loop
+@break:
+	pla
+	tay
+	pla
+	tax
+	pla
+	rts
 
+
+dump_primes_high:
+	pha
+	txa
+	pha
+	tya
+	pha
+	ldx #$00
+	
+	lda #$00
+	sta NUM1+1
+	lda NUM_HIGH
+	sta NUM1
+	jsr out_dec
+	lda #$20
+	lda IO_DISP_DATA
+	
+@dump_loop:
+	lda HIGH_BYTE
+	sta NUM1+1
+	lda HIGH_PRIMES,X
+	sta NUM1
+	jsr out_dec
+			
+
+	lda #$00
+	sta NUM1+1
+	lda NEXT_START,X
+	sta NUM1
+	jsr out_dec
+	
+	inx
+	cpx NUM_HIGH
+	beq @break
+	txa
+	and #$1
+	cmp #$1
+	bne @dump_loop
+	jsr disp_linefeed
+	jmp @dump_loop
+@break:
+	pla
+	tay
+	pla
+	tax
+	pla
+	rts
 
 end_loop: ; end
 	nop
