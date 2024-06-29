@@ -31,7 +31,7 @@ hello:
 	; Bit 3-0: baud divisor (1110 = 3840)
 	; write CR
 	lda #%00001110
-	sta IO_UART_CRFR1
+	sta IO_UART_CR1
 
 	; Bit 7: Select FR = 1
 	; Bit 6,5: Num Bits (11 = 8)
@@ -40,24 +40,47 @@ hello:
 	; Bit 1,0: DTR/RTS control (don't care)
 	; write FR
 	lda #%11100000
-	sta IO_UART_CRFR1
+	sta IO_UART_FR1
+
+	lda #%11000001
+	sta IO_UART_IER1
 
 	ldx #$00
 	lda #$55
 @loop:
+	; check transmit data register empty
+	lda IO_UART_ISR1
+	; sta IO_GPIO0
+
+	; and #%00000001
+	; beq @loop
+	; lda IO_UART_RDR1
+	; sta IO_GPIO0
+	; jmp @loop
+
+	
+	tay
+	and #%00000001
+	beq @write
+	lda IO_UART_RDR1
+	jsr check_busy
+	sta IO_DISP_DATA
+@write:
+	tya
+	and #%01000000
+	; sty IO_GPIO0
+	beq @loop
+	lda #$00
+	sta IO_GPIO0
 	lda message, x
 	bne @continue
 	ldx #$00
 	jmp @loop
 @continue:
-	sta IO_UART_TDRD1
-	lda IO_UART_CRFR1
-	sta NUM1
-	lda #$00
-	sta NUM1+1
-	jsr check_busy
-	jsr out_dec
+	sta IO_UART_TDR1
 	inx
+	lda #$FF
+	sta IO_GPIO0
 	jmp @loop
 		
 
@@ -65,5 +88,5 @@ hello:
 ; IO_UART_TDRD1  = $e023
 .RODATA
 message:
-	.byte "Hello, World!", $0A, $0D, $00
+	.byte "Hello, World!", $0D, $0A, $00
 	; .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqqrstuvwxyz"
