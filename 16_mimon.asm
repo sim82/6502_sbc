@@ -10,6 +10,8 @@ CUR_STATE = $0400
 STEP_SIZE = $0401
 POKE_NIBBLE0 = $0402
 
+ECHO_ON = $0404
+
 TARGET_ADDR = $80
 
 STATE_INIT = 0
@@ -43,6 +45,8 @@ hello:
 	sta TARGET_ADDR
 	lda #>IO_GPIO0
 	sta TARGET_ADDR+1
+	lda #$01
+	sta ECHO_ON
 	
 	; Bit 7: Select CR = 0
 	; Bit 6: CDR/ACR (don't care)
@@ -74,7 +78,10 @@ hello:
 	; jsr check_busy
 	; jsr out_dec
 	jsr uart_read_blocking
+	ldy ECHO_ON
+	beq @skip_echo
 	jsr uart_write_blocking
+@skip_echo:
 	jsr eval_state
 	jmp @loop
 
@@ -87,8 +94,12 @@ state_init:
 	beq @target
 	cmp #'a'
 	beq @enable_auto_inc
-	cmp #'n'
+	cmp #'A'
 	beq @disable_auto_inc
+	cmp #'e'
+	beq @enable_echo
+	cmp #'E'
+	beq @disable_echo
 	cmp #'r'
 	beq @run
 	rts
@@ -115,6 +126,19 @@ state_init:
 	sta IO_DISP_DATA
 	lda #$00
 	jmp set_step_size
+@enable_echo:
+	lda #'e'
+	sta IO_DISP_DATA
+	lda #$01
+	sta ECHO_ON
+	jmp goto_init
+
+@disable_echo:
+	lda #'E'
+	sta IO_DISP_DATA
+	lda #$00
+	sta ECHO_ON
+	jmp goto_init
 @run:
 	lda #'r' 
 	sta IO_DISP_DATA
