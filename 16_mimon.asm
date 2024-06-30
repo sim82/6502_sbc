@@ -23,16 +23,16 @@ STATE_TARGET3 = 6
 .CODE
 	jsr disp_init
 	
-; 	lda #$00
-; 	tax
-; 	tay
-; hello:
-; 	jsr check_busy
-; 	lda message, X
-; 	beq @after_hello
-; 	sta IO_DISP_DATA
-; 	inx
-; 	jmp hello
+	lda #$00
+	tax
+	tay
+hello:
+	jsr check_busy
+	lda message, X
+	beq @after_hello
+	sta IO_DISP_DATA
+	inx
+	jmp hello
 @after_hello:
 	jsr disp_linefeed
 
@@ -67,16 +67,58 @@ STATE_TARGET3 = 6
 
 		
 @loop:
-	lda #$00
-	sta NUM1+1
-	lda CUR_STATE
-	sta NUM1
-	jsr check_busy
-	jsr out_dec
+	; lda #$00
+	; sta NUM1+1
+	; lda CUR_STATE
+	; sta NUM1
+	; jsr check_busy
+	; jsr out_dec
 	jsr uart_read_blocking
 	jsr uart_write_blocking
 	jsr eval_state
 	jmp @loop
+
+		
+state_init:
+	pla
+	cmp #'p'
+	beq @poke
+	cmp #'t'
+	beq @target
+	cmp #'a'
+	beq @enable_auto_inc
+	cmp #'n'
+	beq @disable_auto_inc
+	cmp #'r'
+	beq @run
+	rts
+
+@poke:
+	lda #'p' 
+	sta IO_DISP_DATA
+	lda #STATE_POKE0
+	jmp goto_state
+@target: 
+	lda #'t' 
+	sta IO_DISP_DATA
+	lda #STATE_TARGET0
+	jmp goto_state
+
+@enable_auto_inc:
+	lda #'a' 
+	sta IO_DISP_DATA
+	lda #$01
+	jmp set_step_size
+
+@disable_auto_inc:
+	lda #'A' 
+	sta IO_DISP_DATA
+	lda #$00
+	jmp set_step_size
+@run:
+	lda #'r' 
+	sta IO_DISP_DATA
+	jmp (TARGET_ADDR)
 
 eval_state:
 	pha
@@ -97,83 +139,67 @@ eval_state:
 	beq state_target3
 	pla
 	rts
-		
-state_init:
-	pla
-	cmp #'p'
-	beq @poke
-	cmp #'t'
-	beq @target
-	cmp #'a'
-	beq @enable_auto_inc
-	cmp #'n'
-	beq @disable_auto_inc
-	rts
-
-@poke:
-	lda #STATE_POKE0
-	sta CUR_STATE
-	rts
-@target: 
-	lda #STATE_TARGET0
-	sta CUR_STATE
-	rts
-@enable_auto_inc:
-	lda #$01
-	sta STEP_SIZE
-	lda #STATE_INIT
-	sta CUR_STATE
-	rts
-@disable_auto_inc:
-	lda #$00
-	sta STEP_SIZE
-	lda #STATE_INIT
-	sta CUR_STATE
-	rts
-	
 state_poke0:
 	pla
-	jsr decode_nibble
-	asl 
-	asl
-	asl
-	asl
+	jsr decode_nibble_high
+	bcs goto_init
 	sta POKE_NIBBLE0
 	lda #STATE_POKE1
-	sta CUR_STATE
-	rts
+	jmp goto_state
 
 state_poke1:
 	pla
 	jsr decode_nibble
+	bcs goto_init
 	ora POKE_NIBBLE0
 	ldx #$00
 	sta (TARGET_ADDR, X)
-	lda #STATE_INIT
-	sta CUR_STATE
-	rts
+	lda STEP_SIZE
+	clc
+	adc TARGET_ADDR
+	sta TARGET_ADDR
+	bcc @no_dot
+	lda #'.'
+	sta IO_DISP_DATA
+	lda #$00
+	adc TARGET_ADDR+1
+	sta TARGET_ADDR+1
+@no_dot:
+	lda #STATE_POKE0
+	jmp goto_state
+
 
 state_target0:
 	pla
+	jsr decode_nibble_high
+	sta TARGET_ADDR+1
 	lda #STATE_TARGET1
-	sta CUR_STATE
-	rts
+	jmp goto_state
 state_target1:
 	pla
+	jsr decode_nibble
+	ora TARGET_ADDR+1
 	lda #STATE_TARGET2
-	sta CUR_STATE
-	rts
+	jmp goto_state
 state_target2:
 	pla
+	jsr decode_nibble_high
+	sta TARGET_ADDR
 	lda #STATE_TARGET3
-	sta CUR_STATE
-	rts
+	jmp goto_state
 state_target3:
 	pla
+	jsr decode_nibble
+	ora TARGET_ADDR
+	jmp goto_init
+
+set_step_size:
+	sta STEP_SIZE
+goto_init:
 	lda #STATE_INIT
+goto_state:
 	sta CUR_STATE
 	rts
-	
 uart_read_blocking:
 @loop:
 	; check transmit data register empty
@@ -193,10 +219,19 @@ uart_write_blocking:
 	sta IO_UART_TDR1
 	rts
 
+decode_nibble_high:
+	jsr decode_nibble
+	bcs @exit
+	asl
+	asl
+	asl
+	asl
+@exit:
+	rts
 decode_nibble:
-	sta IO_DISP_DATA
+	; sta IO_DISP_DATA
 	cmp #'0'
-	bmi error
+	bmi @bad_char
 
 	cmp #':'
 	bpl @high
@@ -208,15 +243,21 @@ decode_nibble:
 	; pla
 	; sta NUM1
 	; jsr out_dec
+	clc
 	rts
 
 @high:
 	cmp #'a'
-	bmi error
+	bmi @bad_char
 	cmp #'g'
-	bpl error
+	bpl @bad_char
 	sec
 	sbc #('a' - 10)
+	clc
+	rts
+
+@bad_char:
+	sec
 	rts
 
 error:
@@ -227,5 +268,5 @@ error:
 ; IO_UART_TDRD1  = $e023
 .RODATA
 message:
-	.byte "Hello, World!", $0D, $0A, $00
+	.byte "Welcome to MiMon!", $0D, $0A, $00
 	; .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqqrstuvwxyz"
