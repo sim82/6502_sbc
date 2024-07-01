@@ -1,5 +1,11 @@
+use std::env;
+
 fn main() {
-    let f = std::fs::read("12_sieve_16").unwrap();
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        panic!("missing binary name");
+    }
+    let f = std::fs::read(&args[1]).unwrap();
 
     // code find heuristic:
     // start: first 16 byte chunk that contains non-zero bytes
@@ -23,12 +29,15 @@ fn main() {
         }
     }
     let data = &f[start..end];
-    println!("Ea");
+    println!("send Ea");
 
-    #[allow(clippy::format_collect)] // no one cares, those are 8bit programs...
-    let hexblob = data
-        .iter()
-        .map(|c| format!("{:02x}", c))
-        .collect::<String>();
-    println!("t{:04x}p{}xt{:04x}r", start, hexblob, start);
+    let mut cur = start;
+    let chunk_size = 240; // minicom seems to have a 500 byte per line limit. Try to stay within...
+    for c in data.chunks(chunk_size) {
+        #[allow(clippy::format_collect)] // no one cares, those are 8bit programs...
+        let hexblob = c.iter().map(|c| format!("{:02x}", c)).collect::<String>();
+        println!("send t{:04x}p{}", cur, hexblob);
+        cur += c.len();
+    }
+    println!("send t{:04x}r", start);
 }

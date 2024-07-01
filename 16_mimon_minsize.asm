@@ -10,9 +10,7 @@ CUR_STATE = $0400
 STEP_SIZE = $0401
 POKE_NIBBLE0 = $0402
 
-ECHO_ON = $0404
-
-; TARGET_ADDR = $80
+TARGET_ADDR = $80
 
 STATE_INIT = 0
 STATE_POKE0 = 1
@@ -23,30 +21,28 @@ STATE_TARGET2 = 5
 STATE_TARGET3 = 6
 
 .CODE
-	jsr disp_init
+	; jsr disp_init
 	
 	lda #$00
 	tax
 	tay
-hello:
-	jsr check_busy
-	lda message, X
-	beq @after_hello
-	sta IO_DISP_DATA
-	inx
-	jmp hello
-@after_hello:
-	jsr disp_linefeed
+; hello:
+; 	jsr check_busy
+; 	lda message, X
+; 	beq @after_hello
+; 	sta IO_DISP_DATA
+; 	inx
+; 	jmp hello
+; @after_hello:
+	; jsr disp_linefeed
 
 	lda #$00
 	sta CUR_STATE
 	sta STEP_SIZE
-	; lda #<IO_GPIO0
-	; sta TARGET_ADDR
-	; lda #>IO_GPIO0
-	; sta TARGET_ADDR+1
-	lda #$01
-	sta ECHO_ON
+	lda #<IO_GPIO0
+	sta TARGET_ADDR
+	lda #>IO_GPIO0
+	sta TARGET_ADDR+1
 	
 	; Bit 7: Select CR = 0
 	; Bit 6: CDR/ACR (don't care)
@@ -78,10 +74,7 @@ hello:
 	; jsr check_busy
 	; jsr out_dec
 	jsr uart_read_blocking
-	ldy ECHO_ON
-	beq @skip_echo
 	jsr uart_write_blocking
-@skip_echo:
 	jsr eval_state
 	jmp @loop
 
@@ -94,19 +87,15 @@ state_init:
 	beq @target
 	cmp #'a'
 	beq @enable_auto_inc
-	cmp #'A'
+	cmp #'n'
 	beq @disable_auto_inc
-	cmp #'e'
-	beq @enable_echo
-	cmp #'E'
-	beq @disable_echo
 	cmp #'r'
 	beq @run
 	rts
 
 @poke:
-	lda #'.' 
-	sta IO_DISP_DATA
+	; lda #'p' 
+	; sta IO_DISP_DATA
 	lda #STATE_POKE0
 	jmp goto_state
 @target: 
@@ -116,32 +105,19 @@ state_init:
 	jmp goto_state
 
 @enable_auto_inc:
-	lda #'a' 
-	sta IO_DISP_DATA
+	; lda #'a' 
+	; sta IO_DISP_DATA
 	lda #$01
 	jmp set_step_size
 
 @disable_auto_inc:
-	lda #'A' 
-	sta IO_DISP_DATA
+	; lda #'A' 
+	; sta IO_DISP_DATA
 	lda #$00
 	jmp set_step_size
-@enable_echo:
-	lda #'e'
-	sta IO_DISP_DATA
-	lda #$01
-	sta ECHO_ON
-	jmp goto_init
-
-@disable_echo:
-	lda #'E'
-	sta IO_DISP_DATA
-	lda #$00
-	sta ECHO_ON
-	jmp goto_init
 @run:
-	lda #'r' 
-	sta IO_DISP_DATA
+	; lda #'r' 
+	; sta IO_DISP_DATA
 	jmp (TARGET_ADDR)
 
 eval_state:
@@ -182,13 +158,13 @@ state_poke1:
 	clc
 	adc TARGET_ADDR
 	sta TARGET_ADDR
-	; bcc @no_dot
+	bcc @no_dot
 	; lda #'.'
 	; sta IO_DISP_DATA
 	lda #$00
 	adc TARGET_ADDR+1
 	sta TARGET_ADDR+1
-; @no_dot:
+@no_dot:
 	lda #STATE_POKE0
 	jmp goto_state
 
@@ -203,7 +179,6 @@ state_target1:
 	pla
 	jsr decode_nibble
 	ora TARGET_ADDR+1
-	sta TARGET_ADDR+1
 	lda #STATE_TARGET2
 	jmp goto_state
 state_target2:
@@ -216,12 +191,6 @@ state_target3:
 	pla
 	jsr decode_nibble
 	ora TARGET_ADDR
-	sta TARGET_ADDR
-	; lda TARGET_ADDR
-	; sta NUM1
-	; lda TARGET_ADDR+1
-	; sta NUM1+1
-	; jsr out_dec
 	jmp goto_init
 
 set_step_size:
@@ -298,6 +267,6 @@ error:
 ; IO_UART_CRFR1  = $e021
 ; IO_UART_TDRD1  = $e023
 .RODATA
-message:
-	.byte "Welcome to MiMon!", $0D, $0A, $00
+; message:
+; 	.byte "Welcome to MiMon!", $0D, $0A, $00
 	; .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqqrstuvwxyz"
