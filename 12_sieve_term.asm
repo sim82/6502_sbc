@@ -105,6 +105,7 @@ calc_high:
 	lda #$00
 	sta NUM_HIGH
 	inc HIGH_BYTE
+	beq exit
 	jsr fill_work
 	ldy #$00
 	
@@ -129,6 +130,8 @@ calc_high:
 	jmp @elim_loop
 @break:
 
+	
+
 gen_high_primes:
 	ldy #$00
 @loop:
@@ -146,14 +149,22 @@ gen_high_primes:
 	beq @break
 	jmp @loop
 @break:
-	lda #<message2
-	sta STR_PTR
-	lda #>message2
-	sta STR_PTR+1
-	jsr out_string
+	; lda #<message2
+	; sta STR_PTR
+	; lda #>message2
+	; sta STR_PTR+1
+	; jsr out_string
 	jsr dump_primes_high
 	jmp calc_high
+exit:
 
+	lda #<message_done
+	sta STR_PTR
+	lda #>message_done
+	sta STR_PTR+1
+	jsr out_string
+@loop:
+	jmp @loop
 
 dump_primes:
 	pha
@@ -208,6 +219,36 @@ dump_primes_high:
 	pha
 	tya
 	pha
+
+	lda #<message_block
+	sta STR_PTR
+	lda #>message_block
+	sta STR_PTR+1
+	jsr out_string
+	lda #$00
+	sta NUM1
+	lda HIGH_BYTE
+	sta NUM1+1
+	jsr out_dec
+	
+	lda #<message_and
+	sta STR_PTR
+	lda #>message_and
+	sta STR_PTR+1
+	jsr out_string
+
+	lda #$FF
+	sta NUM1
+	lda HIGH_BYTE
+	sta NUM1+1
+	jsr out_dec
+
+	lda #<message_newline
+	sta STR_PTR
+	lda #>message_newline
+	sta STR_PTR+1
+	jsr out_string
+
 	ldx #$00
 	
 	; lda #$00
@@ -322,8 +363,16 @@ out_string:
 .RODATA
 message:
 	.byte $0D, $0A
-	.byte "Calc Primes...", $0D, $0A, $00
-message2:
+	.byte "Calc Primes..." 
+message_newline:
+	.byte $0D, $0A, $00
+message_block:
 	.byte $0D, $0A
-	.byte "Next block...", $0D, $0A, $00
+	.byte "Primes between ", $00
+message_and:
+	.byte "and ", $00
+	
+message_done:
+	.byte $0D, $0A
+	.byte "Done.", $0D, $0A, $00
 	; .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqqrstuvwxyz"
