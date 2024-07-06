@@ -473,7 +473,7 @@ LAB_SKFF          = LAB_STAK+$FF
 ; BUF_END = BUF_START + $50
 ; RAM_START = $0300
 ; RAM_END = LAB_COLD
-Ibuffs            = $0201;there seems to be bug when this $xx00. easier to offset buf than to enable fix...
+Ibuffs            = $0200; the $xx00 fix must be active
 Ibuffe            = Ibuffs + $50;
 
 Ram_base          = $0300; start of user RAM (page aligned)
@@ -1233,12 +1233,12 @@ LAB_142A:
       INY                     ; adjust for line copy
 ; *** begin patch for when Ibuffs is $xx00 - Daryl Rictor ***
 ; *** insert
-;       .IF   Ibuffs&$FF=0
-;       LDA   Bpntrl            ; test for $00
-;       BNE   LAB_142P          ; not $00
-;       DEC   Bpntrh            ; allow for increment when $xx00
-; LAB_142P:
-;       .ENDIF
+      .IF   Ibuffs&$FF=0
+      LDA   Bpntrl            ; test for $00
+      BNE   LAB_142P          ; not $00
+      DEC   Bpntrh            ; allow for increment when $xx00
+LAB_142P:
+      .ENDIF
 ; *** end   patch for when Ibuffs is $xx00 - Daryl Rictor ***
 ; end of patch
       DEC   Bpntrl            ; allow for increment
