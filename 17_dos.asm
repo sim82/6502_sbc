@@ -26,11 +26,26 @@ read_input:
 	cmp #$0a 		; ignore LF / \n
 	beq read_input
 	cmp #$0d 		; enter key is CR / \r 
-	bne @normal_char
+	bne @no_enter_key
 	jsr put_newline		; handle enter: - put newline
 	jsr exec_input_line     ;               - execute input line
 	rts
+@no_enter_key:
+	cmp #$08		; handle backspace
+	bne @normal_char
+	ldy INPUT_LINE_PTR	; check if input line is empty -> ignore backspace
+	beq mainloop
+	dec INPUT_LINE_PTR	; delete last char (dec ptr)
+
+	; rub-out character on terminal
+	jsr putc		; send the backspace (move cursor back)
+	lda #' '		; overwrite with space
+	jsr putc
+	lda #$08		; send another backspace to move cursor back onto space
+	jsr putc
+	jmp mainloop
 @normal_char:
+	; TODO: ignore non-printable chars
 	ldy INPUT_LINE_PTR	; append normal char to input line
 	cpy #INPUT_LINE_LEN	;   check if input line is full
 	beq @buf_full
