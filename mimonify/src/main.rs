@@ -1,5 +1,7 @@
 use std::env;
 
+use mimonify::guess_program_space;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -12,22 +14,7 @@ fn main() {
     // end: next 16 byte chunk after start that contains only zero bytes
     // i.e. this assumes that code starts on a 16byte boundary and that there
     // are no spans of 16 or more zeros inside the code (don't put empty space in the program...)
-    let mut start = 0;
-    let mut end = 0;
-    let mut iter = f.chunks(16).enumerate();
-    for (i, chunk) in &mut iter {
-        if chunk.iter().any(|c| *c != 0) {
-            start = i * 16;
-            break;
-        }
-    }
-
-    for (i, chunk) in iter {
-        if !chunk.iter().any(|c| *c != 0) {
-            end = i * 16;
-            break;
-        }
-    }
+    let (start, end) = guess_program_space(&f);
     let data = &f[start..end];
     println!("send Ea");
 

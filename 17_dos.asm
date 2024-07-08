@@ -12,10 +12,38 @@ INPUT_LINE_PTR = INPUT_LINE + INPUT_LINE_LEN	; address of current input line ptr
 NEXT_TOKEN_PTR   = INPUT_LINE_PTR + 1
 NEXT_TOKEN_END   = NEXT_TOKEN_PTR + 1
 
+; overlaps token data!
+RECEIVE_POS = INPUT_LINE_PTR + 1
+RECEIVE_SIZE = RECEIVE_POS + 2
+
 .CODE
 	; init local vars
 	lda #$00
 	sta INPUT_LINE_PTR
+
+	; init uart channel 2
+	; Bit 7: Select CR = 0
+	; Bit 6: CDR/ACR (don't care)
+	; Bit 5: Num stop bits (0=1, 1-2)
+	; Bit 4: Echo mode (0=disabled, 1=enabled)
+	; Bit 3-0: baud divisor (1110 = 3840)
+	; write CR
+	lda #%00001110
+	sta IO_UART_CR2
+
+	; Bit 7: Select FR = 1
+	; Bit 6,5: Num Bits (11 = 8)
+	; Bit 4,3: Parity mode (don't care)
+	; Bit 2: Parity Enable / Disable (1/0)
+	; Bit 1,0: DTR/RTS control (don't care)
+	; write FR
+	lda #%11100000
+	sta IO_UART_FR2
+
+	lda #%11000001
+	sta IO_UART_IER2
+	lda #'>'
+	jsr putc
 mainloop:
 	jsr read_input
 	jmp mainloop
@@ -23,12 +51,18 @@ mainloop:
 read_input:
 	jsr getc
 	bcc read_input 		; busy wait for character
+	; pha
+	; jsr print_hex8
+	; jsr put_newline
+	; pla
 	cmp #$0a 		; ignore LF / \n
 	beq read_input
 	cmp #$0d 		; enter key is CR / \r 
 	bne @no_enter_key
 	jsr put_newline		; handle enter: - put newline
 	jsr exec_input_line     ;               - execute input line
+	lda #'>'
+	jsr putc
 	rts
 @no_enter_key:
 	cmp #$08		; handle backspace
@@ -67,7 +101,7 @@ exec_input_line:
 	jmp @loop
 
 @end:
-	jsr put_newline
+	; jsr put_newline
 	jsr reset_tokenize
 @token_loop:
 	jsr read_token
@@ -78,13 +112,16 @@ exec_input_line:
 	cpy NEXT_TOKEN_END
 	beq @end_of_token
 	lda INPUT_LINE, y
-	jsr putc
+	jsr putc2
 	iny
 	jmp @in_token_loop
 
 @end_of_token:
 	jsr retire_token
-	jsr put_newline
+	; jsr put_newline
+	lda #$00
+	jsr putc2
+	jsr receive_file
 	jmp @token_loop
 
 @token_end:
@@ -144,7 +181,11 @@ read_token:
 
 @end_of_token:
 	sty NEXT_TOKEN_END	; Y points to first char after token (either space or end of line)
+	cpy NEXT_TOKEN_PTR
+	; clc
+	; beq @token_empty
 	sec			; report success
+; @token_empty:
 	rts
 
 
@@ -153,6 +194,25 @@ retire_token:
 	sta NEXT_TOKEN_PTR
 	lda #$00
 	sta NEXT_TOKEN_END
+	rts
+
+receive_file:
+	jsr getc2_blocking
+	sta RECEIVE_POS
+	jsr getc2_blocking
+	sta RECEIVE_POS + 1
+	jsr getc2_blocking
+	sta RECEIVE_SIZE
+	jsr getc2_blocking
+	sta RECEIVE_SIZE + 1
+
+	lda RECEIVE_POS
+	ldx RECEIVE_POS+1
+	jsr print_hex16
+	
+	lda RECEIVE_SIZE
+	ldx RECEIVE_SIZE+1
+	jsr print_hex16
 	rts
 putc:
 V_OUTP:
@@ -180,6 +240,35 @@ V_INPT:
         clc
 	rts
 
+
+putc2:
+	pha
+@loop:
+	lda IO_UART_ISR2
+	and #%01000000
+	beq @loop
+	pla
+	sta IO_UART_TDR2
+	rts
+
+getc2_blocking:
+	jsr getc2
+	bcc getc2_blocking
+	rts
+
+getc2:
+@loop:
+	; check transmit data register empty
+	lda IO_UART_ISR2
+	and #%00000001
+	beq @no_keypress
+	lda IO_UART_RDR2
+        sec
+	rts
+
+@no_keypress:
+        clc
+	rts
 
 put_newline:
 	lda #$0a
