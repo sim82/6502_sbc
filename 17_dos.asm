@@ -13,7 +13,7 @@ NEXT_TOKEN_PTR   = INPUT_LINE_PTR + 1
 NEXT_TOKEN_END   = NEXT_TOKEN_PTR + 1
 
 ; overlaps token data!
-RECEIVE_POS = INPUT_LINE_PTR + 1
+RECEIVE_POS = NEXT_TOKEN_END + 1
 RECEIVE_SIZE = RECEIVE_POS + 2
 
 .CODE
@@ -29,6 +29,7 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 	; Bit 3-0: baud divisor (1110 = 3840)
 	; write CR
 	lda #%00001110
+	sta IO_UART_CR1
 	sta IO_UART_CR2
 
 	; Bit 7: Select FR = 1
@@ -38,9 +39,11 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 	; Bit 1,0: DTR/RTS control (don't care)
 	; write FR
 	lda #%11100000
+	sta IO_UART_FR1
 	sta IO_UART_FR2
 
 	lda #%11000001
+	sta IO_UART_IER1
 	sta IO_UART_IER2
 	lda #'>'
 	jsr putc
@@ -91,6 +94,9 @@ read_input:
 	rts
 
 exec_input_line:
+; purge any channel2 input buffer
+	jsr getc2
+	bcs exec_input_line
 	ldy #$0
 @loop:
 	cpy INPUT_LINE_PTR
@@ -101,7 +107,7 @@ exec_input_line:
 	jmp @loop
 
 @end:
-	; jsr put_newline
+	jsr put_newline
 	jsr reset_tokenize
 @token_loop:
 	jsr read_token
@@ -113,6 +119,7 @@ exec_input_line:
 	beq @end_of_token
 	lda INPUT_LINE, y
 	jsr putc2
+	jsr putc
 	iny
 	jmp @in_token_loop
 
@@ -122,9 +129,12 @@ exec_input_line:
 	lda #$00
 	jsr putc2
 	jsr receive_file
+	jmp (RECEIVE_POS)
 	jmp @token_loop
 
 @token_end:
+	lda #'X'
+	jsr putc
 	ldy #$0
 	sty INPUT_LINE_PTR
 	jsr put_newline
@@ -199,8 +209,10 @@ retire_token:
 receive_file:
 	jsr getc2_blocking
 	sta RECEIVE_POS
+	sta TARGET_ADDR
 	jsr getc2_blocking
 	sta RECEIVE_POS + 1
+	sta TARGET_ADDR + 1
 	jsr getc2_blocking
 	sta RECEIVE_SIZE
 	jsr getc2_blocking
@@ -209,11 +221,56 @@ receive_file:
 	lda RECEIVE_POS
 	ldx RECEIVE_POS+1
 	jsr print_hex16
+	lda #':'
+	jsr putc
 	
 	lda RECEIVE_SIZE
 	ldx RECEIVE_SIZE+1
 	jsr print_hex16
+	jsr put_newline
+	; rts
+
+@load_page_loop:
+	lda TARGET_ADDR
+	ldx TARGET_ADDR + 1
+	jsr print_hex16
+	jsr put_newline
+
+	ldx RECEIVE_SIZE + 1
+	beq @non_full_page
+
+
+	lda #'F'
+	jsr putc
+	jsr put_newline
+	ldy #$00
+@loop_full_page:
+	jsr getc2_blocking
+	sta (TARGET_ADDR), y
+	iny
+	bne @loop_full_page
+	dec RECEIVE_SIZE + 1
+	inc TARGET_ADDR + 1
+	jmp @load_page_loop
+	
+@non_full_page:
+	lda #'N'
+	jsr putc
+	jsr put_newline
+	ldy #$00
+@loop:
+	cpy RECEIVE_SIZE
+	beq @end
+	jsr getc2_blocking
+	sta (TARGET_ADDR), y
+	iny
+	jmp @loop
+
+
+@end:
 	rts
+
+	
 putc:
 V_OUTP:
 	pha
