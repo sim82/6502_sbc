@@ -233,16 +233,16 @@ receive_file:
 @load_page_loop:
 	lda TARGET_ADDR
 	ldx TARGET_ADDR + 1
-	jsr print_hex16
-	jsr put_newline
+	; jsr print_hex16
+	; jsr put_newline
 
 	ldx RECEIVE_SIZE + 1
 	beq @non_full_page
 
 
-	lda #'F'
-	jsr putc
-	jsr put_newline
+	; lda #'F'
+	; jsr putc
+	; jsr put_newline
 	ldy #$00
 @loop_full_page:
 	jsr getc2_blocking
@@ -254,13 +254,16 @@ receive_file:
 	jmp @load_page_loop
 	
 @non_full_page:
-	lda #'N'
-	jsr putc
-	jsr put_newline
+	; lda #'N'
+	; jsr putc
+	; jsr put_newline
 	ldy #$00
 @loop:
 	cpy RECEIVE_SIZE
 	beq @end
+	tya
+	; jsr print_hex8
+	; jsr put_newline
 	jsr getc2_blocking
 	sta (TARGET_ADDR), y
 	iny
