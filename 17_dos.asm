@@ -16,6 +16,8 @@ NEXT_TOKEN_END   = NEXT_TOKEN_PTR + 1
 RECEIVE_POS = NEXT_TOKEN_END + 1
 RECEIVE_SIZE = RECEIVE_POS + 2
 
+ZP_PTR = $80
+
 .CODE
 	; init local vars
 	lda #$00
@@ -45,6 +47,11 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 	lda #%11000001
 	sta IO_UART_IER1
 	sta IO_UART_IER2
+
+	lda #<welcome_message
+	ldx #>welcome_message
+	jsr print_message
+
 	lda #'>'
 	jsr putc
 mainloop:
@@ -389,5 +396,23 @@ print_hex4:
 	jsr putc
 	rts
 
+; low in a, high in x,
+print_message:
+	sta ZP_PTR
+	stx ZP_PTR + 1
+	ldy #$00
+@loop:
+	lda (ZP_PTR), y
+	beq @end
+	jsr putc
+	iny
+	jmp @loop
+@end:
+	rts
+
+
 windmill:
 	.byte "-\|/"
+
+welcome_message:
+	.byte $0A, $0D, "dos v1.1", $0A, $0D, $00
