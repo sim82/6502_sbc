@@ -12,7 +12,6 @@ INPUT_LINE_PTR = INPUT_LINE + INPUT_LINE_LEN	; address of current input line ptr
 NEXT_TOKEN_PTR   = INPUT_LINE_PTR + 1
 NEXT_TOKEN_END   = NEXT_TOKEN_PTR + 1
 
-; overlaps token data!
 RECEIVE_POS = NEXT_TOKEN_END + 1
 RECEIVE_SIZE = RECEIVE_POS + 2
 
@@ -102,7 +101,7 @@ read_input:
 
 exec_input_line:
 ; purge any channel2 input buffer
-	jsr getc2
+	jsr getc2_nonblocking
 	bcs exec_input_line
 	ldy #$0
 @loop:
@@ -207,77 +206,79 @@ read_token:
 
 
 retire_token:
-	lda NEXT_TOKEN_END
-	sta NEXT_TOKEN_PTR
+	lda NEXT_TOKEN_END	
+	sta NEXT_TOKEN_PTR	; advance topen pointer to previous token end ptr
 	lda #$00
-	sta NEXT_TOKEN_END
+	sta NEXT_TOKEN_END	; invalidate previous token end ptr
 	rts
 
 receive_file:
-	jsr getc2_blocking
+	; meaning of TARGET_ADDR vs RECEIVE_POS: 
+	;  - TARGET_ADDR: in ZP, used for indirect addressing and modified during read
+	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
+	jsr getc2	; read target address low byte
 	sta RECEIVE_POS
 	sta TARGET_ADDR
-	jsr getc2_blocking
-	sta RECEIVE_POS + 1
+	jsr getc2	; and high byte
+	sta RECEIVE_POS + 1	
 	sta TARGET_ADDR + 1
-	jsr getc2_blocking
+	jsr getc2	; read size low byte
 	sta RECEIVE_SIZE
-	jsr getc2_blocking
+	jsr getc2	; and high byte
 	sta RECEIVE_SIZE + 1
 
+	; debug: output target pos
 	lda RECEIVE_POS
 	ldx RECEIVE_POS+1
 	jsr print_hex16
 	lda #':'
 	jsr putc
 	
+	; debug: output size
 	lda RECEIVE_SIZE
 	ldx RECEIVE_SIZE+1
 	jsr print_hex16
 	jsr put_newline
-	; rts
 
+	;
+	; outer loop over all received pages
+	;
 @load_page_loop:
-	; lda TARGET_ADDR
-	; ldx TARGET_ADDR + 1
-	; jsr print_hex16
-	; jsr put_newline
-
-	ldx RECEIVE_SIZE + 1
-	beq @non_full_page
-
-	lda TARGET_ADDR + 1
+	lda TARGET_ADDR + 1	; QoL: spin windmill
 	jsr print_windmill
 
-	lda #'b'
+	; request next page
+	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr putc2
-	ldy #$00
+
+	ldy #$00		; y: count byte inside page
+	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
+	beq @non_full_page_loop
+
+	;
+	; full page case: exactly 256 bytes
+	;
 @loop_full_page:
-	jsr getc2_blocking
-	sta (TARGET_ADDR), y
+	jsr getc2	; recv next byte
+	sta (TARGET_ADDR), y	;  and store to TARGET_ADDR + y
 	iny
-	bne @loop_full_page
-	dec RECEIVE_SIZE + 1
-	inc TARGET_ADDR + 1
-	jmp @load_page_loop
+	bne @loop_full_page	; end on y wrap around
+
+	; update size / taregt addr after end of page
+	dec RECEIVE_SIZE + 1	; dec remaining size 
+	inc TARGET_ADDR + 1	;  and inc address by 256 each
+	jmp @load_page_loop	; continue with next page
 	
-@non_full_page:
-	lda TARGET_ADDR + 1
-	jsr print_windmill
-	lda #'b'
-	jsr putc2
-	ldy #$00
-@loop:
-	cpy RECEIVE_SIZE
+	;
+	; reminder, always less than 256 bytes
+	;
+@non_full_page_loop:
+	cpy RECEIVE_SIZE	; compare with lower byte of remaining size
 	beq @end
-	tya
-	; jsr print_hex8
-	; jsr put_newline
-	jsr getc2_blocking
-	sta (TARGET_ADDR), y
+	jsr getc2	; recv next byte
+	sta (TARGET_ADDR), y	;  and store to TARGET_ADDR + y
 	iny
 	jmp @loop
-
 
 @end:
 	rts
@@ -327,12 +328,12 @@ putc2:
 	sta IO_UART_TDR2
 	rts
 
-getc2_blocking:
-	jsr getc2
-	bcc getc2_blocking
+getc2:
+	jsr getc2_nonblocking
+	bcc getc2
 	rts
 
-getc2:
+getc2_nonblocking:
 @loop:
 	; check transmit data register empty
 	lda IO_UART_ISR2
