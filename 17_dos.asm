@@ -231,18 +231,19 @@ receive_file:
 	; rts
 
 @load_page_loop:
-	lda TARGET_ADDR
-	ldx TARGET_ADDR + 1
+	; lda TARGET_ADDR
+	; ldx TARGET_ADDR + 1
 	; jsr print_hex16
 	; jsr put_newline
 
 	ldx RECEIVE_SIZE + 1
 	beq @non_full_page
 
+	lda TARGET_ADDR + 1
+	jsr print_windmill
 
-	; lda #'F'
-	; jsr putc
-	; jsr put_newline
+	lda #'b'
+	jsr putc2
 	ldy #$00
 @loop_full_page:
 	jsr getc2_blocking
@@ -254,9 +255,10 @@ receive_file:
 	jmp @load_page_loop
 	
 @non_full_page:
-	; lda #'N'
-	; jsr putc
-	; jsr put_newline
+	lda TARGET_ADDR + 1
+	jsr print_windmill
+	lda #'b'
+	jsr putc2
 	ldy #$00
 @loop:
 	cpy RECEIVE_SIZE
@@ -272,8 +274,15 @@ receive_file:
 
 @end:
 	rts
-
 	
+print_windmill:
+	and #$3
+	tay
+	lda windmill, y
+	jsr putc
+	lda #$08
+	jsr putc
+	rts
 putc:
 V_OUTP:
 	pha
@@ -379,3 +388,6 @@ print_hex4:
 @output:
 	jsr putc
 	rts
+
+windmill:
+	.byte "-\|/"

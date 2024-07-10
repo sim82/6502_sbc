@@ -2,7 +2,7 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use mimonify::guess_program_space;
 use serial::prelude::*;
 use std::{
-    io::prelude::*,
+    io::{prelude::*, stdout},
     path::{Path, PathBuf},
     time::Duration,
 };
@@ -88,14 +88,34 @@ fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile) {
 
     let data = &file.data[start..end];
 
-    for chunk in data.chunks(256) {
-        println!("chunk: {}", chunk.len());
+    port.set_timeout(Duration::from_secs(5)).unwrap();
+    for (i, chunk) in data.chunks(256).enumerate() {
+        // print!("waiting for sync ...");
+        // stdout().flush();
+        match (port.read_u8()) {
+            Ok(b'b') => (),
+
+            Ok(c) => {
+                println!("\nunknown command: {:x}", c);
+                return;
+            }
+            Err(e) => {
+                println!("\nIO error: {:?}", e);
+                return;
+            }
+        }
+        print!("\rsend chunk: {:04} {}", i, chunk.len());
+        stdout().flush();
+
         // for c in chunk {
         //     port.write_u8(*c);
         // }
         port.write_all(chunk).unwrap();
         port.flush();
+        print!("\r");
+        stdout().flush();
         // std::thread::sleep(Duration::from_secs(1))
     }
+    println!("\ndone.");
     // loop {}
 }
