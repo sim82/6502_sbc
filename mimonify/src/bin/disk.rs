@@ -1,3 +1,4 @@
+use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use mimonify::guess_program_space;
 use serial::prelude::*;
@@ -15,18 +16,18 @@ struct OpenFile {
 }
 
 impl OpenFile {
-    pub fn read_from<F: AsRef<Path>>(name: F) -> OpenFile {
+    pub fn read_from<F: AsRef<Path>>(name: F) -> Result<OpenFile> {
         let mut filename = PathBuf::new();
         filename.push("disk");
         filename.push(name);
-        let data = std::fs::read(filename).unwrap();
+        let data = std::fs::read(filename)?;
         let (start, end) = guess_program_space(&data);
-        OpenFile {
+        Ok(OpenFile {
             data,
             start: start as u16,
             end: end as u16,
             ptr: start as u16,
-        }
+        })
         // filena
         // std::fs::read()
     }
@@ -75,8 +76,14 @@ fn open_file<T: SerialPort>(port: &mut T) {
         }
     }
     println!("open file: {}", filename);
-    let file = OpenFile::read_from(filename);
-    serve_file(port, file);
+    match OpenFile::read_from(filename) {
+        Ok(file) => serve_file(port, file),
+        Err(e) => {
+            println!("error: {:?}. abort.", e);
+            port.write_u16::<LittleEndian>(0xffff);
+            port.write_u16::<LittleEndian>(0xffff);
+        }
+    }
 }
 fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile) {
     println!("serve: {:x} - {:x}", file.start, file.end);

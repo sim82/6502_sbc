@@ -15,7 +15,6 @@ NEXT_TOKEN_END   = NEXT_TOKEN_PTR + 1
 RECEIVE_POS = NEXT_TOKEN_END + 1
 RECEIVE_SIZE = RECEIVE_POS + 2
 
-PTR_ARG = RECEIVE_SIZE + 1
 ZP_PTR = $80
 
 .CODE
@@ -48,6 +47,7 @@ ZP_PTR = $80
 	sta IO_UART_IER1
 	sta IO_UART_IER2
 
+	jsr put_newline
 	lda #<welcome_message
 	ldx #>welcome_message
 	jsr print_message
@@ -105,9 +105,10 @@ compare_token:
 @loop:
 	cpy NEXT_TOKEN_END
 	beq @found
+
 	lda INPUT_LINE, y
-	jsr putc
-	cmp PTR_ARG, y
+	; jsr putc
+	cmp (ZP_PTR), y
 	bne @mismatch
 	iny
 	jmp @loop
@@ -121,20 +122,18 @@ compare_token:
 	rts
 	
 cmd_help:
-	lda #'h'
-	jsr putc
-	lda #'e'
-	jsr putc
-	lda #'l'
-	jsr putc
-	lda #'p'
-	jsr putc
+	lda #<welcome_message
+	ldx #>welcome_message
+	jsr print_message
+	lda #<help_message
+	ldx #>help_message
+	jsr print_message
 	rts
 	
-exec_input_line_new:
+exec_input_line:
 ; purge any channel2 input buffer
 	jsr getc2_nonblocking
-	bcs exec_input_line_new
+	bcs exec_input_line
 	jsr purge_channel2_input
 	jsr reset_tokenize
 	jsr read_token
@@ -142,16 +141,46 @@ exec_input_line_new:
 
 	; ldy NEXT_TOKEN_PTR
 	ldx #<cmd_help_str
-	stx PTR_ARG
+	stx ZP_PTR
 	ldx #>cmd_help_str
-	stx PTR_ARG + 1
+	stx ZP_PTR + 1
 	jsr compare_token
 	bcc @end
 	jsr cmd_help
+
+	jmp @cleanup
 @end:
+	jsr purge_channel2_input
+	lda #'o'
+	jsr putc2
+	ldy #$0
+@send_filename_loop:
+	cpy NEXT_TOKEN_END
+	beq @end_of_filename
+	lda INPUT_LINE, y
+	jsr putc2
+	iny
+	jmp @send_filename_loop
+@end_of_filename:
+	lda #$00
+	jsr putc2
+	jsr receive_file
+	bcc @file_error
+	jmp (RECEIVE_POS)
+
+@file_error:
+
+	lda #<file_not_found_message
+	ldx #>file_not_found_message
+	jsr print_message
+@cleanup:
+
+	ldy #$0
+	sty INPUT_LINE_PTR
+	jsr put_newline
 	rts
 
-exec_input_line:
+exec_input_line_old:
 	jsr purge_channel2_input
 	ldy #$0
 @loop:
@@ -272,6 +301,17 @@ receive_file:
 	jsr getc2	; and high byte
 	sta RECEIVE_POS + 1	
 	sta TARGET_ADDR + 1
+	; check for file error: target addr $ffff
+	cmp #$FF
+	bne @no_error
+	lda TARGET_ADDR
+	cmp #$FF
+	bne @no_error
+	; fell through both times -> error
+	clc
+	rts
+
+@no_error:
 	jsr getc2	; read size low byte
 	sta RECEIVE_SIZE
 	jsr getc2	; and high byte
@@ -331,6 +371,7 @@ receive_file:
 	jmp @non_full_page_loop
 
 @end:
+	sec
 	rts
 	
 print_windmill:
@@ -399,7 +440,7 @@ getc2_nonblocking:
 
 purge_channel2_input:
 ; purge any channel2 input buffer
-	jsr getc2
+	jsr getc2_nonblocking
 	bcs purge_channel2_input
 	rts
 
@@ -472,7 +513,14 @@ windmill:
 	.byte "-\|/"
 
 welcome_message:
-	.byte $0A, $0D, "dos v1.1", $0A, $0D, $00
+	.byte "dos v1.1", $0A, $0D, $00
+
+
+help_message:
+	.byte "sorry, you're on your own...", $0A, $0D, $00
+
+file_not_found_message:
+	.byte "file not found.", $0A, $0D, $00
 
 cmd_help_str:
 	.byte "help"
