@@ -15,6 +15,7 @@ NEXT_TOKEN_END   = NEXT_TOKEN_PTR + 1
 RECEIVE_POS = NEXT_TOKEN_END + 1
 RECEIVE_SIZE = RECEIVE_POS + 2
 
+PTR_ARG = RECEIVE_SIZE + 1
 ZP_PTR = $80
 
 .CODE
@@ -99,10 +100,59 @@ read_input:
 @buf_full:
 	rts
 
-exec_input_line:
+compare_token:
+	ldy #$00
+@loop:
+	cpy NEXT_TOKEN_END
+	beq @found
+	lda INPUT_LINE, y
+	jsr putc
+	cmp PTR_ARG, y
+	bne @mismatch
+	iny
+	jmp @loop
+
+@found:
+	sec
+	rts
+	
+@mismatch:
+	clc
+	rts
+	
+cmd_help:
+	lda #'h'
+	jsr putc
+	lda #'e'
+	jsr putc
+	lda #'l'
+	jsr putc
+	lda #'p'
+	jsr putc
+	rts
+	
+exec_input_line_new:
 ; purge any channel2 input buffer
 	jsr getc2_nonblocking
-	bcs exec_input_line
+	bcs exec_input_line_new
+	jsr purge_channel2_input
+	jsr reset_tokenize
+	jsr read_token
+	bcc @end
+
+	; ldy NEXT_TOKEN_PTR
+	ldx #<cmd_help_str
+	stx PTR_ARG
+	ldx #>cmd_help_str
+	stx PTR_ARG + 1
+	jsr compare_token
+	bcc @end
+	jsr cmd_help
+@end:
+	rts
+
+exec_input_line:
+	jsr purge_channel2_input
 	ldy #$0
 @loop:
 	cpy INPUT_LINE_PTR
@@ -278,7 +328,7 @@ receive_file:
 	jsr getc2	; recv next byte
 	sta (TARGET_ADDR), y	;  and store to TARGET_ADDR + y
 	iny
-	jmp @loop
+	jmp @non_full_page_loop
 
 @end:
 	rts
@@ -345,6 +395,12 @@ getc2_nonblocking:
 
 @no_keypress:
         clc
+	rts
+
+purge_channel2_input:
+; purge any channel2 input buffer
+	jsr getc2
+	bcs purge_channel2_input
 	rts
 
 put_newline:
@@ -417,3 +473,6 @@ windmill:
 
 welcome_message:
 	.byte $0A, $0D, "dos v1.1", $0A, $0D, $00
+
+cmd_help_str:
+	.byte "help"
