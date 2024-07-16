@@ -17,6 +17,29 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 
 ZP_PTR = $80
 
+.macro set_ptr src
+	ldx #<src
+	stx ZP_PTR
+	ldx #>src
+	stx ZP_PTR + 1
+.endmacro
+
+.macro dispatch_command cmd_ptr, dest
+.local @next
+	set_ptr cmd_ptr
+	jsr compare_token
+	bcc @next
+	jsr dest
+	jmp @cleanup
+@next:
+.endmacro
+
+.macro print_message_from_ptr src
+	lda #<src
+	ldx #>src
+	jsr print_message
+.endmacro
+
 .CODE
 	; init local vars
 	lda #$00
@@ -48,9 +71,7 @@ ZP_PTR = $80
 	sta IO_UART_IER2
 
 	jsr put_newline
-	lda #<welcome_message
-	ldx #>welcome_message
-	jsr print_message
+	print_message_from_ptr welcome_message
 
 	lda #'>'
 	jsr putc
@@ -121,35 +142,35 @@ compare_token:
 	clc
 	rts
 	
+cmd_help_str:
+	.byte "help"
 cmd_help:
-	lda #<welcome_message
-	ldx #>welcome_message
-	jsr print_message
-	lda #<help_message
-	ldx #>help_message
-	jsr print_message
+	print_message_from_ptr welcome_message
+	print_message_from_ptr help_message
 	rts
-	
+
+cmd_ls_str:
+	.byte "ls"
+cmd_ls:
+	print_message_from_ptr help_message
+	rts
+
+
 exec_input_line:
-; purge any channel2 input buffer
 	jsr getc2_nonblocking
 	bcs exec_input_line
 	jsr purge_channel2_input
 	jsr reset_tokenize
 	jsr read_token
-	bcc @end
-
-	; ldy NEXT_TOKEN_PTR
-	ldx #<cmd_help_str
-	stx ZP_PTR
-	ldx #>cmd_help_str
-	stx ZP_PTR + 1
-	jsr compare_token
-	bcc @end
-	jsr cmd_help
-
+	bcs @dispatch_builtin
 	jmp @cleanup
-@end:
+
+@dispatch_builtin:
+	dispatch_command cmd_help_str, cmd_help
+	dispatch_command cmd_ls_str, cmd_ls
+	; fall through. successfull commands jump to @cleanup from macro
+; @end:
+; purge any channel2 input buffer before starting IO
 	jsr purge_channel2_input
 	lda #'o'
 	jsr putc2
@@ -169,10 +190,7 @@ exec_input_line:
 	jmp (RECEIVE_POS)
 
 @file_error:
-
-	lda #<file_not_found_message
-	ldx #>file_not_found_message
-	jsr print_message
+	print_message_from_ptr file_not_found_message
 @cleanup:
 
 	ldy #$0
@@ -180,50 +198,6 @@ exec_input_line:
 	jsr put_newline
 	rts
 
-exec_input_line_old:
-	jsr purge_channel2_input
-	ldy #$0
-@loop:
-	cpy INPUT_LINE_PTR
-	beq @end
- 	lda INPUT_LINE, y
-	jsr putc
-	iny
-	jmp @loop
-
-@end:
-	jsr put_newline
-	jsr reset_tokenize
-@token_loop:
-	jsr read_token
-	bcc @token_end
-	ldy NEXT_TOKEN_PTR
-
-@in_token_loop:
-	cpy NEXT_TOKEN_END
-	beq @end_of_token
-	lda INPUT_LINE, y
-	jsr putc2
-	jsr putc
-	iny
-	jmp @in_token_loop
-
-@end_of_token:
-	jsr retire_token
-	; jsr put_newline
-	lda #$00
-	jsr putc2
-	jsr receive_file
-	jmp (RECEIVE_POS)
-	jmp @token_loop
-
-@token_end:
-	lda #'X'
-	jsr putc
-	ldy #$0
-	sty INPUT_LINE_PTR
-	jsr put_newline
-	rts
 ; tokenizer
 ; in-place tokenize content of input line. Tokens are separated by space character.
 ; The tokenizer will not modify the input line but keep track of the current token
@@ -513,7 +487,7 @@ windmill:
 	.byte "-\|/"
 
 welcome_message:
-	.byte "dos v1.1", $0A, $0D, $00
+	.byte "dos v1.2", $0A, $0D, $00
 
 
 help_message:
@@ -522,5 +496,3 @@ help_message:
 file_not_found_message:
 	.byte "file not found.", $0A, $0D, $00
 
-cmd_help_str:
-	.byte "help"
