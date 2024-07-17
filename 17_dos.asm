@@ -17,6 +17,8 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 
 ZP_PTR = $80
 
+IO_BUFFER = $0300
+
 .macro set_ptr src
 	ldx #<src
 	stx ZP_PTR
@@ -155,6 +157,30 @@ cmd_ls:
 	print_message_from_ptr help_message
 	rts
 
+cmd_cat_str:
+	.byte "cat"
+cmd_cat:
+	print_message_from_ptr @purrrr
+	jsr retire_token
+	jsr read_token
+	jsr purge_channel2_input
+	lda #'r'
+	jsr putc2
+	ldy NEXT_TOKEN_PTR
+@send_filename_loop:
+	cpy NEXT_TOKEN_END
+	beq @end_of_filename
+	lda INPUT_LINE, y
+	jsr putc2
+	iny
+	jmp @send_filename_loop
+@end_of_filename:
+	lda #$00
+	jsr putc2
+	jsr cat_file
+	rts
+@purrrr:
+	.byte "purrrrrr", $0A, $0D, $00
 
 exec_input_line:
 	jsr getc2_nonblocking
@@ -168,6 +194,7 @@ exec_input_line:
 @dispatch_builtin:
 	dispatch_command cmd_help_str, cmd_help
 	dispatch_command cmd_ls_str, cmd_ls
+	dispatch_command cmd_cat_str, cmd_cat
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:
 ; purge any channel2 input buffer before starting IO
@@ -348,6 +375,88 @@ receive_file:
 	sec
 	rts
 	
+cat_iobuffer:
+	stx ZP_PTR
+	ldy #$00
+@loop:
+	lda IO_BUFFER, y
+	jsr putc
+	cmp #$0A
+	bne @jump_linefeed
+	lda #$0D
+	jsr putc
+@jump_linefeed:
+	iny
+	cpy ZP_PTR
+	bne @loop
+	rts
+	
+
+cat_file:
+	jsr getc2	; read size low byte
+	sta RECEIVE_SIZE
+	; jsr print_hex8
+	jsr getc2	; and high byte
+	sta RECEIVE_SIZE + 1
+	; jsr print_hex8
+	; check for file error: file size $ffff
+	cmp #$FF
+	bne @no_error
+	lda RECEIVE_SIZE
+	cmp #$FF
+	bne @no_error
+	; fell through both times -> error
+	clc
+	rts
+
+@no_error:
+	;
+	; outer loop over all received pages
+	; pages are loaded into IO_BUFFER one by one
+	;
+@load_page_loop:
+	; request next page
+	; lda #'b'		; send 'b' command to signal 'send next page'
+	; jsr putc2
+
+	lda #'b'		; send 'b' command to signal 'send next page'
+	jsr putc2
+	ldy #$00		; y: count byte inside page
+	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
+	beq @non_full_page
+
+	;
+	; full page case: exactly 256 bytes
+	;
+@loop_full_page:
+	jsr getc2	; recv next byte
+	sta IO_BUFFER, y	;  and store to IO_BUFFER+ y
+	iny
+	bne @loop_full_page	; end on y wrap around
+
+	dec RECEIVE_SIZE + 1	; dec remaining size 
+	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
+	jsr cat_iobuffer
+	jmp @load_page_loop	; continue with next page
+	
+	;
+	; reminder, always less than 256 bytes
+	;
+@non_full_page:
+@non_full_page_loop:
+	cpy RECEIVE_SIZE	; compare with lower byte of remaining size
+	beq @end
+	jsr getc2	; recv next byte
+	sta IO_BUFFER, y	;  and store to TARGET_ADDR + y
+	iny
+	jmp @non_full_page_loop
+
+@end:
+	ldx RECEIVE_SIZE
+	jsr cat_iobuffer
+	sec
+	rts
+
 print_windmill:
 	and #$3
 	tay

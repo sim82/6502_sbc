@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use mimonify::guess_program_space;
 use serial::prelude::*;
@@ -56,18 +56,28 @@ fn main() {
         };
 
         println!("{:x}", c);
-        if c == b'o' {
-            open_file(&mut port);
+        let res = if c == b'o' {
+            open_file(&mut port, false)
+        } else if c == b'r' {
+            open_file(&mut port, true)
+        } else {
+            Ok(())
+        };
+        match res {
+            Ok(_) => (),
+            Err(e) => println!("error: {:?}", e),
         }
     }
 }
-fn open_file<T: SerialPort>(port: &mut T) {
+fn open_file<T: SerialPort>(port: &mut T, raw: bool) -> Result<()> {
+    port.set_timeout(Duration::from_secs(5)).unwrap();
     println!("open file");
     let mut filename = String::new();
     loop {
-        let Ok(c) = port.read_u8() else {
-            continue;
-        };
+        // let Ok(c) = port.read_u8() else {
+        //     continue;
+        // };
+        let c = port.read_u8()?;
         println!("fn: {:x}", c);
         if c != 0x0 {
             filename.push(c.into());
@@ -77,52 +87,64 @@ fn open_file<T: SerialPort>(port: &mut T) {
     }
     println!("open file: {}", filename);
     match OpenFile::read_from(filename) {
-        Ok(file) => serve_file(port, file),
+        Ok(file) => serve_file(port, file, raw)?,
         Err(e) => {
             println!("error: {:?}. abort.", e);
-            port.write_u16::<LittleEndian>(0xffff);
-            port.write_u16::<LittleEndian>(0xffff);
+            port.write_u16::<LittleEndian>(0xffff)?;
+            if !raw {
+                port.write_u16::<LittleEndian>(0xffff)?;
+            }
         }
     }
+    Ok(())
 }
-fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile) {
-    println!("serve: {:x} - {:x}", file.start, file.end);
-    let size = file.end - file.start;
-    port.write_u16::<LittleEndian>(file.start);
-    port.write_u16::<LittleEndian>(size);
-    let start = file.start as usize;
-    let end = file.end as usize;
+fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<()> {
+    let size;
+    let data;
+    if !raw {
+        println!("serve binary: {:x} - {:x}", file.start, file.end);
+        port.write_u16::<LittleEndian>(file.start)?;
+        size = file.end - file.start;
+        let start = file.start as usize;
+        let end = file.end as usize;
 
-    let data = &file.data[start..end];
+        data = &file.data[start..end];
+    } else {
+        size = file.data.len() as u16;
+        data = &file.data;
 
-    port.set_timeout(Duration::from_secs(5)).unwrap();
+        println!("serve raw: {:x}", size);
+    }
+    port.write_u16::<LittleEndian>(size)?;
+
     for (i, chunk) in data.chunks(256).enumerate() {
         // print!("waiting for sync ...");
         // stdout().flush();
-        match (port.read_u8()) {
+        match port.read_u8() {
             Ok(b'b') => (),
 
             Ok(c) => {
                 println!("\nunknown command: {:x}", c);
-                return;
+                return Err(anyhow!("unknown command: {:x}", c));
             }
             Err(e) => {
                 println!("\nIO error: {:?}", e);
-                return;
+                return Err(anyhow!("\nIO error: {:?}", e));
             }
         }
         print!("\rsend chunk: {:04} {}", i, chunk.len());
-        stdout().flush();
+        stdout().flush()?;
 
         // for c in chunk {
         //     port.write_u8(*c);
         // }
         port.write_all(chunk).unwrap();
-        port.flush();
+        port.flush()?;
         print!("\r");
-        stdout().flush();
+        stdout().flush()?;
         // std::thread::sleep(Duration::from_secs(1))
     }
     println!("\ndone.");
+    Ok(())
     // loop {}
 }
