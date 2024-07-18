@@ -110,8 +110,14 @@ fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<
 
         data = &file.data[start..end];
     } else {
-        size = file.data.len() as u16;
-        data = &file.data;
+        // protect our poor 6502 from huge files...
+        if file.data.len() <= 0xfffe {
+            size = file.data.len() as u16;
+            data = &file.data;
+        } else {
+            size = 0xfffe;
+            data = &file.data[0x0..0xfffe];
+        }
 
         println!("serve raw: {:x}", size);
     }

@@ -196,6 +196,38 @@ cmd_cat:
 @purrrr:
 	.byte "purrrr", $0A, $0D, $00
 
+cmd_bench_str:
+	.byte "bench"
+cmd_bench:
+	jsr retire_token
+	jsr read_token
+	jsr purge_channel2_input
+	lda #'r'
+	jsr putc2
+	ldy NEXT_TOKEN_PTR
+@send_filename_loop:
+	cpy NEXT_TOKEN_END
+	beq @end_of_filename
+	lda INPUT_LINE, y
+	jsr putc2
+	iny
+	jmp @send_filename_loop
+@end_of_filename:
+	lda #$00
+	jsr putc2
+	store_address IO_BUFFER, IO_ADDR
+	store_address @noop, IO_FUN
+	lda #$00
+	sta ZP_PTR
+	jsr read_file_paged
+	rts
+
+@noop:
+	inc ZP_PTR
+	lda ZP_PTR
+	jsr print_windmill
+	rts
+
 exec_input_line:
 	jsr getc2_nonblocking
 	bcs exec_input_line
@@ -209,6 +241,7 @@ exec_input_line:
 	dispatch_command cmd_help_str, cmd_help
 	dispatch_command cmd_ls_str, cmd_ls
 	dispatch_command cmd_cat_str, cmd_cat
+	dispatch_command cmd_bench_str, cmd_bench
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:
 ; purge any channel2 input buffer before starting IO
@@ -405,12 +438,10 @@ read_file_paged:
 
 	dec RECEIVE_SIZE + 1	; dec remaining size 
 	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
-	; hack: simulate indirect jsr using indirect jump trampoline
+	; hack: simulate indirect jsr using indirect jump trampoline (is this a new invention or just what ye olde folks called a vector?)
 	jsr @io_fun_trampoline
 	jmp @load_page_loop	; continue with next page
 
-@hack1:
-	jmp (IO_FUN)
 	
 	;
 	; reminder, always less than 256 bytes
