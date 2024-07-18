@@ -224,7 +224,7 @@ exec_input_line:
 @end_of_filename:
 	lda #$00
 	jsr putc2
-	jsr receive_file
+	jsr load_binary
 	bcc @file_error
 	jmp (RECEIVE_POS)
 
@@ -304,16 +304,17 @@ retire_token:
 	sta NEXT_TOKEN_END	; invalidate previous token end ptr
 	rts
 
-receive_file:
+load_binary:
 	; meaning of TARGET_ADDR vs RECEIVE_POS: 
 	;  - TARGET_ADDR: in ZP, used for indirect addressing and modified during read
 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
+
 	jsr getc2	; read target address low byte
 	sta RECEIVE_POS
-	sta TARGET_ADDR
+	sta IO_ADDR
 	jsr getc2	; and high byte
 	sta RECEIVE_POS + 1	
-	sta TARGET_ADDR + 1
+	sta IO_ADDR + 1
 	; check for file error: target addr $ffff
 	cmp #$FF
 	bne @no_error
@@ -325,67 +326,101 @@ receive_file:
 	rts
 
 @no_error:
-	jsr getc2	; read size low byte
-	sta RECEIVE_SIZE
-	jsr getc2	; and high byte
-	sta RECEIVE_SIZE + 1
+	lda #<@load_binary_page_completion
+	sta IO_FUN
+	lda #>@load_binary_page_completion
+	sta IO_FUN + 1
+	jsr read_file_paged
 
-	; debug: output target pos
-	lda RECEIVE_POS
-	ldx RECEIVE_POS+1
-	jsr print_hex16
-	lda #':'
-	jsr putc
-	
-	; debug: output size
-	lda RECEIVE_SIZE
-	ldx RECEIVE_SIZE+1
-	jsr print_hex16
-	jsr put_newline
-
-	;
-	; outer loop over all received pages
-	;
-@load_page_loop:
-	lda TARGET_ADDR + 1	; QoL: spin windmill
+@load_binary_page_completion:
+	lda IO_ADDR + 1	; QoL: spin windmill
 	jsr print_windmill
+	inc IO_ADDR + 1	;  and inc address by 256 each
 
-	; request next page
-	lda #'b'		; send 'b' command to signal 'send next page'
-	jsr putc2
-
-	ldy #$00		; y: count byte inside page
-	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
-	beq @non_full_page_loop
-
-	;
-	; full page case: exactly 256 bytes
-	;
-@loop_full_page:
-	jsr getc2	; recv next byte
-	sta (TARGET_ADDR), y	;  and store to TARGET_ADDR + y
-	iny
-	bne @loop_full_page	; end on y wrap around
-
-	; update size / taregt addr after end of page
-	dec RECEIVE_SIZE + 1	; dec remaining size 
-	inc TARGET_ADDR + 1	;  and inc address by 256 each
-	jmp @load_page_loop	; continue with next page
-	
-	;
-	; reminder, always less than 256 bytes
-	;
-@non_full_page_loop:
-	cpy RECEIVE_SIZE	; compare with lower byte of remaining size
-	beq @end
-	jsr getc2	; recv next byte
-	sta (TARGET_ADDR), y	;  and store to TARGET_ADDR + y
-	iny
-	jmp @non_full_page_loop
-
-@end:
-	sec
 	rts
+	
+; receive_file:
+; 	; meaning of TARGET_ADDR vs RECEIVE_POS: 
+; 	;  - TARGET_ADDR: in ZP, used for indirect addressing and modified during read
+; 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
+; 	jsr getc2	; read target address low byte
+; 	sta RECEIVE_POS
+; 	sta TARGET_ADDR
+; 	jsr getc2	; and high byte
+; 	sta RECEIVE_POS + 1	
+; 	sta TARGET_ADDR + 1
+; 	; check for file error: target addr $ffff
+; 	cmp #$FF
+; 	bne @no_error
+; 	lda TARGET_ADDR
+; 	cmp #$FF
+; 	bne @no_error
+; 	; fell through both times -> error
+; 	clc
+; 	rts
+
+; @no_error:
+; 	jsr getc2	; read size low byte
+; 	sta RECEIVE_SIZE
+; 	jsr getc2	; and high byte
+; 	sta RECEIVE_SIZE + 1
+
+; 	; debug: output target pos
+; 	lda RECEIVE_POS
+; 	ldx RECEIVE_POS+1
+; 	jsr print_hex16
+; 	lda #':'
+; 	jsr putc
+	
+; 	; debug: output size
+; 	lda RECEIVE_SIZE
+; 	ldx RECEIVE_SIZE+1
+; 	jsr print_hex16
+; 	jsr put_newline
+
+; 	;
+; 	; outer loop over all received pages
+; 	;
+; @load_page_loop:
+; 	lda TARGET_ADDR + 1	; QoL: spin windmill
+; 	jsr print_windmill
+
+; 	; request next page
+; 	lda #'b'		; send 'b' command to signal 'send next page'
+; 	jsr putc2
+
+; 	ldy #$00		; y: count byte inside page
+; 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
+; 	beq @non_full_page_loop
+
+; 	;
+; 	; full page case: exactly 256 bytes
+; 	;
+; @loop_full_page:
+; 	jsr getc2	; recv next byte
+; 	sta (TARGET_ADDR), y	;  and store to TARGET_ADDR + y
+; 	iny
+; 	bne @loop_full_page	; end on y wrap around
+
+; 	; update size / taregt addr after end of page
+; 	dec RECEIVE_SIZE + 1	; dec remaining size 
+; 	inc TARGET_ADDR + 1	;  and inc address by 256 each
+; 	jmp @load_page_loop	; continue with next page
+	
+; 	;
+; 	; reminder, always less than 256 bytes
+; 	;
+; @non_full_page_loop:
+; 	cpy RECEIVE_SIZE	; compare with lower byte of remaining size
+; 	beq @end
+; 	jsr getc2	; recv next byte
+; 	sta (TARGET_ADDR), y	;  and store to TARGET_ADDR + y
+; 	iny
+; 	jmp @non_full_page_loop
+
+; @end:
+; 	sec
+; 	rts
 	
 cat_iobuffer:
 	stx ZP_PTR
@@ -449,7 +484,8 @@ read_file_paged:
 
 	dec RECEIVE_SIZE + 1	; dec remaining size 
 	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
-	jsr @hack1
+	; hack: simulate indirect jsr using indirect jump trampoline
+	jsr @io_fun_trampoline
 	jmp @load_page_loop	; continue with next page
 
 @hack1:
@@ -469,15 +505,14 @@ read_file_paged:
 
 @end:
 	ldx RECEIVE_SIZE
-	jsr @hack2
-	jmp @after_hack2
-
-@hack2:
-	jmp (IO_FUN)
+	; hack: simulate indirect jsr using indirect jump trampoline
+	jsr @io_fun_trampoline
 		
-@after_hack2:
 	sec
 	rts
+
+@io_fun_trampoline:
+	jmp (IO_FUN)
 
 print_windmill:
 	and #$3
