@@ -4,7 +4,7 @@
 -----------------------------
    1   | Clock    | Clock/Input
    2   | RWB      | Input
-   3   | NC       | Input
+   3   | LcdSel   | Input
    4   | NC       | Input
    5   | NC       | Input
    6   | NC       | Input
@@ -21,8 +21,8 @@
   17   | OE       | Output
   18   | WE       | Output
   19   | SysClk   | Output
-  20   | NC       | NC
-  21   | NC       | NC
+  20   | InvClk   | Output
+  21   | LcdEn    | Output
   22   | NC       | NC
   23   | NC       | NC
   24   | VCC      | VCC

@@ -7,11 +7,11 @@
                           |                 |
                       RWB |  2           23 | NC
                           |                 |
-                       NC |  3           22 | NC
+                   LcdSel |  3           22 | NC
                           |                 |
-                       NC |  4           21 | NC
+                       NC |  4           21 | LcdEn
                           |                 |
-                       NC |  5           20 | NC
+                       NC |  5           20 | InvClk
                           |                 |
                        NC |  6           19 | SysClk
                           |                 |
