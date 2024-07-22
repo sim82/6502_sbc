@@ -96,13 +96,10 @@ IO_BUFFER = $0300
 	jsr purge_channel2_input
 	lda #'o'
 	jsr putc2
-	ldy #$00
-@send_filename_loop:
-	lda filename, y
-	iny
+	lda #'.'
 	jsr putc2
-	bne @send_filename_loop ; this works because putc2 implicitly restores zero flag from A reg
-
+	lda #'b'
+	jsr putc2
 	jsr load_binary
 	bcc @file_error
 	jmp (RECEIVE_POS)
@@ -210,29 +207,42 @@ putc2:
 	rts
 
 getc2:
-	jsr getc2_nonblocking
-	bcc getc2
-	rts
-
-getc2_nonblocking:
-@loop:
-	; check transmit data register empty
 	lda IO_UART_ISR2
 	and #%00000001
-	beq @no_keypress
+	beq getc2
 	lda IO_UART_RDR2
-        sec
+shared_rts:
 	rts
+	
+; getc2:
+; 	jsr getc2_nonblocking
+; 	bcc getc2
+; 	rts
 
-@no_keypress:
-        clc
-	rts
+; getc2_nonblocking:
+; @loop:
+; 	; check transmit data register empty
+; 	lda IO_UART_ISR2
+; 	and #%00000001
+; 	beq @no_keypress
+; 	lda IO_UART_RDR2
+;         sec
+; 	rts
+
+; @no_keypress:
+;         clc
+; 	rts
 
 purge_channel2_input:
 ; purge any channel2 input buffer
-	jsr getc2_nonblocking
-	bcs purge_channel2_input
-	rts
+	lda IO_UART_ISR2
+	and #%00000001
+	beq shared_rts
+	lda IO_UART_RDR2
+	jmp purge_channel2_input
+	; jsr getc2_nonblocking
+	; bcs purge_channel2_input
+	; rts
 
 print_disp:
 	ldy #$00
@@ -255,5 +265,5 @@ welcome_message:
 file_not_found_message:
 	.byte "e:nf", $00
 
-filename:
-	.byte "boot", $00
+; filename:
+; 	.byte "boot", $00
