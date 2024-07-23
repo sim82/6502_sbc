@@ -50,7 +50,7 @@
 .exportzp LAB_WARM, IrqBase, NmiBase, Dtypef
 .export LAB_COLD, LAB_FCER, LAB_14BD, LAB_EVEX, LAB_SNER, LAB_22B6, LAB_1463, LAB_RMSG
 
-.import V_INPT, V_OUTP, V_LOAD, V_SAVE, V_USR
+.import V_INPT, V_OUTP, V_LOAD, V_SAVE, V_USR, V_INIT
 
 ; BUF_START = $0200
 ; BUF_END = BUF_START + $50
@@ -484,6 +484,7 @@ Stack_floor       = 16        ; bytes left free on stack for background interrup
 ; BASIC cold start entry point
 
 LAB_COLD:
+      jsr  V_INIT
       LDX   #$FF              ; set byte
       STX   Clineh            ; set current line high byte (set immediate mode)
       TXS                     ; reset stack pointer

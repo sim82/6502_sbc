@@ -4,6 +4,7 @@
 .SEGMENT "VECTORS"
 ; change for ram build!
 	.WORD $FF00
+	; .WORD $3000
 
 
 
@@ -53,7 +54,7 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 	sta IO_DISP_CTRL
 
  	jsr check_busy
-	lda #$f             ; display on, cursor blink
+	lda #%00001100; display on, cursor/blink off
 	sta IO_DISP_CTRL
 
 	; init uart channel 2
@@ -86,12 +87,12 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 	jsr print_disp
 ; purge any channel2 input buffer before starting IO
 	jsr purge_channel2_input
-	lda #'o'
+	ldy #$00
+@loop:
+	lda filename, y
+	iny
 	jsr putc2
-	lda #'.'
-	jsr putc2
-	lda #'b'
-	jsr putc2
+	bne @loop
 	jsr load_binary
 	bcc @file_error
 	jmp (RECEIVE_POS)
@@ -149,8 +150,16 @@ load_binary:
 	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr putc2
 	ldy #$00		; y: count byte inside page
-	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
+	lda RECEIVE_SIZE + 1
 	beq @non_full_page
+
+	and #$03
+	tax
+	lda windmill, x
+	sta IO_DISP_DATA
+	; jsr check_busy
+	; ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
+
 
 	;
 	; full page case: exactly 256 bytes
@@ -161,8 +170,12 @@ load_binary:
 	iny
 	bne @loop_full_page	; end on y wrap around
 
+	; interleave lcd delete (for windmill) with uart io to save need disp_busy call...
+	lda #%10000101
+	sta IO_DISP_CTRL
 	dec RECEIVE_SIZE + 1	; dec remaining size 
 	inc IO_ADDR + 1
+
 	jmp @load_page_loop	; continue with next page
 
 	
@@ -251,11 +264,14 @@ print_disp:
 
 	
 welcome_message:
-	.byte "bl1.0", $00
+	.byte "bl1.1", $00
 
 
 file_not_found_message:
-	.byte "e:nf", $00
+	.byte "e:n", $00
 
-; filename:
-; 	.byte "boot", $00
+filename:
+ 	.byte "o.b", $00
+
+windmill:
+	.byte $5c, "|/-"

@@ -1,5 +1,5 @@
 .include "std.inc" ; use at lease the same constants... at some point consolidate into a single bios
-.export V_INPT, V_OUTP, V_LOAD, V_SAVE, V_USR
+.export V_INPT, V_OUTP, V_LOAD, V_SAVE, V_USR, V_INIT
 ; .export __HEADER_START__
 ; , __RAM_SIZE__
 ; , __RAM_START__, __STACKSIZE__, __IBUFFSIZE__
@@ -31,6 +31,34 @@ Smemh             = Smeml+1   ; start of mem high byte      (Start-of-Basic)
 Svarl             = $7B       ; start of vars low byte      (Start-of-Variables)
 Svarh             = Svarl+1   ; start of vars high byte     (Start-of-Variables)
 .CODE
+V_INIT:
+	
+	; init uart channel 2
+	; Bit 7: Select CR = 0
+	; Bit 6: CDR/ACR (don't care)
+	; Bit 5: Num stop bits (0=1, 1-2)
+	; Bit 4: Echo mode (0=disabled, 1=enabled)
+	; Bit 3-0: baud divisor (1110 = 3840)
+	; write CR
+	lda #%00001110
+	sta IO_UART_CR1
+	sta IO_UART_CR2
+
+	; Bit 7: Select FR = 1
+	; Bit 6,5: Num Bits (11 = 8)
+	; Bit 4,3: Parity mode (don't care)
+	; Bit 2: Parity Enable / Disable (1/0)
+	; Bit 1,0: DTR/RTS control (don't care)
+	; write FR
+	lda #%11100000
+	sta IO_UART_FR1
+	sta IO_UART_FR2
+
+	lda #%11000001
+	sta IO_UART_IER1
+	sta IO_UART_IER2
+	rts
+
 V_OUTP:
 	pha
 @loop:
