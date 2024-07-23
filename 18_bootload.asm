@@ -170,13 +170,14 @@ load_binary:
 	iny
 	bne @loop_full_page	; end on y wrap around
 
-	; interleave lcd delete (for windmill) with uart io to save need disp_busy call...
-	lda #%10000101
-	sta IO_DISP_CTRL
 	dec RECEIVE_SIZE + 1	; dec remaining size 
 	inc IO_ADDR + 1
 
-	jmp @load_page_loop	; continue with next page
+	; interleave lcd delete (for windmill) with uart io to save need disp_busy call...
+	lda #%10000101
+	sta IO_DISP_CTRL
+	; jmp @load_page_loop	; continue with next page
+	bne @load_page_loop ; Z = 0 after const lda
 
 	
 	;
@@ -189,7 +190,8 @@ load_binary:
 	jsr getc2	; recv next byte
 	sta (IO_ADDR), y	;  and store to TARGET_ADDR + y
 	iny
-	jmp @non_full_page_loop
+	; jmp @non_full_page_loop
+	bne @non_full_page_loop ; Z = 0 after iny (Y cannot wrap in non full page loop)
 
 @end:
 	
