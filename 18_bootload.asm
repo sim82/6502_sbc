@@ -202,19 +202,25 @@ load_binary:
 
 
 putc2:
-	pha
+	; pha
 @loop:
-	lda IO_UART_ISR2
-	and #%01000000
-	beq @loop
-	pla
+	; lda IO_UART_ISR2
+	; and #%01000000
+	; beq @loop
+	bit IO_UART_ISR2
+	bvs @loop
+	; pla
 	sta IO_UART_TDR2
 	rts
 
 getc2:
+	; lda IO_UART_ISR2
+	; and #%00000001
 	lda IO_UART_ISR2
-	and #%00000001
-	beq getc2
+	ror
+	bcc getc2
+	; and #%00000001
+	; beq getc2
 	lda IO_UART_RDR2
 shared_rts:
 	rts
@@ -241,8 +247,10 @@ shared_rts:
 purge_channel2_input:
 ; purge any channel2 input buffer
 	lda IO_UART_ISR2
-	and #%00000001
-	beq shared_rts
+	ror
+	bcc shared_rts
+	; and #%00000001
+	; beq shared_rts
 	lda IO_UART_RDR2
 	jmp purge_channel2_input
 	; jsr getc2_nonblocking
@@ -257,7 +265,8 @@ print_disp:
 	beq @done
 	sta IO_DISP_DATA 
 	iny
-	jmp @loop
+	; jmp @loop
+	bne @loop ; z not set after iny
 @done:
 	rts
 
