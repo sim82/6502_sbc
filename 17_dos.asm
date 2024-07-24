@@ -421,12 +421,12 @@ read_file_paged:
 	; lda #'b'		; send 'b' command to signal 'send next page'
 	; jsr putc2
 
-	lda #'b'		; send 'b' command to signal 'send next page'
-	jsr putc2
 	ldy #$00		; y: count byte inside page
 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
 
+	lda #'b'		; send 'b' command to signal 'send next page'
+	jsr putc2
 	;
 	; full page case: exactly 256 bytes
 	;
@@ -447,6 +447,11 @@ read_file_paged:
 	; reminder, always less than 256 bytes
 	;
 @non_full_page:
+	; don't send 'b' if last page is empty (i.e. size is a multiple of 256)
+	cpy RECEIVE_SIZE
+	beq @end
+	lda #'b'		; send 'b' command to signal 'send next page'
+	jsr putc2
 @non_full_page_loop:
 	cpy RECEIVE_SIZE	; compare with lower byte of remaining size
 	beq @end

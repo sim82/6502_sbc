@@ -55,12 +55,13 @@ fn main() {
             continue;
         };
 
-        println!("{:x}", c);
+        // println!("{:x}", c);
         let res = if c == b'o' {
             open_file(&mut port, false)
         } else if c == b'r' {
             open_file(&mut port, true)
         } else {
+            println!("unexpected: {:x} '{}'", c, c as char);
             Ok(())
         };
         match res {
@@ -78,7 +79,7 @@ fn open_file<T: SerialPort>(port: &mut T, raw: bool) -> Result<()> {
         //     continue;
         // };
         let c = port.read_u8()?;
-        println!("fn: {:x}", c);
+        println!("fn: {:x} '{}'", c, c as char);
         if c != 0x0 {
             filename.push(c.into());
         } else {

@@ -153,6 +153,7 @@ load_binary:
 	lda RECEIVE_SIZE + 1
 	beq @non_full_page
 
+	ror
 	and #$03
 	tax
 	lda windmill, x
@@ -204,14 +205,15 @@ load_binary:
 
 
 putc2:
-	; pha
+	pha
 @loop:
-	; lda IO_UART_ISR2
-	; and #%01000000
+	lda IO_UART_ISR2
+	and #%01000000
+	beq @loop
+	; meh, does not work
+	; bit IO_UART_ISR2
 	; beq @loop
-	bit IO_UART_ISR2
-	bvs @loop
-	; pla
+	pla
 	sta IO_UART_TDR2
 	rts
 
@@ -275,7 +277,7 @@ print_disp:
 
 	
 welcome_message:
-	.byte "bl1.1", $00
+	.byte "bl1.2", $00
 
 
 file_not_found_message:
@@ -284,5 +286,7 @@ file_not_found_message:
 filename:
  	.byte "o.b", $00
 
+; windmill:
+; 	.byte $5c, "|/-"
 windmill:
-	.byte $5c, "|/-"
+	.byte %11101011, %11011111, %10100101, %00101110
