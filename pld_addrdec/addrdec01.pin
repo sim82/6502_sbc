@@ -14,16 +14,16 @@
   10   | A14      | Input
   11   | A15      | Input
   12   | GND      | GND
-  13   | NC       | Input
-  14   | ROM      | Output
-  15   | RAM      | Output
-  16   | IO       | Output
-  17   | OE       | Output
-  18   | WE       | Output
+  13   | Ram1En   | Input
+  14   | RomB     | Output
+  15   | Ram0B    | Output
+  16   | IoB      | Output
+  17   | OeB      | Output
+  18   | WeB      | Output
   19   | SysClk   | Output
   20   | InvClk   | Output
   21   | LcdEn    | Output
-  22   | RamHi    | Output
+  22   | Ram1B    | Output
   23   | NC       | NC
   24   | VCC      | VCC
 

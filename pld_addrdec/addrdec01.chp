@@ -7,7 +7,7 @@
                           |                 |
                       RWB |  2           23 | NC
                           |                 |
-                   LcdSel |  3           22 | RamHi
+                   LcdSel |  3           22 | Ram1B
                           |                 |
                       A08 |  4           21 | LcdEn
                           |                 |
@@ -15,15 +15,15 @@
                           |                 |
                       A10 |  6           19 | SysClk
                           |                 |
-                      A11 |  7           18 | WE
+                      A11 |  7           18 | WeB
                           |                 |
-                      A12 |  8           17 | OE
+                      A12 |  8           17 | OeB
                           |                 |
-                      A13 |  9           16 | IO
+                      A13 |  9           16 | IoB
                           |                 |
-                      A14 | 10           15 | RAM
+                      A14 | 10           15 | Ram0B
                           |                 |
-                      A15 | 11           14 | ROM
+                      A15 | 11           14 | RomB
                           |                 |
-                      GND | 12           13 | NC
+                      GND | 12           13 | Ram1En
                           -------------------

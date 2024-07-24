@@ -1,17 +1,17 @@
 GAL22V10
 CombTest
 
-Clock RWB   LcdSel  A08   A09   A10    A11     A12     A13    A14   A15   GND 
-NC    ROM   RAM     IO    OE    WE     SysClk  InvClk  LcdEn  RamHi NC    VCC
+Clock     RWB   LcdSel  A08   A09   A10    A11     A12     A13    A14   A15   GND 
+Ram1En    RomB   Ram0B  IoB   OeB   WeB    SysClk  InvClk  LcdEn  Ram1B NC    VCC
 
 
 
-/ROM = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 
-/RAM = /A15 
-/RamHi = A15 * /A14 + A15 * /A13 + A15 * /A12 + A15 * /A11 + A15 * /A10 + A15 * /A09 + A15 * /A08
-/IO =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock
-/OE = RWB * Clock
-/WE = /RWB * Clock
+/RomB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 + A15 * /A14 * /Ram1En + A15 * /A13 * /Ram1En + A15 * /A12 * /Ram1En + A15 * /A11 * /Ram1En + A15 * /A10 * /Ram1En + A15 * /A09 * /Ram1En 
+/Ram0B = /A15 
+/Ram1B = A15 * /A14 * Ram1En + A15 * /A13 * Ram1En + A15 * /A12 * Ram1En + A15 * /A11 * Ram1En + A15 * /A10 * Ram1En + A15 * /A09 * Ram1En 
+/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock
+/OeB = RWB * Clock
+/WeB = /RWB * Clock
 SysClk = Clock
 InvClk = /Clock
 LcdEn = Clock * /LcdSel

@@ -14,15 +14,15 @@ Pin 23 = NC           S0 = 0   S1 = 0
   8  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   9  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 22 = RamHi        S0 = 0   S1 = 1
+Pin 22 = Ram1B        S0 = 0   S1 = 1
  10  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 11  ---- ---- ---- ---- ---- ---- ---- ---- ---- -x-- x---
- 12  ---- ---- ---- ---- ---- ---- ---- ---- -x-- ---- x---
- 13  ---- ---- ---- ---- ---- ---- ---- -x-- ---- ---- x---
- 14  ---- ---- ---- ---- ---- ---- -x-- ---- ---- ---- x---
- 15  ---- ---- ---- ---- ---- -x-- ---- ---- ---- ---- x---
- 16  ---- ---- ---- ---- -x-- ---- ---- ---- ---- ---- x---
- 17  ---- ---- ---- -x-- ---- ---- ---- ---- ---- ---- x---
+ 11  ---- ---- ---- ---- ---- ---- ---- ---- ---- -x-- x-x-
+ 12  ---- ---- ---- ---- ---- ---- ---- ---- -x-- ---- x-x-
+ 13  ---- ---- ---- ---- ---- ---- ---- -x-- ---- ---- x-x-
+ 14  ---- ---- ---- ---- ---- ---- -x-- ---- ---- ---- x-x-
+ 15  ---- ---- ---- ---- ---- -x-- ---- ---- ---- ---- x-x-
+ 16  ---- ---- ---- ---- -x-- ---- ---- ---- ---- ---- x-x-
+ 17  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  18  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  19  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  20  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -78,7 +78,7 @@ Pin 19 = SysClk       S0 = 1   S1 = 1
  64  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  65  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 18 = WE           S0 = 0   S1 = 1
+Pin 18 = WeB          S0 = 0   S1 = 1
  66  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
  67  x--- -x-- ---- ---- ---- ---- ---- ---- ---- ---- ----
  68  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -97,7 +97,7 @@ Pin 18 = WE           S0 = 0   S1 = 1
  81  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  82  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 17 = OE           S0 = 0   S1 = 1
+Pin 17 = OeB          S0 = 0   S1 = 1
  83  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
  84  x--- x--- ---- ---- ---- ---- ---- ---- ---- ---- ----
  85  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -114,7 +114,7 @@ Pin 17 = OE           S0 = 0   S1 = 1
  96  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  97  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 16 = IO           S0 = 0   S1 = 1
+Pin 16 = IoB          S0 = 0   S1 = 1
  98  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
  99  x--- ---- ---- -x-- x--- x--- x--- x--- x--- x--- x---
 100  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -129,7 +129,7 @@ Pin 16 = IO           S0 = 0   S1 = 1
 109  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 110  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 15 = RAM          S0 = 0   S1 = 1
+Pin 15 = Ram0B        S0 = 0   S1 = 1
 111  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 112  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- -x--
 113  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -142,15 +142,15 @@ Pin 15 = RAM          S0 = 0   S1 = 1
 120  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 121  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 14 = ROM          S0 = 0   S1 = 1
+Pin 14 = RomB         S0 = 0   S1 = 1
 122  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 123  ---- ---- ---- x--- x--- x--- x--- x--- x--- x--- x---
-124  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
-125  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
-126  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
-127  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
-128  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
-129  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+124  ---- ---- ---- ---- ---- ---- ---- ---- ---- -x-- x--x
+125  ---- ---- ---- ---- ---- ---- ---- ---- -x-- ---- x--x
+126  ---- ---- ---- ---- ---- ---- ---- -x-- ---- ---- x--x
+127  ---- ---- ---- ---- ---- ---- -x-- ---- ---- ---- x--x
+128  ---- ---- ---- ---- ---- -x-- ---- ---- ---- ---- x--x
+129  ---- ---- ---- ---- -x-- ---- ---- ---- ---- ---- x--x
 130  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
 SP
