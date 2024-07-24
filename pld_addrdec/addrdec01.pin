@@ -5,10 +5,10 @@
    1   | Clock    | Clock/Input
    2   | RWB      | Input
    3   | LcdSel   | Input
-   4   | NC       | Input
-   5   | NC       | Input
-   6   | NC       | Input
-   7   | NC       | Input
+   4   | A08      | Input
+   5   | A09      | Input
+   6   | A10      | Input
+   7   | A11      | Input
    8   | A12      | Input
    9   | A13      | Input
   10   | A14      | Input
@@ -23,7 +23,7 @@
   19   | SysClk   | Output
   20   | InvClk   | Output
   21   | LcdEn    | Output
-  22   | NC       | NC
+  22   | RamHi    | Output
   23   | NC       | NC
   24   | VCC      | VCC
 

@@ -7,15 +7,15 @@
                           |                 |
                       RWB |  2           23 | NC
                           |                 |
-                   LcdSel |  3           22 | NC
+                   LcdSel |  3           22 | RamHi
                           |                 |
-                       NC |  4           21 | LcdEn
+                      A08 |  4           21 | LcdEn
                           |                 |
-                       NC |  5           20 | InvClk
+                      A09 |  5           20 | InvClk
                           |                 |
-                       NC |  6           19 | SysClk
+                      A10 |  6           19 | SysClk
                           |                 |
-                       NC |  7           18 | WE
+                      A11 |  7           18 | WE
                           |                 |
                       A12 |  8           17 | OE
                           |                 |

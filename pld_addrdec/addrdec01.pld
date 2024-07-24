@@ -1,14 +1,15 @@
 GAL22V10
 CombTest
 
-Clock RWB   LcdSel  NC    NC    NC     NC      A12     A13    A14   A15   GND 
-NC    ROM   RAM     IO    OE    WE     SysClk  InvClk  LcdEn  NC    NC    VCC
+Clock RWB   LcdSel  A08   A09   A10    A11     A12     A13    A14   A15   GND 
+NC    ROM   RAM     IO    OE    WE     SysClk  InvClk  LcdEn  RamHi NC    VCC
 
 
 
-/ROM = A15 * /A14 * /A13 + A15 * A12
+/ROM = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 
 /RAM = /A15 
-/IO =  /A12 * A13 * A14 * A15 * Clock
+/RamHi = A15 * /A14 + A15 * /A13 + A15 * /A12 + A15 * /A11 + A15 * /A10 + A15 * /A09 + A15 * /A08
+/IO =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock
 /OE = RWB * Clock
 /WE = /RWB * Clock
 SysClk = Clock

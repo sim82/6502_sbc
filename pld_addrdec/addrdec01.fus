@@ -14,15 +14,15 @@ Pin 23 = NC           S0 = 0   S1 = 0
   8  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   9  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 22 = NC           S0 = 0   S1 = 0
- 10  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 11  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 12  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 13  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 14  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 15  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 16  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
- 17  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+Pin 22 = RamHi        S0 = 0   S1 = 1
+ 10  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+ 11  ---- ---- ---- ---- ---- ---- ---- ---- ---- -x-- x---
+ 12  ---- ---- ---- ---- ---- ---- ---- ---- -x-- ---- x---
+ 13  ---- ---- ---- ---- ---- ---- ---- -x-- ---- ---- x---
+ 14  ---- ---- ---- ---- ---- ---- -x-- ---- ---- ---- x---
+ 15  ---- ---- ---- ---- ---- -x-- ---- ---- ---- ---- x---
+ 16  ---- ---- ---- ---- -x-- ---- ---- ---- ---- ---- x---
+ 17  ---- ---- ---- -x-- ---- ---- ---- ---- ---- ---- x---
  18  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  19  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  20  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -116,7 +116,7 @@ Pin 17 = OE           S0 = 0   S1 = 1
 
 Pin 16 = IO           S0 = 0   S1 = 1
  98  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 99  x--- ---- ---- ---- ---- ---- ---- -x-- x--- x--- x---
+ 99  x--- ---- ---- -x-- x--- x--- x--- x--- x--- x--- x---
 100  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 101  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 102  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -144,8 +144,8 @@ Pin 15 = RAM          S0 = 0   S1 = 1
 
 Pin 14 = ROM          S0 = 0   S1 = 1
 122  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-123  ---- ---- ---- ---- ---- ---- ---- ---- -x-- -x-- x---
-124  ---- ---- ---- ---- ---- ---- ---- x--- ---- ---- x---
+123  ---- ---- ---- x--- x--- x--- x--- x--- x--- x--- x---
+124  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 125  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 126  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 127  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
