@@ -9,9 +9,9 @@
 	
 .RODATA
 BEGADR:
-	.WORD $0200
+	.WORD $0500
 ENDADR:
-	.WORD $7f00
+	.WORD $fd00
 		
 .CODE
 	; ORG	$0000

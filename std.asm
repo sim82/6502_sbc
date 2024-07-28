@@ -36,7 +36,6 @@ div16:
 	tax
 	pla
 	rts
-	
 
 disp_init:
 	lda #$00
