@@ -1,7 +1,7 @@
 (export (version "E")
   (design
     (source "/home/sim/src/6502_sbc/pcb01/pcb01.kicad_sch")
-    (date "So 04 Aug 2024 14:46:02 CEST")
+    (date "So 04 Aug 2024 15:57:33 CEST")
     (tool "Eeschema 7.0.11")
     (sheet (number "1") (name "/") (tstamps "/")
       (title_block
@@ -366,7 +366,7 @@
       (tstamps "f140fb7e-208d-4de7-9388-1ed7cb05da3a"))
     (comp (ref "X1")
       (value "ACO-xxxMHz")
-      (footprint "Package_DIP:DIP-14_W7.62mm_Socket")
+      (footprint "Package_DIP:DIP-14_W7.62mm")
       (datasheet "http://www.conwin.com/datasheets/cx/cx030.pdf")
       (libsource (lib "65xx") (part "osci-14or8") (description "HCMOS Crystal Clock Oscillator, DIP14-style metal package"))
       (property (name "Sheetname") (value ""))
