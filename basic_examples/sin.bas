@@ -1,0 +1,5 @@
+
+10 FOR i = 0 TO 10 * 3.1415 STEP 0.1
+15 t = 40 + 40 * SIN(i)
+20 PRINT TAB(t) "*"
+30 NEXT
