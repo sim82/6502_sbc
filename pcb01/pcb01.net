@@ -1,7 +1,7 @@
 (export (version "E")
   (design
     (source "/home/sim/src/6502_sbc/pcb01/pcb01.kicad_sch")
-    (date "Thu 08 Aug 2024 05:48:11 PM CEST")
+    (date "Mon 26 Aug 2024 12:57:03 PM CEST")
     (tool "Eeschema 7.0.11-7.0.11~ubuntu22.04.1")
     (sheet (number "1") (name "/") (tstamps "/")
       (title_block
