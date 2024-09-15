@@ -17,33 +17,15 @@ reset:
 
 	jsr put_newline
 
-	; lda #%00101010
-	; sta $fe32
-	; jsr dly
-	; lda #%00110000
-	; sta $fe32
-	; jsr dly
-	; lda #%01000000
-	; sta $fe32
-	; jsr dly
-	
-	; lda #%01010000
-	; sta $fe32
-	; jsr dly
-
 	; CRA - reset MR pointer
-	; lda #%10110000
-	; sta $fe32
+	lda #%10110000
+	sta $fe32
 	; jsr dly
 
-	; ; MR0A
-	; lda #%00001000
-	; sta $fe30
+	; MR0A
+	lda #%00001001
+	sta $fe30
 
-	; ; CRA - reset MR pointer
-	; lda #%00010000
-	; sta $fe32
-	; jsr dly
 
 	; MR1A
 	lda #%00010011
@@ -54,78 +36,50 @@ reset:
 	sta $fe30
 
 	; CSRA
+	; lda #%01100110
+	; lda #%10111011
 	lda #%11001100
 	sta $fe31
 
-	; ; ACR
-	; lda #%00000000
-	; ; lda #%01100000
-	; sta $fe34
-	; ; IMR
-	; lda #%00000000
-	; sta $fe35
-	; sta $fe36
-	; sta $fe37
-	; sta $fe3d
 
 	; CRA
 	; reset MR pointer to 0x0
 	; lda #%10110000
-	; sta $fe32
-
-	; ; MR0A
-	; lda #%00001000
-	; sta $fe30
-
-	; ; MR1A
-	; lda #%00010011
-	; sta $fe30
-
-	; ; MR2A
-	; lda #%00000111
-	; sta $fe30
-
-	; MR2A
-	; lda $%00000000
-	; sta $fe30
-
-	; CRA
-	; reset MR pointer to 0x0
-	; lda #%10110000
-	lda #%00010000
+	lda #%10110101
 	sta $fe32
-	jsr dly
-
-	lda $fe30
-	jsr print_hex8
-	lda #' '
-	jsr putc
-
-	lda $fe30
-	jsr print_hex8
-	lda #' '
-	jsr putc
-
-	lda $fe30
-	jsr print_hex8
-	lda #' '
-	jsr putc
+	; jsr dly
 
 	; lda $fe30
 	; jsr print_hex8
 	; lda #' '
 	; jsr putc
-	jsr put_newline
 
-	; CRA
-	lda #%00000100
-	sta $fe32
+	; lda $fe30
+	; jsr print_hex8
+	; lda #' '
+	; jsr putc
+
+	; lda $fe30
+	; jsr print_hex8
+	; lda #' '
+	; jsr putc
+
+	; ; lda $fe30
+	; ; jsr print_hex8
+	; ; lda #' '
+	; ; jsr putc
+	; jsr put_newline
+
 	
 
 @loop:
 
+@waitfull:
 	; sta IO_UART_TDR1
-	; lda $fe31
+	lda $fe31
+	and #%00000100
+	beq @waitfull
+
 	; jsr dly
 	; jsr print_hex8
 	; lda #' '
@@ -136,7 +90,7 @@ reset:
 	inx
 	sta $fe33
 
-	jsr dly
+	; jsr dly
 	jmp @loop
 
 
