@@ -11,7 +11,8 @@
 BEGADR:
 	.WORD $0500
 ENDADR:
-	.WORD $fd00
+	.WORD $fd00 ; 64k ram version
+	; .WORD $7f00 ; 32k/32k rom version
 		
 .CODE
 	; ORG	$0000
@@ -66,7 +67,8 @@ TSTBWD:
 	STA	MEMPTR
 	TAX
 	NOP
-	JMP	OUTXAH		;EXIT !
+	; JMP	OUTXAH		;EXIT !
+	jmp start               ; high freq test without display (it's too slow for 14MHz...)
 REPERR:
 	STA IO_GPIO0
 	LDA	ACTUAL		;REPORT ERROR
