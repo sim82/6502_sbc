@@ -2,7 +2,7 @@
 
 .INCLUDE "std.inc"
 .SEGMENT "VECTORS"
-	.WORD $0300
+	.WORD $8000
 
 	
 
@@ -13,9 +13,9 @@ PAGE_ADDR_HI = $81
 
 
 reset:
-	jsr uart_init
+	; jsr uart_init
 
-	jsr put_newline
+	; jsr put_newline
 
 	; CRA - reset MR pointer
 	lda #%10110000
