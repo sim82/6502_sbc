@@ -33,12 +33,18 @@ impl OpenFile {
     }
 }
 fn main() {
-    let mut port = serial::open(
-        "/dev/serial/by-id/usb-Raspberry_Pi_Debug_Probe__CMSIS-DAP__E6633861A3387C2C-if01",
-    )
-    .unwrap();
+    let dev = match (std::env::args().nth(1)) {
+        Some(dev) => dev,
+        None => "/dev/serial/by-id/usb-Raspberry_Pi_Debug_Probe__CMSIS-DAP__E6633861A3387C2C-if01"
+            .into(),
+    };
+    let baud = std::env::args().nth(2).map_or(serial::Baud38400, |v| {
+        serial::BaudOther(v.parse::<usize>().unwrap())
+    });
+    println!("dev: {} baud: {:?}", dev, baud);
+    let mut port = serial::open(&dev).unwrap();
     port.reconfigure(&|settings| {
-        settings.set_baud_rate(serial::Baud38400).unwrap();
+        settings.set_baud_rate(baud).unwrap();
         settings.set_char_size(serial::Bits8);
         settings.set_parity(serial::ParityNone);
         settings.set_stop_bits(serial::Stop1);
