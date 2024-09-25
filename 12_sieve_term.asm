@@ -1,4 +1,4 @@
-.AUTOIMPORT +
+.IMPORT uart_init, div16, put_newline, putc
 .INCLUDE "std.inc"
 .SEGMENT "VECTORS"
 	.WORD $8000
@@ -22,13 +22,14 @@ HIGH_BYTE = $008a
 STR_PTR = $8b
 
 .CODE
+reset:
 	lda #$00
 	sta CHECK_SUM
 	sta NUM_PRIMES
 
-
-reset:
-	jsr disp_init
+	; jsr disp_init
+	jsr uart_init
+	jsr putc
 	
 	lda #$00
 	tax
@@ -163,6 +164,7 @@ exit:
 	lda #>message_done
 	sta STR_PTR+1
 	jsr out_string
+	jmp reset
 @loop:
 	jmp @loop
 
@@ -179,8 +181,8 @@ dump_primes:
 	lda NUM_PRIMES
 	sta NUM1
 	jsr out_dec
-	lda #$20
-	lda IO_DISP_DATA
+	; lda #$20
+	; lda IO_DISP_DATA
 	
 @dump_loop:
 	lda #$00
@@ -203,7 +205,8 @@ dump_primes:
 	and #$1
 	cmp #$1
 	bne @dump_loop
-	jsr disp_linefeed
+	; jsr disp_linefeed
+	jsr put_newline
 	jmp @dump_loop
 @break:
 	pla
@@ -313,24 +316,24 @@ out_dec:
 @revloop:
 	pla
 	beq @end
-	jsr uart_write_blocking
+	jsr putc
 	jmp @revloop
 	
 @end:
 	lda #$20
-	jsr uart_write_blocking
+	jsr putc
 	
 	pla
 	rts
-uart_write_blocking:
-	pha
-@loop:
-	lda IO_UART_ISR1
-	and #%01000000
-	beq @loop
-	pla
-	sta IO_UART_TDR1
-	rts
+; uart_write_blocking:
+; 	pha
+; @loop:
+; 	lda IO_UART_ISR1
+; 	and #%01000000
+; 	beq @loop
+; 	pla
+; 	sta IO_UART_TDR1
+; 	rts
 
 end_loop: ; end
 	nop
@@ -345,8 +348,6 @@ fill_work:
 	inx
 	bne @loop
 
-	lda #$30
-	sta IO_DISP_DATA
 	rts
 		
 out_string:
@@ -354,7 +355,7 @@ out_string:
 @loop:
 	lda (STR_PTR), Y
 	beq @end
-	jsr uart_write_blocking
+	jsr putc
 	iny
 	jmp @loop
 @end:

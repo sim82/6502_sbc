@@ -106,6 +106,9 @@ fn open_file<T: SerialPort>(port: &mut T, raw: bool) -> Result<()> {
     Ok(())
 }
 fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<()> {
+    let mut sum1 = 0u8;
+    let mut sum2 = 0u8;
+
     let size;
     let data;
     if !raw {
@@ -151,6 +154,10 @@ fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<
         // for c in chunk {
         //     port.write_u8(*c);
         // }
+        for c in chunk {
+            sum1 = sum1.wrapping_add(*c);
+            sum2 = sum1.wrapping_add(sum2);
+        }
         port.write_all(chunk).unwrap();
         port.flush()?;
         print!("\r");
@@ -158,6 +165,7 @@ fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<
         // std::thread::sleep(Duration::from_secs(1))
     }
     println!("\ndone.");
+    println!("fletch16: {:02x} {:02x}", sum1, sum2);
     Ok(())
     // loop {}
 }

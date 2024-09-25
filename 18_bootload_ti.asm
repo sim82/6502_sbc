@@ -158,12 +158,10 @@ load_binary:
 	lda RECEIVE_SIZE + 1
 	beq @non_full_page
 
-	tax
-	lda BLINKENLIGHT
-	sta IO_GPIO0
-	asl
-	; adc 0
-	sta BLINKENLIGHT
+	ldx BLINKENLIGHT
+	stx IO_GPIO0
+	inx
+	stx BLINKENLIGHT
 	; lda windmill, x
 	; sta IO_DISP_DATA
 	; jsr check_busy
