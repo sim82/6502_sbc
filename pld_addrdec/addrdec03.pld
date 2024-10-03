@@ -1,0 +1,24 @@
+GAL22V10
+CombTest
+
+Clock     RWB    NC     A08   A09   A10    A11     A12     A13    A14   A15   GND 
+Ram1En    InvClk SysClk NC    IoB   RomB   Ram0B   Ram1B   OeB    WeB    NC   VCC
+
+
+
+/RomB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 + A15 * /A14 * /Ram1En + A15 * /A13 * /Ram1En + A15 * /A12 * /Ram1En + A15 * /A11 * /Ram1En + A15 * /A10 * /Ram1En + A15 * /A09 * /Ram1En 
+/Ram0B = /A15 
+/Ram1B = A15 * /A14 * Ram1En + A15 * /A13 * Ram1En + A15 * /A12 * Ram1En + A15 * /A11 * Ram1En + A15 * /A10 * Ram1En + A15 * /A09 * Ram1En 
+/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 
+/OeB = RWB * Clock
+/WeB = /RWB * Clock
+SysClk = Clock
+InvClk = RWB
+
+
+
+DESCRIPTION
+Changes:
+ - 17.9.2024: replace unused InvClock with unqualified RWB passthrough (because that is routet to extension connector)
+ - 18.9.2024: remove Clock from IoB
+ - 3.10.2024: re-order pins for Mark2 board

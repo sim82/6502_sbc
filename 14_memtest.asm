@@ -24,7 +24,7 @@ ENDADR:
 ACTUAL	=	$E6
 PATTERN =	$E5
 MEMPTR	=	$FA
-	jsr disp_init
+	; jsr disp_init
 start:
 ;
 ; TEST MEMORY, STARTING AT BEGADR UPTO ENDADR
@@ -162,15 +162,15 @@ OUTXAH:
 	jsr out_dec
 		
 	lda #$20
-	jsr check_busy
-	lda IO_DISP_DATA
+	; jsr check_busy
+	; lda IO_DISP_DATA
 	
 	ldy #$00
 	sty NUM1+1
 	txa
 	sta NUM1
-	jsr out_dec
-	jsr disp_linefeed
+	; jsr out_dec
+	; jsr disp_linefeed
 	
 	bne end
 	jmp start
