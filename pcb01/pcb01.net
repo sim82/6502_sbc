@@ -1,7 +1,7 @@
 (export (version "E")
   (design
     (source "/home/sim/src/6502_sbc/pcb01/pcb01.kicad_sch")
-    (date "Thu 03 Oct 2024 02:41:11 PM CEST")
+    (date "Thu 03 Oct 2024 02:48:42 PM CEST")
     (tool "Eeschema 7.0.11+dfsg-1build4")
     (sheet (number "1") (name "/") (tstamps "/")
       (title_block
@@ -1353,6 +1353,7 @@
     (net (code "16") (name "/A15")
       (node (ref "J1") (pin "a2") (pinfunction "Pin_a2") (pintype "passive"))
       (node (ref "U1") (pin "25") (pinfunction "A15") (pintype "tri_state"))
+      (node (ref "U3") (pin "1") (pinfunction "A15") (pintype "input"))
       (node (ref "U4") (pin "11") (pinfunction "I9") (pintype "input")))
     (net (code "17") (name "/CLOCK")
       (node (ref "U4") (pin "1") (pinfunction "CLK") (pintype "input"))
@@ -1739,7 +1740,6 @@
       (node (ref "U10") (pin "38") (pinfunction "VCC") (pintype "power_in"))
       (node (ref "U10") (pin "39") (pinfunction "VCC") (pintype "power_in"))
       (node (ref "U2") (pin "28") (pinfunction "VCC") (pintype "power_in"))
-      (node (ref "U3") (pin "1") (pinfunction "A15") (pintype "input"))
       (node (ref "U3") (pin "28") (pinfunction "VCC") (pintype "power_in"))
       (node (ref "U4") (pin "24") (pinfunction "VCC") (pintype "power_in"))
       (node (ref "U5") (pin "16") (pinfunction "VCC") (pintype "power_in"))
