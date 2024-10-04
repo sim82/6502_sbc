@@ -1,0 +1,15 @@
+GAL22V10
+CombTest
+
+Clock B0    B1    NC    NC     NC     NC    NC    NC    C0    C1    GND 
+/OE   A0    A1    NC    NC     NC     NC    NC    NC    NC    OUT    VCC
+
+
+A0.R    = /B0 * /A0 + A0 * B1
+A1.R    = /B1 * /A1 + A1 * B0
+ 
+OUT     = A0 * C0 + /A0 * C1
+
+DESCRIPTION
+
+

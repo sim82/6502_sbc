@@ -1,1 +1,5 @@
-target/
+build/*
+
+pcb1/gerber/*
+pcb1/production/*
+pcb1/pcb1-backups/*
