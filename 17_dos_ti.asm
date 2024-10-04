@@ -532,7 +532,7 @@ windmill:
 	.byte "-\|/"
 
 welcome_message:
-	.byte "dos v1.3 blksdfjf fsdkljf sdflksdjaf asdlkfjdsfk sdflkasdjf sdlkfj sd", $0A, $0D, $00
+	.byte "dos v1.3", $0A, $0D, $00
 
 
 help_message:
