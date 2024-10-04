@@ -1,5 +1,14 @@
 build/*
 
-pcb1/gerber/*
-pcb1/production/*
-pcb1/pcb1-backups/*
+pcb01/gerber/*
+pcb01/production/*
+pcb01/pcb01-backups/*
+
+mimonify/target/*
+mimonify/disk/*
+
+**/*.lck
+**/*.bak
+
+attic/*
+
