@@ -1,7 +1,5 @@
 .IMPORT uart_init, div16, put_newline, putc
 .INCLUDE "std.inc"
-.SEGMENT "VECTORS"
-	.WORD $8000
 
 	
 WORK = $1000

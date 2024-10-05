@@ -4,8 +4,6 @@
 ; found on http://forum.6502.org/viewtopic.php?f=4&t=5265#p62323 and ported to as65
 .AUTOIMPORT +
 .INCLUDE "std.inc"
-.SEGMENT "VECTORS"
-	.WORD $8000
 	
 .RODATA
 BEGADR:

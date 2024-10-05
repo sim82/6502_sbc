@@ -1,4 +1,5 @@
 build/*
+tmp/*
 
 pcb01/gerber/*
 pcb01/production/*

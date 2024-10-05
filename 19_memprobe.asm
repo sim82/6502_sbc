@@ -1,8 +1,6 @@
 .IMPORT uart_init, putc, print_hex8, put_newline
 
 .INCLUDE "std.inc"
-.SEGMENT "VECTORS"
-	.WORD $0300
 
 	
 

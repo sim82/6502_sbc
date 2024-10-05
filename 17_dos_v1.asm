@@ -1,5 +1,5 @@
 
-.IMPORT put_newline, uart_init, putc, getc, putc2, getc2, getc2_nonblocking, purge_channel2_input, print_hex16
+.AUTOIMPORT +
 .INCLUDE "std.inc"
 .SEGMENT "VECTORS"
 	.WORD $8000
@@ -19,8 +19,6 @@ IO_FUN = RECEIVE_SIZE + 2
 ZP_PTR = $80
 
 IO_ADDR = ZP_PTR + 2
-FLETCH_1 = IO_ADDR + 2
-FLETCH_2 = FLETCH_1 + 1
 
 IO_BUFFER = $0300
 
@@ -60,17 +58,31 @@ IO_BUFFER = $0300
 	lda #$00
 	sta INPUT_LINE_PTR
 
-	
-	jsr uart_init
+	; init uart channel 2
+	; Bit 7: Select CR = 0
+	; Bit 6: CDR/ACR (don't care)
+	; Bit 5: Num stop bits (0=1, 1-2)
+	; Bit 4: Echo mode (0=disabled, 1=enabled)
+	; Bit 3-0: baud divisor (1110 = 3840)
+	; write CR
+	lda #%00001110
+	sta IO_UART_CR1
+	sta IO_UART_CR2
 
-; @loop:
+	; Bit 7: Select FR = 1
+	; Bit 6,5: Num Bits (11 = 8)
+	; Bit 4,3: Parity mode (don't care)
+	; Bit 2: Parity Enable / Disable (1/0)
+	; Bit 1,0: DTR/RTS control (don't care)
+	; write FR
+	lda #%11100000
+	sta IO_UART_FR1
+	sta IO_UART_FR2
 
-; 	jsr getc
-; 	bcc @loop
-; 	jsr putc
-; 	jmp @loop
+	lda #%11000001
+	sta IO_UART_IER1
+	sta IO_UART_IER2
 
-	
 	jsr put_newline
 	print_message_from_ptr welcome_message
 
@@ -216,16 +228,6 @@ cmd_bench:
 	jsr print_windmill
 	rts
 
-cmd_echo_str:
-	.byte "echo"
-cmd_echo:
-	jsr getc
-	bcc cmd_echo
-	jsr putc
-	; endless loop
-	jmp cmd_echo
-
-
 exec_input_line:
 	jsr getc2_nonblocking
 	bcs exec_input_line
@@ -240,7 +242,6 @@ exec_input_line:
 	dispatch_command cmd_ls_str, cmd_ls
 	dispatch_command cmd_cat_str, cmd_cat
 	dispatch_command cmd_bench_str, cmd_bench
-	dispatch_command cmd_echo_str, cmd_echo
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:
 ; purge any channel2 input buffer before starting IO
@@ -260,14 +261,6 @@ exec_input_line:
 	jsr putc2
 	jsr load_binary
 	bcc @file_error
-	lda RECEIVE_POS
-	ldx RECEIVE_POS + 1
-	jsr print_hex16
-	jsr put_newline
-	ldy 0
-@delay:
-	iny
-	bne @delay
 	jmp (RECEIVE_POS)
 
 @file_error:
@@ -351,9 +344,6 @@ load_binary:
 	;  - IO_ADDR: in ZP, used for indirect addressing and modified during read
 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
 
-	lda #0
-	sta FLETCH_1
-	sta FLETCH_2
 	jsr getc2	; read target address low byte
 	sta RECEIVE_POS
 	sta IO_ADDR
@@ -374,13 +364,6 @@ load_binary:
 	; set up for read_file_paged
 	store_address @load_binary_page_completion, IO_FUN
 	jsr read_file_paged
-	bcc @read_error
-	lda FLETCH_1
-	ldx FLETCH_2
-	jsr print_hex16
-	jsr put_newline
-	sec
-@read_error:
 	rts
 
 @load_binary_page_completion:
@@ -450,7 +433,6 @@ read_file_paged:
 @loop_full_page:
 	jsr getc2	; recv next byte
 	sta (IO_ADDR), y	;  and store to (IO_ADDR) + y
-	jsr update_fletch16
 	iny
 	bne @loop_full_page	; end on y wrap around
 
@@ -475,7 +457,6 @@ read_file_paged:
 	beq @end
 	jsr getc2	; recv next byte
 	sta (IO_ADDR), y	;  and store to TARGET_ADDR + y
-	jsr update_fletch16
 	iny
 	jmp @non_full_page_loop
 
@@ -490,19 +471,6 @@ read_file_paged:
 @io_fun_trampoline:
 	jmp (IO_FUN)
 
-	; update fletch16 chksum with value in a
-	; will NOT preserve a!
-update_fletch16:
-	; pha
-	clc
-	adc FLETCH_1
-	sta FLETCH_1
-	clc
-	adc FLETCH_2
-	sta FLETCH_2
-	; pla
-	rts
-	
 print_windmill:
 	and #$3
 	tay
@@ -511,7 +479,117 @@ print_windmill:
 	lda #$08
 	jsr putc
 	rts
+putc:
+V_OUTP:
+	pha
+@loop:
+	lda IO_UART_ISR1
+	and #%01000000
+	beq @loop
+	pla
+	sta IO_UART_TDR1
+	rts
 
+getc:
+V_INPT:
+@loop:
+	; check transmit data register empty
+	lda IO_UART_ISR1
+	and #%00000001
+	beq @no_keypress
+	lda IO_UART_RDR1
+        sec
+	rts
+
+@no_keypress:
+        clc
+	rts
+
+
+putc2:
+	pha
+@loop:
+	lda IO_UART_ISR2
+	and #%01000000
+	beq @loop
+	pla
+	sta IO_UART_TDR2
+	rts
+
+getc2:
+	jsr getc2_nonblocking
+	bcc getc2
+	rts
+
+getc2_nonblocking:
+@loop:
+	; check transmit data register empty
+	lda IO_UART_ISR2
+	and #%00000001
+	beq @no_keypress
+	lda IO_UART_RDR2
+        sec
+	rts
+
+@no_keypress:
+        clc
+	rts
+
+purge_channel2_input:
+; purge any channel2 input buffer
+	jsr getc2_nonblocking
+	bcs purge_channel2_input
+	rts
+
+put_newline:
+	lda #$0a
+	jsr putc
+	lda #$0d
+	jsr putc
+	rts
+
+
+; low in a, high in x
+print_hex16:
+	pha
+	txa
+	jsr print_hex8
+	pla
+	jsr print_hex8
+	rts
+
+; arg in a
+print_hex8:
+	pha
+	jsr print_hex4_high
+	pla
+	jsr print_hex4
+	rts
+
+print_hex4_high:
+	lsr
+	lsr
+	lsr
+	lsr
+print_hex4:
+	and #$f
+	cmp #10
+	bcs @in_a_to_f_range
+	clc
+	adc #'0'
+	jmp @output
+@in_a_to_f_range:
+	; cmp $16
+	; bmi @error
+	; adc #('a' - 10)
+	clc
+	adc #($61 - $a)
+	jmp @output
+; @error:
+; 	lda #'X'
+@output:
+	jsr putc
+	rts
 
 ; low in a, high in x,
 print_message:
