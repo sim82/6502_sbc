@@ -1,5 +1,5 @@
 BUILD_DIR=./build
-SRCS := uart_ti.asm std.asm 12_sieve_term.asm 14_memtest.asm 17_dos_ti.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm
+SRCS := uart_ti.asm std.asm 12_sieve_term.asm 14_memtest.asm 17_dos.asm 17_dos_token.asm 17_dos_pageio.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 DEPS_NO_STD := $(BUILD_DIR)/uart_ti.o
@@ -9,7 +9,7 @@ $(BUILD_DIR)/%.o: %.asm
 	mkdir -p $(dir $@)
 	ca65 -o $@ $<
 
-all: $(BUILD_DIR)/12_sieve_term $(BUILD_DIR)/14_memtest $(BUILD_DIR)/17_dos_ti $(BUILD_DIR)/18_bootload_ti $(BUILD_DIR)/19_memprobe $(BUILD_DIR)/basic $(BUILD_DIR)/20_uart $(BUILD_DIR)/21_reltest_ram $(BUILD_DIR)/21_reltest_rel
+all: $(BUILD_DIR)/12_sieve_term $(BUILD_DIR)/14_memtest $(BUILD_DIR)/17_dos $(BUILD_DIR)/18_bootload_ti $(BUILD_DIR)/19_memprobe $(BUILD_DIR)/basic $(BUILD_DIR)/20_uart $(BUILD_DIR)/21_reltest_ram $(BUILD_DIR)/21_reltest_rel
 
 $(BUILD_DIR)/12_sieve_term: $(BUILD_DIR)/12_sieve_term.o $(DEPS_ALL)	
 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
@@ -19,7 +19,7 @@ $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
 	ld65 -o $@ -C my_sbc_rambottom.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/memtest
 
-$(BUILD_DIR)/17_dos_ti: $(BUILD_DIR)/17_dos_ti.o $(DEPS_NO_STD)	
+$(BUILD_DIR)/17_dos: $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(DEPS_NO_STD)	
 	ld65 -o $@ -C my_sbc_ram.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/dos
 
