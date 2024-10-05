@@ -1,5 +1,6 @@
 
-.IMPORT put_newline, uart_init, putc, getc, putc2, getc2, getc2_nonblocking, purge_channel2_input, print_hex16
+.IMPORT put_newline, uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, fpurge, print_hex16
+.import fgetc_buf, open_file_nonpaged
 .import reset_tokenize, read_token, retire_token
 .import read_file_paged
 .INCLUDE "std.inc"
@@ -145,20 +146,20 @@ cmd_cat:
 	print_message_from_ptr @purrrr
 	jsr retire_token
 	jsr read_token
-	jsr purge_channel2_input
+	jsr fpurge
 	lda #'r'
-	jsr putc2
+	jsr fputc
 	ldy NEXT_TOKEN_PTR
 @send_filename_loop:
 	cpy NEXT_TOKEN_END
 	beq @end_of_filename
 	lda INPUT_LINE, y
-	jsr putc2
+	jsr fputc
 	iny
 	jmp @send_filename_loop
 @end_of_filename:
 	lda #$00
-	jsr putc2
+	jsr fputc
 	store_address IO_BUFFER, IO_ADDR
 	store_address cat_iobuffer, IO_FUN
 	jsr read_file_paged
@@ -166,25 +167,65 @@ cmd_cat:
 @purrrr:
 	.byte "purrrr", $0A, $0D, $00
 
-cmd_bench_str:
-	.byte "bench"
-cmd_bench:
+cmd_rat_str:
+	.byte "rat"
+cmd_rat:
+	print_message_from_ptr @purrrr
 	jsr retire_token
 	jsr read_token
-	jsr purge_channel2_input
+	jsr fpurge
 	lda #'r'
-	jsr putc2
+	jsr fputc
 	ldy NEXT_TOKEN_PTR
 @send_filename_loop:
 	cpy NEXT_TOKEN_END
 	beq @end_of_filename
 	lda INPUT_LINE, y
-	jsr putc2
+	jsr fputc
 	iny
 	jmp @send_filename_loop
 @end_of_filename:
 	lda #$00
-	jsr putc2
+	jsr fputc
+	jsr open_file_nonpaged
+	bcc @end
+@byte_loop:
+	jsr fgetc_buf
+	bcc @end
+
+	cmp #$0A
+	bne @jump_linefeed
+	lda #$0d
+	jsr putc
+	lda #$0a
+
+@jump_linefeed:
+	jsr putc
+	jmp @byte_loop
+@end:
+	rts
+@purrrr:
+	.byte "squeeeek", $0A, $0D, $00
+
+cmd_bench_str:
+	.byte "bench"
+cmd_bench:
+	jsr retire_token
+	jsr read_token
+	jsr fpurge
+	lda #'r'
+	jsr fputc
+	ldy NEXT_TOKEN_PTR
+@send_filename_loop:
+	cpy NEXT_TOKEN_END
+	beq @end_of_filename
+	lda INPUT_LINE, y
+	jsr fputc
+	iny
+	jmp @send_filename_loop
+@end_of_filename:
+	lda #$00
+	jsr fputc
 	store_address IO_BUFFER, IO_ADDR
 	store_address @noop, IO_FUN
 	lda #$00
@@ -209,9 +250,9 @@ cmd_echo:
 
 
 exec_input_line:
-	jsr getc2_nonblocking
+	jsr fgetc_nonblocking
 	bcs exec_input_line
-	jsr purge_channel2_input
+	jsr fpurge
 	jsr reset_tokenize
 	jsr read_token
 	bcs @dispatch_builtin
@@ -221,25 +262,26 @@ exec_input_line:
 	dispatch_command cmd_help_str, cmd_help
 	dispatch_command cmd_ls_str, cmd_ls
 	dispatch_command cmd_cat_str, cmd_cat
+	dispatch_command cmd_rat_str, cmd_rat
 	dispatch_command cmd_bench_str, cmd_bench
 	dispatch_command cmd_echo_str, cmd_echo
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:
 ; purge any channel2 input buffer before starting IO
-	jsr purge_channel2_input
+	jsr fpurge
 	lda #'o'
-	jsr putc2
+	jsr fputc
 	ldy #$0
 @send_filename_loop:
 	cpy NEXT_TOKEN_END
 	beq @end_of_filename
 	lda INPUT_LINE, y
-	jsr putc2
+	jsr fputc
 	iny
 	jmp @send_filename_loop
 @end_of_filename:
 	lda #$00
-	jsr putc2
+	jsr fputc
 	jsr load_binary
 	bcc @file_error
 	lda RECEIVE_POS
@@ -270,10 +312,10 @@ load_binary:
 	lda #0
 	sta FLETCH_1
 	sta FLETCH_2
-	jsr getc2	; read target address low byte
+	jsr fgetc	; read target address low byte
 	sta RECEIVE_POS
 	sta IO_ADDR
-	jsr getc2	; and high byte
+	jsr fgetc	; and high byte
 	sta RECEIVE_POS + 1	
 	sta IO_ADDR + 1
 	; check for file error: target addr $ffff
@@ -352,7 +394,7 @@ windmill:
 	.byte "-\|/"
 
 welcome_message:
-	.byte "dos v1.3", $0A, $0D, $00
+	.byte "dos v2.0", $0A, $0D, $00
 
 
 help_message:

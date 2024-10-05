@@ -1,6 +1,6 @@
 
 .INCLUDE "std.inc"
-.EXPORT uart_init, putc, getc, putc2, getc2, getc2_nonblocking, print_hex16, print_hex8, put_newline, purge_channel2_input
+.EXPORT uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, print_hex16, print_hex8, put_newline, fpurge
 .CODE
 
 uart_init:
@@ -74,7 +74,7 @@ V_INPT:
         clc
 	rts
 
-putc2:
+fputc:
 	pha
 @loop:
 	lda IO_UART2_SRB
@@ -84,12 +84,12 @@ putc2:
 	sta IO_UART2_FIFOB
 	rts
 
-getc2:
-	jsr getc2_nonblocking
-	bcc getc2
+fgetc:
+	jsr fgetc_nonblocking
+	bcc fgetc
 	rts
 
-getc2_nonblocking:
+fgetc_nonblocking:
 @loop:
 	; check transmit data register empty
 	lda IO_UART2_SRB
@@ -103,10 +103,10 @@ getc2_nonblocking:
         clc
 	rts
 
-purge_channel2_input:
+fpurge:
 ; purge any channel2 input buffer
-	jsr getc2_nonblocking
-	bcs purge_channel2_input
+	jsr fgetc_nonblocking
+	bcs fpurge
 	rts
 
 
