@@ -22,19 +22,22 @@ open_file_nonpaged:
 	rts
 
 @no_error:
+	lda #0
+	sta FLETCH_1
+	sta FLETCH_2
 
 load_page_to_iobuf:
 	ldy #$00		; y: count byte inside page
 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
 
+	print_message_from_ptr msg_read_full_page
 	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr fputc
 
 @loop_full_page:
-	print_message_from_ptr msg_read_full_page
 	jsr fgetc	; recv next byte
-	sta IO_BUFFER, y	;  and store to (IO_ADDR) + y
+	sta IO_BUFFER, y	;  and store to IO_BUFFER + y
 	jsr update_fletch16
 	iny
 	bne @loop_full_page	; end on y wrap around
@@ -65,8 +68,8 @@ load_page_to_iobuf:
 	jsr fgetc	; recv next byte
 	; lda #%11001100
 	; sta IO_GPIO0
-	sta IO_BUFFER, y	;  and store to TARGET_ADDR + y
-	; jsr update_fletch16
+	sta IO_BUFFER, y	;  and store to IO_BUFFER + y
+	jsr update_fletch16
 	iny
 	; sty IO_GPIO0
 	jmp @non_full_page_loop
@@ -86,8 +89,7 @@ load_page_to_iobuf:
 
 @end_empty:
 	pha
-	; lda #'x'
-	; jsr putc
+	print_message_from_ptr msg_read_eof
 	pla
 	clc
 	rts
@@ -212,3 +214,5 @@ msg_read_full_page:
 	.byte "read full page", $0A, $0D, $00
 msg_read_page:
 	.byte "read partial page", $0A, $0D, $00
+msg_read_eof:
+	.byte "end of file", $0A, $0D, $00
