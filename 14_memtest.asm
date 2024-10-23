@@ -11,7 +11,10 @@ BEGADR:
 ENDADR:
 	.WORD $fd00 ; 64k ram version
 	; .WORD $7f00 ; 32k/32k rom version
-		
+
+; comment in for ROM build
+; .SEGMENT "VECTORS"
+	; .WORD $8000
 .CODE
 	; ORG	$0000
 ; BEGADR = $0200

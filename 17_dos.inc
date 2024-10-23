@@ -21,3 +21,34 @@ IO_BW_END = FLETCH_2 + 1
 IO_BW_PTR = IO_BW_END + 1
 
 IO_BUFFER = $0300
+
+.macro set_ptr src
+	ldx #<src
+	stx ZP_PTR
+	ldx #>src
+	stx ZP_PTR + 1
+.endmacro
+
+.macro dispatch_command cmd_ptr, dest
+.local @next
+	set_ptr cmd_ptr
+	jsr compare_token
+	bcc @next
+	jsr dest
+	jmp @cleanup
+@next:
+.endmacro
+
+.macro print_message_from_ptr src
+	lda #<src
+	ldx #>src
+	jsr print_message
+.endmacro
+
+; store 16bit value (addr) into two bytes of memory at dest
+.macro store_address addr, dest
+	lda #<addr
+	sta dest
+	lda #>addr
+	sta dest + 1
+.endmacro

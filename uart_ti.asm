@@ -85,8 +85,14 @@ fputc:
 	rts
 
 fgetc:
+	lda #$15
+	sta IO_GPIO0
 	jsr fgetc_nonblocking
 	bcc fgetc
+	; pha
+	; lda #%11001100
+	; sta IO_GPIO0
+	; pla
 	rts
 
 fgetc_nonblocking:

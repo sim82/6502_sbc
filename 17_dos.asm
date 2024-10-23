@@ -3,40 +3,11 @@
 .import fgetc_buf, open_file_nonpaged
 .import reset_tokenize, read_token, retire_token
 .import read_file_paged
+.import print_message
 .INCLUDE "std.inc"
 .INCLUDE "17_dos.inc"
 
 
-.macro set_ptr src
-	ldx #<src
-	stx ZP_PTR
-	ldx #>src
-	stx ZP_PTR + 1
-.endmacro
-
-.macro dispatch_command cmd_ptr, dest
-.local @next
-	set_ptr cmd_ptr
-	jsr compare_token
-	bcc @next
-	jsr dest
-	jmp @cleanup
-@next:
-.endmacro
-
-.macro print_message_from_ptr src
-	lda #<src
-	ldx #>src
-	jsr print_message
-.endmacro
-
-; store 16bit value (addr) into two bytes of memory at dest
-.macro store_address addr, dest
-	lda #<addr
-	sta dest
-	lda #>addr
-	sta dest + 1
-.endmacro
 
 .CODE
 	; init local vars
@@ -190,6 +161,8 @@ cmd_rat:
 	jsr open_file_nonpaged
 	bcc @end
 @byte_loop:
+	lda #'.'
+	jsr putc
 	jsr fgetc_buf
 	bcc @end
 
@@ -374,20 +347,6 @@ print_windmill:
 	jsr putc
 	rts
 
-
-; low in a, high in x,
-print_message:
-	sta ZP_PTR
-	stx ZP_PTR + 1
-	ldy #$00
-@loop:
-	lda (ZP_PTR), y
-	beq @end
-	jsr putc
-	iny
-	jmp @loop
-@end:
-	rts
 
 
 windmill:

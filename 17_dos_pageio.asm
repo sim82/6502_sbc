@@ -1,11 +1,11 @@
 .code
-.import fgetc, fputc, putc
+.import fgetc, fputc, putc, print_message, print_hex8
 .export read_file_paged, open_file_nonpaged, fgetc_buf
 .include "17_dos.inc"
+.include "std.inc"
 
 open_file_nonpaged:
 	jsr fgetc
-	
 	sta RECEIVE_SIZE
 	; jsr print_hex8
 	jsr fgetc	; and high byte
@@ -32,8 +32,9 @@ load_page_to_iobuf:
 	jsr fputc
 
 @loop_full_page:
+	print_message_from_ptr msg_read_full_page
 	jsr fgetc	; recv next byte
-	sta (IO_ADDR), y	;  and store to (IO_ADDR) + y
+	sta IO_BUFFER, y	;  and store to (IO_ADDR) + y
 	jsr update_fletch16
 	iny
 	bne @loop_full_page	; end on y wrap around
@@ -49,31 +50,52 @@ load_page_to_iobuf:
 	; reminder, always less than 256 bytes
 	;
 @non_full_page:
+	print_message_from_ptr msg_read_page
+	ldy #00
 	; don't send 'b' if last page is empty (i.e. size is a multiple of 256)
 	cpy RECEIVE_SIZE
-	beq @end
+	beq @end_empty
 	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr fputc
+	; lda RECEIVE_SIZE
+	; jsr print_hex8
 @non_full_page_loop:
 	cpy RECEIVE_SIZE	; compare with lower byte of remaining size
 	beq @end
 	jsr fgetc	; recv next byte
-	sta (IO_ADDR), y	;  and store to TARGET_ADDR + y
-	jsr update_fletch16
+	; lda #%11001100
+	; sta IO_GPIO0
+	sta IO_BUFFER, y	;  and store to TARGET_ADDR + y
+	; jsr update_fletch16
 	iny
+	; sty IO_GPIO0
 	jmp @non_full_page_loop
 
 @end:
+	; lda #%11001100
+	; sta IO_GPIO0
+	; tya 
+	; jsr print_hex8
 	ldx RECEIVE_SIZE
 	stx IO_BW_END
 	ldx #$00
 	stx IO_BW_PTR
+	stx RECEIVE_SIZE
+	sec
+	rts
+
+@end_empty:
+	pha
+	; lda #'x'
+	; jsr putc
+	pla
+	clc
 	rts
 
 
 fgetc_buf:
 	ldy IO_BW_PTR
-	lda (IO_ADDR), y
+	lda IO_BUFFER, y
 	iny
 	cpy IO_BW_END
 	sty IO_BW_PTR
@@ -185,3 +207,8 @@ update_fletch16:
 	; pla
 	rts
 
+
+msg_read_full_page:
+	.byte "read full page", $0A, $0D, $00
+msg_read_page:
+	.byte "read partial page", $0A, $0D, $00
