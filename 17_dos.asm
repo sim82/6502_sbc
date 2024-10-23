@@ -161,11 +161,10 @@ cmd_rat:
 	jsr open_file_nonpaged
 	bcc @end
 @byte_loop:
-	lda #'.'
-	jsr putc
 	jsr fgetc_buf
 	bcc @end
 
+	; jmp @byte_loop
 	cmp #$0A
 	bne @jump_linefeed
 	lda #$0d
@@ -176,6 +175,10 @@ cmd_rat:
 	jsr putc
 	jmp @byte_loop
 @end:
+	lda FLETCH_1
+	ldx FLETCH_2
+	jsr print_hex16
+	jsr put_newline
 	rts
 @purrrr:
 	.byte "squeeeek", $0A, $0D, $00
