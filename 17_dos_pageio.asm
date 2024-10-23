@@ -27,11 +27,11 @@ open_file_nonpaged:
 	sta FLETCH_2
 
 load_page_to_iobuf:
+	; print_message_from_ptr msg_read_full_page
 	ldy #$00		; y: count byte inside page
 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
 
-	print_message_from_ptr msg_read_full_page
 	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr fputc
 
@@ -53,7 +53,7 @@ load_page_to_iobuf:
 	; reminder, always less than 256 bytes
 	;
 @non_full_page:
-	print_message_from_ptr msg_read_page
+	; print_message_from_ptr msg_read_page
 	ldy #00
 	; don't send 'b' if last page is empty (i.e. size is a multiple of 256)
 	cpy RECEIVE_SIZE
@@ -88,9 +88,9 @@ load_page_to_iobuf:
 	rts
 
 @end_empty:
-	pha
-	print_message_from_ptr msg_read_eof
-	pla
+	; pha
+	; print_message_from_ptr msg_read_eof
+	; pla
 	clc
 	rts
 
