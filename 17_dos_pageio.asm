@@ -5,6 +5,9 @@
 .include "std.inc"
 
 open_file_nonpaged:
+	lda #$ff
+	sta IO_BW_EOF
+	
 	jsr fgetc
 	sta RECEIVE_SIZE
 	; jsr print_hex8
@@ -25,6 +28,7 @@ open_file_nonpaged:
 	lda #0
 	sta FLETCH_1
 	sta FLETCH_2
+	sta IO_BW_EOF	; clear eof
 
 load_page_to_iobuf:
 	; print_message_from_ptr msg_read_full_page
@@ -80,7 +84,7 @@ load_page_to_iobuf:
 	; tya 
 	; jsr print_hex8
 	ldx RECEIVE_SIZE
-	inx
+	; inx ; this is a bit iffy? why don't we need the x+1?
 	stx IO_BW_END
 	ldx #$00
 	stx IO_BW_PTR
@@ -97,17 +101,27 @@ load_page_to_iobuf:
 
 
 fgetc_buf:
+	ldy IO_BW_EOF
+	bne @eof
+
 	ldy IO_BW_PTR
 	lda IO_BUFFER, y
 	iny
 	cpy IO_BW_END
 	sty IO_BW_PTR
-	beq @fill_buffer
+	bne @skip_fill_buffer 	; if we are not yet a the end of the input buffer, skip re-filling it
+	pha
+	jsr load_page_to_iobuf
+	pla
+	bcs @skip_fill_buffer
+	ldy #$FF
+	sty IO_BW_EOF
+@skip_fill_buffer:
 	sec
 	rts
-@fill_buffer:
-	
-	jsr load_page_to_iobuf
+@eof:
+	lda #'X'
+	clc
 	rts
 
 ; IO_ADDR: 16bit destination address
