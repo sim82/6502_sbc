@@ -84,7 +84,7 @@ load_page_to_iobuf:
 	; tya 
 	; jsr print_hex8
 	ldx RECEIVE_SIZE
-	; inx ; this is a bit iffy? why don't we need the x+1?
+	; inx ; this is a bit iffy? why don't we need the x+1? ; meh, it is just a regular 0 based size / index. 256 == 0 in the full page case...
 	stx IO_BW_END
 	ldx #$00
 	stx IO_BW_PTR
