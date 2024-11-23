@@ -21,6 +21,15 @@ IO_BW_END = FLETCH_2 + 1
 IO_BW_PTR = IO_BW_END + 1
 IO_BW_EOF = IO_BW_PTR + 1
 
+AL = IO_BW_EOF + 1
+AH = AL + 1
+
+BL = AH + 1
+BH = BL + 1
+
+CL = BH + 1
+CH = CL + 1
+
 IO_BUFFER = $0300
 
 .macro set_ptr src

@@ -4,6 +4,7 @@
 .import reset_tokenize, read_token, retire_token
 .import read_file_paged
 .import print_message
+.import stream_bin
 .INCLUDE "std.inc"
 .INCLUDE "17_dos.inc"
 
@@ -82,7 +83,7 @@ compare_token:
 	cpy NEXT_TOKEN_END
 	beq @found
 
-	lda INPUT_LINE, y
+	lda INPUT_LINE, y ; looks sus... shouldn't this be offset to current token? Works only for the first token (!?)
 	; jsr putc
 	cmp (ZP_PTR), y
 	bne @mismatch
@@ -90,6 +91,14 @@ compare_token:
 	jmp @loop
 
 @found:
+	; now check if we reached the end of the target string (null termination)
+	; iny
+	; lda (ZP_PTR), y
+	; jsr putc
+
+	lda #$00
+	cmp (ZP_PTR), y
+	bne @mismatch
 	sec
 	rts
 	
@@ -98,21 +107,21 @@ compare_token:
 	rts
 	
 cmd_help_str:
-	.byte "help"
+	.byte "help", $00
 cmd_help:
 	print_message_from_ptr welcome_message
 	print_message_from_ptr help_message
 	rts
 
 cmd_ls_str:
-	.byte "ls"
+	.byte "ls", $00
 cmd_ls:
 	print_message_from_ptr help_message
 	rts
 
 
 cmd_cat_str:
-	.byte "cat"
+	.byte "cat", $00
 cmd_cat:
 	print_message_from_ptr @purrrr
 	jsr retire_token
@@ -139,7 +148,7 @@ cmd_cat:
 	.byte "purrrr", $0A, $0D, $00
 
 cmd_rat_str:
-	.byte "rat"
+	.byte "rat", $00
 cmd_rat:
 	print_message_from_ptr @purrrr
 	jsr retire_token
@@ -184,7 +193,7 @@ cmd_rat:
 	.byte "squeeeek", $0A, $0D, $00
 
 cmd_bench_str:
-	.byte "bench"
+	.byte "bench", $00
 cmd_bench:
 	jsr retire_token
 	jsr read_token
@@ -216,7 +225,7 @@ cmd_bench:
 	rts
 
 cmd_echo_str:
-	.byte "echo"
+	.byte "echo", $00
 cmd_echo:
 	jsr getc
 	bcc cmd_echo
@@ -224,6 +233,38 @@ cmd_echo:
 	; endless loop
 	jmp cmd_echo
 
+; r - streamed binary load / relocate
+cmd_r_str:
+	.byte "r", $00
+cmd_r:
+	print_message_from_ptr @purrrr
+	jsr retire_token
+	jsr read_token
+	jsr fpurge
+	lda #'r'
+	jsr fputc
+	ldy NEXT_TOKEN_PTR
+@send_filename_loop:
+	cpy NEXT_TOKEN_END
+	beq @end_of_filename
+	lda INPUT_LINE, y
+	jsr fputc
+	iny
+	jmp @send_filename_loop
+@end_of_filename:
+	lda #$00
+	jsr fputc
+	jsr open_file_nonpaged
+	bcc @end
+	jsr stream_bin
+@end:
+	lda FLETCH_1
+	ldx FLETCH_2
+	jsr print_hex16
+	jsr put_newline
+	rts
+@purrrr:
+	.byte "stream...", $0A, $0D, $00
 
 exec_input_line:
 	jsr fgetc_nonblocking
@@ -241,6 +282,7 @@ exec_input_line:
 	dispatch_command cmd_rat_str, cmd_rat
 	dispatch_command cmd_bench_str, cmd_bench
 	dispatch_command cmd_echo_str, cmd_echo
+	dispatch_command cmd_r_str, cmd_r
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:
 ; purge any channel2 input buffer before starting IO

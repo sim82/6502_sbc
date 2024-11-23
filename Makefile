@@ -19,7 +19,7 @@ $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
 	ld65 -o $@ -C my_sbc_rambottom.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/memtest
 
-$(BUILD_DIR)/17_dos: $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_baseio.o $(DEPS_NO_STD)	
+$(BUILD_DIR)/17_dos: $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(DEPS_NO_STD)	
 	ld65 -o $@ -C my_sbc_ram.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/dos
 
