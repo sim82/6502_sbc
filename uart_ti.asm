@@ -49,7 +49,7 @@ uart_init:
 
 
 putc:
-V_OUTP:
+; V_OUTP:
 	pha
 @loop:
 	lda IO_UART2_SRA
@@ -60,7 +60,7 @@ V_OUTP:
 	rts
 
 getc:
-V_INPT:
+; V_INPT:
 @loop:
 	; check transmit data register empty
 	lda IO_UART2_SRA
