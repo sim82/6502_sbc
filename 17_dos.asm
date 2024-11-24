@@ -257,15 +257,22 @@ cmd_r:
 	jsr open_file_nonpaged
 	bcc @end
 	jsr stream_bin
+	bcc @error
 @end:
+	print_message_from_ptr @fletch16_msg
 	lda FLETCH_1
 	ldx FLETCH_2
 	jsr print_hex16
 	jsr put_newline
-	bcs @no_error
 	
+	lda #$d0
+	sta MON_ADDRH
+	lda #$00
+	sta MON_ADDRL
+	
+	rts
+@error:
 	print_message_from_ptr @error_msg
-@no_error:
 	rts
 @purrrr:
 	.byte "stream...", $0A, $0D, $00
@@ -273,27 +280,61 @@ cmd_r:
 @error_msg:
 	.byte "error.", $0A, $0D, $00
 
+@fletch16_msg:
+	.byte "done. ", $0A, $0D, "fletch16: ", $00
+
 ; m - monitor
 cmd_m_str:
 	.byte "m", $00
 cmd_m:
-	lda #$00
-	sta ZP_PTR
-	lda #$d0
-	sta ZP_PTR + 1
+	; lda #$00
+	; sta ZP_PTR
+	; lda #$d0
+	; sta ZP_PTR + 1
 	
 	ldy #0
+
 @loop:
-	cpy #16
-	beq @end
+	lda (MON_ADDRL), y
 	
-	lda (ZP_PTR), y
 	jsr print_hex8
+
+	iny
+	beq @end
+
+	tya
+	and #$f
+	beq @newline
+
 	lda #' '
 	jsr putc
-	iny
 	jmp @loop
+@newline:
+	jsr put_newline
+	jmp @loop
+
+
+	
+; 	ldx #$10
+; ; @outer_loop:
+; 	ldy #0
+; @loop:
+; 	cpy #16
+; 	beq @end
+	
+; 	lda (ZP_PTR), y
+; 	jsr print_hex8
+; 	lda #' '
+; 	jsr putc
+; 	iny
+; 	jmp @loop
 @end:
+	inc MON_ADDRH
+	; jsr put_newline
+	; inc ZP_PTR + 1
+	; dex
+	; bne @outer_loop
+	
 	rts
 
 ; j - jmp
@@ -355,6 +396,12 @@ exec_input_line:
 @delay:
 	iny
 	bne @delay
+
+	; put receive pos into monitor address, for inspection after reset
+	lda RECEIVE_POS + 1
+	sta MON_ADDRH
+	lda RECEIVE_POS
+	sta MON_ADDRL
 	jmp (RECEIVE_POS)
 
 @file_error:

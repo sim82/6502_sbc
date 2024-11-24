@@ -30,6 +30,9 @@ BH = BL + 1
 CL = BH + 1
 CH = CL + 1
 
+MON_ADDRL = CH + 1
+MON_ADDRH = MON_ADDRL + 1
+
 IO_BUFFER = $0300
 
 .macro set_ptr src

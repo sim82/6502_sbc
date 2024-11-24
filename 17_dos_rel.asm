@@ -147,12 +147,37 @@ reloc:
 	bcc @eof
 	; only support WORD size in text segment
 	cmp #$82
-	bne @error
+	bne @not_word
 
-	; super primitive: just patch in $d0 into high adress part...
-	lda #$d0
-	ldy #1
+	; super primitive: just add $d0 to high adress part...
+
+	ldy #$01
+	lda (CL), y
+	clc
+	adc #$d0
 	sta (CL), y
+	jmp @loop
+@not_word:
+	cmp #$42
+	bne @not_high
+
+	; lda #$d0
+	ldy #$00
+	lda (CL), y
+	clc
+	adc #$d0
+	sta (CL), y
+
+	; skip low byte stored after reloc entry
+	jsr fgetc_buf
+	bcc @eof
+	jmp @loop
+
+@not_high:
+	cmp #$22
+	; ignore...
+	bne @error
+	
 	jmp @loop
 
 @eof:
@@ -169,14 +194,25 @@ reloc:
 	sec
 	rts
 
-copy_code:
-	lda #$d0
-	sta CH
-	lda #$00
-	sta CL
-	ldx AL
+
+copy_code_full_page:
+	; lda #$d0
+	; sta CH
+	; lda #$00
+	; sta CL
+
+	ldx #$00
+	lda #$01 ; super hacky: skip zero test on first iter...
+	jmp copy_code_loop
+
+copy_code_single_page:
+	; lda #$d0
+	; sta CH
+	; lda #$00
+	; sta CL
 	
-@loop:
+	txa ; hacky: zero test x before entering the loop...
+copy_code_loop:
 	beq @done
 	jsr fgetc_buf
 	bcc @eof
@@ -197,7 +233,7 @@ copy_code:
 	adc CH
 	sta CH
 	dex
-	jmp @loop
+	jmp copy_code_loop
 	
 @eof:
 	lda #%00001001
@@ -211,6 +247,32 @@ copy_code:
 @done:
 	rts
 
+copy_code:
+	lda #$d0
+	sta CH
+	lda #$00
+	sta CL
+
+@loop:
+	lda AH
+	jsr print_hex8
+	jsr put_newline
+	lda AH
+	beq @single_page
+
+	; jsr print_hex8
+	; jsr put_newline
+
+	jsr copy_code_full_page
+	dec AH
+	; inc CH
+	jmp @loop
+
+@single_page:
+	ldx AL
+	jsr copy_code_single_page
+
+	rts
 
 	
 stream_bin:
@@ -244,14 +306,17 @@ stream_bin:
 
 	jsr reloc
 	
+	sec
 	rts
 	
 
 @eof:
 	lda #%00000001
 	sta IO_GPIO0
+	clc
 	rts
 @error:
 	lda #%00000010
 	sta IO_GPIO0
+	clc
 	rts
