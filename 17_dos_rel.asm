@@ -68,6 +68,25 @@ skipx:
 	; jsr put_newline
 	rts
 
+dumpx:
+	txa
+@loop:
+	beq @done
+	jsr fgetc_buf
+
+	bcc @eof
+	jsr putc
+	; txa
+	; jsr print_hex8
+	dex
+	jmp @loop
+@eof:
+	lda #%00000001
+	sta IO_GPIO0
+@done:
+	jsr put_newline
+	rts
+
 skip_extra:
 @extra_loop:
 	jsr fgetc_buf
@@ -79,6 +98,40 @@ skip_extra:
 	; skip extra data
 	tax
 	dex ; size includes the length field -> one less byte to skip
+
+	jsr fgetc_buf
+	bcc @eof
+
+	dex ; consume type field
+
+	; hyper crappy: print some blurbs
+	cmp #$0
+	bne @not_filename
+	lda #'f'
+	jsr putc
+	lda #':'
+	jsr putc
+	jsr dumpx
+	jmp @extra_loop
+@not_filename:
+	cmp #$4
+	bne @not_creation
+	lda #'c'
+	jsr putc
+	lda #':'
+	jsr putc
+	jsr dumpx
+	jmp @extra_loop
+@not_creation:
+	cmp #$2
+	bne @not_assembler
+	lda #'a'
+	jsr putc
+	lda #':'
+	jsr putc
+	jsr dumpx
+	jmp @extra_loop
+@not_assembler:
 	jsr skipx
 	jmp @extra_loop
 @eof:
