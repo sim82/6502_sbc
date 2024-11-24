@@ -1,5 +1,5 @@
 
-.IMPORT put_newline, uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, fpurge, print_hex16
+.IMPORT put_newline, uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, fpurge, print_hex16, print_hex8
 .import fgetc_buf, open_file_nonpaged
 .import reset_tokenize, read_token, retire_token
 .import read_file_paged
@@ -262,9 +262,52 @@ cmd_r:
 	ldx FLETCH_2
 	jsr print_hex16
 	jsr put_newline
+	bcs @no_error
+	
+	print_message_from_ptr @error_msg
+@no_error:
 	rts
 @purrrr:
 	.byte "stream...", $0A, $0D, $00
+
+@error_msg:
+	.byte "error.", $0A, $0D, $00
+
+; m - monitor
+cmd_m_str:
+	.byte "m", $00
+cmd_m:
+	lda #$00
+	sta ZP_PTR
+	lda #$d0
+	sta ZP_PTR + 1
+	
+	ldy #0
+@loop:
+	cpy #16
+	beq @end
+	
+	lda (ZP_PTR), y
+	jsr print_hex8
+	lda #' '
+	jsr putc
+	iny
+	jmp @loop
+@end:
+	rts
+
+; j - jmp
+cmd_j_str:
+	.byte "j", $00
+cmd_j:
+
+	lda #$d0
+	sta RECEIVE_POS + 1
+	lda #$00
+	sta RECEIVE_POS
+	jmp (RECEIVE_POS)
+	rts
+	
 
 exec_input_line:
 	jsr fgetc_nonblocking
@@ -283,6 +326,8 @@ exec_input_line:
 	dispatch_command cmd_bench_str, cmd_bench
 	dispatch_command cmd_echo_str, cmd_echo
 	dispatch_command cmd_r_str, cmd_r
+	dispatch_command cmd_m_str, cmd_m
+	dispatch_command cmd_j_str, cmd_j
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:
 ; purge any channel2 input buffer before starting IO

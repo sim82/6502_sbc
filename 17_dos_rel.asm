@@ -118,7 +118,7 @@ check_header:
 	rts
 
 reloc:
-	lda #$3f
+	lda #$cf
 	sta CH
 	lda #$ff
 	sta CL
@@ -149,6 +149,10 @@ reloc:
 	cmp #$82
 	bne @error
 
+	; super primitive: just patch in $d0 into high adress part...
+	lda #$d0
+	ldy #1
+	sta (CL), y
 	jmp @loop
 
 @eof:
@@ -165,6 +169,50 @@ reloc:
 	sec
 	rts
 
+copy_code:
+	lda #$d0
+	sta CH
+	lda #$00
+	sta CL
+	ldx AL
+	
+@loop:
+	beq @done
+	jsr fgetc_buf
+	bcc @eof
+
+	ldy #00
+	sta (CL), y
+
+	; jsr print_hex8
+	; jsr put_newline
+	; txa
+	; jsr print_hex8
+	; jsr put_newline
+	clc
+	lda #01
+	adc CL
+	sta CL
+	lda #00
+	adc CH
+	sta CH
+	dex
+	jmp @loop
+	
+@eof:
+	lda #%00001001
+	sta IO_GPIO0
+	clc
+	rts
+@error:
+	lda #%00001010
+	sta IO_GPIO0
+	clc
+@done:
+	rts
+
+
+	
 stream_bin:
 	jsr check_header
 	bcs @header_ok
@@ -186,11 +234,13 @@ stream_bin:
 	
  	jsr print_hex16
 	jsr put_newline
-	ldx AL
-	jsr skipx
+	jsr copy_code
+	; ldx AL
+	; jsr skipx
 	; expect empty missing symbol table
 	check_byte $00
 	check_byte $00
+
 
 	jsr reloc
 	

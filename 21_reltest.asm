@@ -19,3 +19,12 @@ high:
 	sta IO_GPIO0
 	rts
 	
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
