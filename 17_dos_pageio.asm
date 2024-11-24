@@ -109,6 +109,11 @@ load_page_to_iobuf:
 	rts
 
 @end_empty:
+	pla
+	tay
+	pla
+	tax
+	pla
 	; pha
 	; print_message_from_ptr msg_read_eof
 	; pla
