@@ -25,6 +25,18 @@ loop:
 .byte "0123456789abcdef"
 .byte "0123456789abcdef"
 .byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
+.byte "0123456789abcdef"
 low:
 	lda #00
 	sta IO_GPIO0

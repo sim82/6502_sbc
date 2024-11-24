@@ -130,6 +130,25 @@ reloc:
 
 	cmp #00
 	beq @done
+	cmp #$ff
+
+	bne @no_extended_inc
+	lda #254
+	clc
+	adc CL
+	sta CL
+	lda #00
+	adc CH
+	sta CH
+	lda CL
+	ldx CH
+	lda #'.'
+	jsr putc
+	jsr put_newline
+	; restart
+	jmp @loop
+	
+@no_extended_inc:
 	clc
 	; add to reloc address
 	adc CL
@@ -305,8 +324,9 @@ stream_bin:
 
 
 	jsr reloc
+	; preserve carry flag!
 	
-	sec
+@reloc_error:
 	rts
 	
 
