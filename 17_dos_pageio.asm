@@ -31,6 +31,11 @@ open_file_nonpaged:
 	sta IO_BW_EOF	; clear eof
 
 load_page_to_iobuf:
+	pha
+	txa
+	pha
+	tya
+	pha
 	; print_message_from_ptr msg_read_full_page
 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
@@ -50,6 +55,12 @@ load_page_to_iobuf:
 	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
 	stx IO_BW_PTR
 	stx IO_BW_END
+
+	pla
+	tay
+	pla
+	tax
+	pla
 	sec
 	rts
 
@@ -89,6 +100,11 @@ load_page_to_iobuf:
 	ldx #$00
 	stx IO_BW_PTR
 	stx RECEIVE_SIZE
+	pla
+	tay
+	pla
+	tax
+	pla
 	sec
 	rts
 
@@ -117,6 +133,7 @@ fgetc_buf:
 	ldy #$FF
 	sty IO_BW_EOF
 @skip_fill_buffer:
+
 	sec
 	rts
 @eof:
