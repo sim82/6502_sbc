@@ -24,7 +24,7 @@ $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
 	ln -sf $(shell pwd)/$@ mimonify/disk/memtest
 
 $(BUILD_DIR)/17_dos: $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(DEPS_NO_STD)	
-	ld65 -o $@ -C my_sbc_ram.cfg $^ 
+	ld65 -o $@ -C my_sbc_dos.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/dos
 
 $(BUILD_DIR)/17_dos_rel: $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(DEPS_NO_STD)	
@@ -40,7 +40,7 @@ $(BUILD_DIR)/19_memprobe: $(BUILD_DIR)/19_memprobe.o $(DEPS_ALL)
 	ln -sf $(shell pwd)/$@ mimonify/disk/memprobe
 
 $(BUILD_DIR)/basic: $(BUILD_DIR)/basic.o $(BUILD_DIR)/basic_bios.o $(DEPS_NO_STD)	
-	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
+	ld65 -o $@ -C my_sbc_ram_basic.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/basic
 
 $(BUILD_DIR)/20_uart: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)	
