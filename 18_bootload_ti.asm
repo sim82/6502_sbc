@@ -4,6 +4,7 @@
 .SEGMENT "VECTORS"
 ; change for ram build!
 	.WORD $FF00
+	.WORD irq
 	; .WORD $3000
 
 
@@ -255,7 +256,15 @@ purge_channel2_input:
 	jmp purge_channel2_input
 
 
+irq:
+	lda $fdfe
+	ora $fdff
+	beq @skip
+	jmp ($fdfe)
+@skip:
+	rti
 	
+
 filename:
  	.byte "o.b", $00
 
