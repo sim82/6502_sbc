@@ -1,5 +1,5 @@
 BUILD_DIR=./build
-SRCS := uart_ti.asm std.asm 12_sieve_term.asm 14_memtest.asm 17_dos.asm 17_dos_token.asm 17_dos_pageio.asm 17_dos_baseio.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm 22_irq.asm
+SRCS := uart_ti.asm std.asm 12_sieve_term.asm 14_memtest.asm 17_dos.asm 17_dos_token.asm 17_dos_pageio.asm 17_dos_baseio.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm 22_irq.asm 23_flow_control.asm
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 DEPS_NO_STD := $(BUILD_DIR)/uart_ti.o
@@ -9,7 +9,7 @@ $(BUILD_DIR)/%.o: %.asm
 	mkdir -p $(dir $@)
 	ca65 -o $@ $<
 
-all: $(BUILD_DIR)/12_sieve_term $(BUILD_DIR)/12_sieve_term_rel $(BUILD_DIR)/14_memtest $(BUILD_DIR)/17_dos $(BUILD_DIR)/17_dos_rel $(BUILD_DIR)/18_bootload_ti $(BUILD_DIR)/19_memprobe $(BUILD_DIR)/basic $(BUILD_DIR)/20_uart $(BUILD_DIR)/20_uart_rel $(BUILD_DIR)/21_reltest_ram $(BUILD_DIR)/21_reltest_rel $(BUILD_DIR)/22_irq
+all: $(BUILD_DIR)/12_sieve_term $(BUILD_DIR)/12_sieve_term_rel $(BUILD_DIR)/14_memtest $(BUILD_DIR)/17_dos $(BUILD_DIR)/17_dos_rel $(BUILD_DIR)/18_bootload_ti $(BUILD_DIR)/19_memprobe $(BUILD_DIR)/basic $(BUILD_DIR)/20_uart $(BUILD_DIR)/20_uart_rel $(BUILD_DIR)/21_reltest_ram $(BUILD_DIR)/21_reltest_rel $(BUILD_DIR)/22_irq $(BUILD_DIR)/23_flow_control
 
 $(BUILD_DIR)/12_sieve_term: $(BUILD_DIR)/12_sieve_term.o $(DEPS_ALL)	
 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
@@ -57,6 +57,9 @@ $(BUILD_DIR)/21_reltest_rel: $(BUILD_DIR)/21_reltest.o
 	ld65 -o $@ -C my_sbc_rel.cfg $^ 
 
 $(BUILD_DIR)/22_irq: $(BUILD_DIR)/22_irq.o $(DEPS_ALL)
+	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
+
+$(BUILD_DIR)/23_flow_control: $(BUILD_DIR)/23_flow_control.o $(DEPS_ALL)
 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
 
 clean:

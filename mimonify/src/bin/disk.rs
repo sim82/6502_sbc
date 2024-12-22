@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use mimonify::guess_program_space;
-use serial::prelude::*;
+use serial::{prelude::*, PortSettings};
 use std::{
     io::{prelude::*, stdout},
     path::{Path, PathBuf},
@@ -43,15 +43,27 @@ fn main() {
     });
     println!("dev: {} baud: {:?}", dev, baud);
     let mut port = serial::open(&dev).unwrap();
-    port.reconfigure(&|settings| {
-        settings.set_baud_rate(baud).unwrap();
-        settings.set_char_size(serial::Bits8);
-        settings.set_parity(serial::ParityNone);
-        settings.set_stop_bits(serial::Stop1);
-        settings.set_flow_control(serial::FlowNone);
-        Ok(())
+    // port.reconfigure(&|settings| {
+    //     settings.set_baud_rate(baud).unwrap();
+    //     settings.set_char_size(serial::Bits8);
+    //     settings.set_parity(serial::ParityNone);
+    //     settings.set_stop_bits(serial::Stop1);
+    //     settings.set_flow_control(serial::FlowHardware);
+    //     Ok(())
+    // })
+    // .unwrap();
+    port.configure(&PortSettings {
+        baud_rate: baud,
+        char_size: serial::Bits8,
+        parity: serial::ParityNone,
+        stop_bits: serial::Stop1,
+        flow_control: serial::FlowNone,
     })
     .unwrap();
+    // loop {
+    //     let x = port.read_cts().unwrap();
+    //     println!("cts: {:?}", x);
+    // }
     loop {
         let mut buf = [0u8];
         // let Ok(1) = port.read(&mut buf) else {
