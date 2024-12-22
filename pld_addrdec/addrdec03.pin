@@ -15,7 +15,7 @@
   11   | A15      | Input
   12   | GND      | GND
   13   | Ram1En   | Input
-  14   | InvClk   | Output
+  14   | RwBout   | Output
   15   | SysClk   | Output
   16   | NC       | NC
   17   | IoB      | Output
