@@ -5,6 +5,7 @@
 .import read_file_paged
 .import print_message
 .import stream_bin
+.import init_pagetable, alloc_page, alloc_page_span
 .INCLUDE "std.inc"
 .INCLUDE "17_dos.inc"
 
@@ -17,6 +18,7 @@
 
 	
 	jsr uart_init
+	jsr init_pagetable
 
 ; @loop:
 
@@ -350,6 +352,20 @@ cmd_j:
 	rts
 	
 
+; alloc - test memory allocator
+cmd_alloc_str:
+	.byte "alloc", $00
+cmd_alloc:
+@loop:
+	ldx #4
+	jsr alloc_page_span
+	bcc @end
+	jsr print_hex8
+	jsr put_newline
+	; jmp @loop
+@end:
+	rts
+
 exec_input_line:
 	jsr fgetc_nonblocking
 	bcs exec_input_line
@@ -369,6 +385,7 @@ exec_input_line:
 	dispatch_command cmd_r_str, cmd_r
 	dispatch_command cmd_m_str, cmd_m
 	dispatch_command cmd_j_str, cmd_j
+	dispatch_command cmd_alloc_str, cmd_alloc
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:
 ; purge any channel2 input buffer before starting IO

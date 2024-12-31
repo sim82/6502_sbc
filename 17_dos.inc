@@ -1,5 +1,6 @@
 
-INPUT_LINE = $0200				; address of input line
+PAGETABLE = $0200
+INPUT_LINE = $0300				; address of input line
 INPUT_LINE_LEN = $50				; capacity of input line
 INPUT_LINE_PTR = INPUT_LINE + INPUT_LINE_LEN	; address of current input line ptr 
 						; (relative to address of input line)
@@ -33,8 +34,9 @@ CH = CL + 1
 MON_ADDRL = CH + 1
 MON_ADDRH = MON_ADDRL + 1
 A_TEMP = MON_ADDRH + 1
+Y_TEMP = A_TEMP + 1
 
-IO_BUFFER = $0300
+IO_BUFFER = $0400
 
 .macro set_ptr src
 	ldx #<src
