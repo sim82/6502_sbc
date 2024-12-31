@@ -5,6 +5,7 @@
 .include "std.inc"
 
 open_file_nonpaged:
+	save_regs
 	lda #$ff
 	sta IO_BW_EOF
 	
@@ -22,6 +23,7 @@ open_file_nonpaged:
 	bne @no_error
 	; fell through both times -> error
 	clc
+	restore_regs
 	rts
 
 @no_error:
@@ -30,10 +32,11 @@ open_file_nonpaged:
 	sta FLETCH_2
 	sta IO_BW_EOF	; clear eof
 
-
+	jsr load_page_to_iobuf
+	restore_regs
+	rts
 
 load_page_to_iobuf:
-	save_regs
 	lda #<IO_BUFFER
 	sta IO_ADDR
 	
@@ -44,11 +47,10 @@ load_page_to_iobuf:
 	stx IO_BW_END
 	ldx #00
 	stx IO_BW_PTR
-
-	restore_regs
 	rts
 
 fgetc_buf:
+	save_xy
 	ldy IO_BW_EOF
 	bne @eof
 
@@ -67,11 +69,59 @@ fgetc_buf:
 @skip_fill_buffer:
 
 	sec
+	restore_xy
 	rts
 @eof:
 	lda #'X'
 	clc
+	restore_xy
 	rts
+
+; IO_ADDR: 16bit destination address
+; IO_FUN: address of per-page io completion function (after a page was loaded into (IO_ADDR)).
+;         (IO_FUN) is called with subroutine semantics (i.e. do rts to return), X register contains size of
+;         current page ($00 means full page). Code in IO_FUN is allowed to modify IO_ADDR, which enables easy loding in to
+;         consecutove pages (use e.g. for binary loading)
+read_file_paged:
+	save_regs
+	jsr fgetc	; read size low byte
+	sta RECEIVE_SIZE
+	; jsr print_hex8
+	jsr fgetc	; and high byte
+	sta RECEIVE_SIZE + 1
+	; jsr print_hex8
+	; check for file error: file size $ffff
+	cmp #$FF
+	bne @no_error
+	lda RECEIVE_SIZE
+	cmp #$FF
+	bne @no_error
+	; fell through both times -> error
+	clc
+	restore_regs
+	rts
+
+@no_error:
+	;
+	; outer loop over all received pages
+	; pages are loaded into IO_BUFFER one by one
+	;
+@load_page_loop:
+	jsr load_page_to_iobuf_gen
+	bcc @end
+	; hack: simulate indirect jsr using indirect jump trampoline (is this a new invention or just what ye olde folks called a vector?)
+	jsr @io_fun_trampoline
+	jmp @load_page_loop	; continue with next page
+
+@end:
+	sec
+	restore_regs
+	rts
+
+@io_fun_trampoline:
+	jmp (IO_FUN)
+
+
 
 load_page_to_iobuf_gen:
 	lda #%0000000
@@ -140,49 +190,6 @@ load_page_to_iobuf_gen:
 	sta IO_GPIO0
 	clc
 	rts
-
-
-; IO_ADDR: 16bit destination address
-; IO_FUN: address of per-page io completion function (after a page was loaded into (IO_ADDR)).
-;         (IO_FUN) is called with subroutine semantics (i.e. do rts to return), X register contains size of
-;         current page ($00 means full page). Code in IO_FUN is allowed to modify IO_ADDR, which enables easy loding in to
-;         consecutove pages (use e.g. for binary loading)
-read_file_paged:
-	jsr fgetc	; read size low byte
-	sta RECEIVE_SIZE
-	; jsr print_hex8
-	jsr fgetc	; and high byte
-	sta RECEIVE_SIZE + 1
-	; jsr print_hex8
-	; check for file error: file size $ffff
-	cmp #$FF
-	bne @no_error
-	lda RECEIVE_SIZE
-	cmp #$FF
-	bne @no_error
-	; fell through both times -> error
-	clc
-	rts
-
-@no_error:
-	;
-	; outer loop over all received pages
-	; pages are loaded into IO_BUFFER one by one
-	;
-@load_page_loop:
-	jsr load_page_to_iobuf_gen
-	bcc @end
-	; hack: simulate indirect jsr using indirect jump trampoline (is this a new invention or just what ye olde folks called a vector?)
-	jsr @io_fun_trampoline
-	jmp @load_page_loop	; continue with next page
-
-@end:
-	sec
-	rts
-
-@io_fun_trampoline:
-	jmp (IO_FUN)
-
 
 
 	; update fletch16 chksum with value in a

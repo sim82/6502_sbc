@@ -32,6 +32,7 @@ CH = CL + 1
 
 MON_ADDRL = CH + 1
 MON_ADDRH = MON_ADDRL + 1
+A_TEMP = MON_ADDRH + 1
 
 IO_BUFFER = $0300
 
@@ -82,3 +83,20 @@ IO_BUFFER = $0300
 	pla
 .endmacro
 
+.macro save_xy
+	sta A_TEMP
+	txa
+	pha
+	tya
+	pha
+	lda A_TEMP
+.endmacro
+
+.macro restore_xy
+	sta A_TEMP
+	pla
+	tay
+	pla
+	tax
+	lda A_TEMP
+.endmacro
