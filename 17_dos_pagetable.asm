@@ -66,28 +66,27 @@ alloc_page:
 alloc_page_span:
 	
 	save_xy
-	stx A_TEMP
+	sta A_TEMP ; A_TEMP contains requested span size
 
-	ldy #$00
+	ldx #$00 ; counter for start of span (OPT: store smallest free page index)
 
 @outer_loop:
-	ldx A_TEMP ; restore size
-	sty Y_TEMP ; save start of span
+	ldy A_TEMP ; restore span size
+	stx X_TEMP ; save start of current span (used in success case)
 @inner_loop:
-	lda PAGETABLE, y
-
+	lda PAGETABLE, x
 	bmi @non_empty
 	
-	dex
+	dey
 	beq @empty_span ; x zero -> found empty span
 
-	iny
+	inx
 	beq @out_of_memory
 	jmp @inner_loop
 
 
 @non_empty:
-	iny
+	inx
 	beq @out_of_memory ; iny overflow
 
 	jmp @outer_loop
@@ -95,16 +94,15 @@ alloc_page_span:
 @empty_span:
 
 ; mark pages as allocated
-	ldx Y_TEMP
 	ldy A_TEMP
+	ldx X_TEMP 
 @mark_loop:
 	jsr set_page_allocated
 	inx
 	dey
 	bne @mark_loop
 
-	
-	lda Y_TEMP
+	lda X_TEMP
 	sec
 	jmp @exit
 

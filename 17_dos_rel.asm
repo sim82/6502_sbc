@@ -1,5 +1,6 @@
 .export stream_bin
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
+.import alloc_page_spaen
 .include "17_dos.inc"
 .include "std.inc"
 .code
