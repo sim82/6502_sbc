@@ -48,6 +48,31 @@ load_page_to_iobuf:
 	restore_regs
 	rts
 
+fgetc_buf:
+	ldy IO_BW_EOF
+	bne @eof
+
+	ldy IO_BW_PTR
+	lda IO_BUFFER, y
+	iny
+	cpy IO_BW_END
+	sty IO_BW_PTR
+	bne @skip_fill_buffer 	; if we are not yet a the end of the input buffer, skip re-filling it
+	pha
+	jsr load_page_to_iobuf
+	pla
+	bcs @skip_fill_buffer
+	ldy #$FF
+	sty IO_BW_EOF
+@skip_fill_buffer:
+
+	sec
+	rts
+@eof:
+	lda #'X'
+	clc
+	rts
+
 load_page_to_iobuf_gen:
 	lda #%0000000
 	sta IO_GPIO0
@@ -116,30 +141,6 @@ load_page_to_iobuf_gen:
 	clc
 	rts
 
-fgetc_buf:
-	ldy IO_BW_EOF
-	bne @eof
-
-	ldy IO_BW_PTR
-	lda IO_BUFFER, y
-	iny
-	cpy IO_BW_END
-	sty IO_BW_PTR
-	bne @skip_fill_buffer 	; if we are not yet a the end of the input buffer, skip re-filling it
-	pha
-	jsr load_page_to_iobuf
-	pla
-	bcs @skip_fill_buffer
-	ldy #$FF
-	sty IO_BW_EOF
-@skip_fill_buffer:
-
-	sec
-	rts
-@eof:
-	lda #'X'
-	clc
-	rts
 
 ; IO_ADDR: 16bit destination address
 ; IO_FUN: address of per-page io completion function (after a page was loaded into (IO_ADDR)).
