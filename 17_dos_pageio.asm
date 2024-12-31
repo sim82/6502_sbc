@@ -30,12 +30,27 @@ open_file_nonpaged:
 	sta FLETCH_2
 	sta IO_BW_EOF	; clear eof
 
+
+
 load_page_to_iobuf:
-	pha
-	txa
-	pha
-	tya
-	pha
+	save_regs
+	lda #<IO_BUFFER
+	sta IO_ADDR
+	
+	lda #>IO_BUFFER
+	sta IO_ADDR + 1
+	
+	jsr load_page_to_iobuf_gen
+	stx IO_BW_END
+	ldx #00
+	stx IO_BW_PTR
+
+	restore_regs
+	rts
+
+load_page_to_iobuf_gen:
+	lda #%0000000
+	sta IO_GPIO0
 	; print_message_from_ptr msg_read_full_page
 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
@@ -43,24 +58,19 @@ load_page_to_iobuf:
 	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr fputc
 
+	lda #%0000001
+	sta IO_GPIO0
 	ldy #$00		; y: count byte inside page
 @loop_full_page:
 	jsr fgetc	; recv next byte
-	sta IO_BUFFER, y	;  and store to IO_BUFFER + y
+	sta (IO_ADDR), y	;  and store to IO_BUFFER + y
 	jsr update_fletch16
 	iny
 	bne @loop_full_page	; end on y wrap around
 
 	dec RECEIVE_SIZE + 1	; dec remaining size 
 	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
-	stx IO_BW_PTR
-	stx IO_BW_END
 
-	pla
-	tay
-	pla
-	tax
-	pla
 	sec
 	rts
 
@@ -68,6 +78,8 @@ load_page_to_iobuf:
 	; reminder, always less than 256 bytes
 	;
 @non_full_page:
+	lda #%0000010
+	sta IO_GPIO0
 	; print_message_from_ptr msg_read_page
 	ldy #00
 	; don't send 'b' if last page is empty (i.e. size is a multiple of 256)
@@ -83,43 +95,26 @@ load_page_to_iobuf:
 	jsr fgetc	; recv next byte
 	; lda #%11001100
 	; sta IO_GPIO0
-	sta IO_BUFFER, y	;  and store to IO_BUFFER + y
+	sta (IO_ADDR), y	;  and store to IO_BUFFER + y
 	jsr update_fletch16
 	iny
 	; sty IO_GPIO0
 	jmp @non_full_page_loop
 
 @end:
-	; lda #%11001100
-	; sta IO_GPIO0
-	; tya 
-	; jsr print_hex8
+	; inx ; this is a bit iffy? why don't we need the x+1? \
+	; meh, it is just a regular 0 based size / index. 256 == 0 in the full page case...
 	ldx RECEIVE_SIZE
-	; inx ; this is a bit iffy? why don't we need the x+1? ; meh, it is just a regular 0 based size / index. 256 == 0 in the full page case...
-	stx IO_BW_END
-	ldx #$00
-	stx IO_BW_PTR
-	stx RECEIVE_SIZE
-	pla
-	tay
-	pla
-	tax
-	pla
+	ldy #$00
+	sty RECEIVE_SIZE
 	sec
 	rts
 
 @end_empty:
-	pla
-	tay
-	pla
-	tax
-	pla
-	; pha
-	; print_message_from_ptr msg_read_eof
-	; pla
+	lda #%0000100
+	sta IO_GPIO0
 	clc
 	rts
-
 
 fgetc_buf:
 	ldy IO_BW_EOF

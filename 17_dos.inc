@@ -65,3 +65,20 @@ IO_BUFFER = $0300
 	lda #>addr
 	sta dest + 1
 .endmacro
+
+.macro save_regs
+	pha
+	txa
+	pha
+	tya
+	pha
+.endmacro
+
+.macro restore_regs
+	pla
+	tay
+	pla
+	tax
+	pla
+.endmacro
+
