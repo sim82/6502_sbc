@@ -123,6 +123,14 @@ read_file_paged:
 
 
 
+; internal function: load next page for open file into (IO_ADDR)
+; NOTE: registers are clobbered!
+; return:
+; - if more data was read (not EOF)
+;   - carry is set
+;   - (IO_ADDR) contains valid file data
+;   - x contains number of valid bytes in (IO_ADDR), 00 == 256 means a full page was read
+; - if no more data was read carry is cleared, register / (IO_ADDR) content is undefined
 load_page_to_iobuf_gen:
 	lda #%0000000
 	sta IO_GPIO0
