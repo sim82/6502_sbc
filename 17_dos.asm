@@ -261,16 +261,26 @@ cmd_r:
 	jsr stream_bin
 	bcc @error
 @end:
+	ldx DH
+	stx RECEIVE_POS + 1
+	stx MON_ADDRH
+	lda DL
+	sta RECEIVE_POS
+	sta MON_ADDRL
+	
+	jsr print_hex16
+	jsr put_newline
+	
 	print_message_from_ptr @fletch16_msg
 	lda FLETCH_1
 	ldx FLETCH_2
 	jsr print_hex16
 	jsr put_newline
 	
-	lda #$d0
-	sta MON_ADDRH
-	lda #$00
-	sta MON_ADDRL
+	; lda #$d0
+	; sta MON_ADDRH
+	; lda #$00
+	; sta MON_ADDRL
 	
 	rts
 @error:
@@ -294,6 +304,10 @@ cmd_m:
 	; lda #$d0
 	; sta ZP_PTR + 1
 	
+	ldx MON_ADDRH
+	lda MON_ADDRL
+	jsr print_hex16
+	jsr put_newline
 	ldy #0
 
 @loop:
@@ -344,10 +358,10 @@ cmd_j_str:
 	.byte "j", $00
 cmd_j:
 
-	lda #$d0
-	sta RECEIVE_POS + 1
-	lda #$00
-	sta RECEIVE_POS
+	; lda #$d0
+	; sta RECEIVE_POS + 1
+	; lda #$00
+	; sta RECEIVE_POS
 	jmp (RECEIVE_POS)
 	rts
 	

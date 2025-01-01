@@ -193,10 +193,22 @@ check_header:
 ; read relocation information and apply to loaded binary
 
 reloc:
-	lda #$cf
+	; load reloc base address from D. Decrease by one since reloc info is
+	; relative to the byte before the start of the code segment.
+	; NOTE: expects a page aligned pointer.
+	; lda #$cf
+	lda DH
 	sta CH
-	lda #$ff
+	dec CH
+	; lda #$ff
+	lda DL
 	sta CL
+	dec CL
+
+	; print it
+	ldx CH
+	lda CL
+	jsr print_hex16
 	
 @loop:
 	; read offset
@@ -250,7 +262,8 @@ reloc:
 	ldy #$01
 	lda (CL), y
 	clc
-	adc #$d0
+	; adc #$d0
+	adc DH
 	sta (CL), y
 	jmp @loop
 @not_word:
@@ -261,7 +274,8 @@ reloc:
 	ldy #$00
 	lda (CL), y
 	clc
-	adc #$d0
+	; adc #$d0
+	adc DH
 	sta (CL), y
 
 	; skip low byte stored after reloc entry
@@ -298,9 +312,11 @@ reloc:
 ; read code segment and put it into the target location.
 
 copy_code:
-	lda #$d0
+	; lda #$d0
+	lda DH
 	sta CH
-	lda #$00
+	; lda #$00
+	lda DL
 	sta CL
 
 @loop:
@@ -390,6 +406,11 @@ copy_code_loop:
 ; to be opened for buffered byte input.
 
 stream_bin:
+	; lda #$c0
+	; sta DH
+	; lda #$00
+	; sta DL
+	
 	jsr check_header
 	bcs @header_ok
 	; pass through error state
@@ -410,6 +431,16 @@ stream_bin:
 	
  	jsr print_hex16
 	jsr put_newline
+
+	lda AH
+	; round up page num (NOTE: handle case where size is mod 256)
+	clc
+	adc #$01
+	jsr alloc_page_span
+	sta DH
+	lda #$00
+	sta DL
+	
 	jsr copy_code
 	; ldx AL
 	; jsr skipx
