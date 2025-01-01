@@ -4,17 +4,32 @@
 .include "17_dos.inc"
 .include "std.inc"
 
+PF_ALLOCATED = %10000000
+PF_SPAN_END = %01000000
+PF_STATIC = %00100000
+
+.macro set_pagex_flag flag
+	lda #flag
+	sta PAGETABLE, x
+.endmacro
+
+.macro set_page_flag offs, flag
+	ldx #offs
+	set_pagex_flag flag
+.endmacro
 
 .macro alloc_static offs
-	ldx #offs
-	jsr set_page_allocated
+	set_page_flag offs, PF_ALLOCATED | PF_STATIC
 .endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; init_pagetable
 
 init_pagetable:
 	save_regs
 	ldx #$00
 @clear_loop:
-	jsr set_page_free
+	set_pagex_flag $00
 	inx
 	bne @clear_loop
 	
@@ -28,16 +43,9 @@ init_pagetable:
 	restore_regs
 	rts
 
-
-set_page_allocated:
-	lda #%10000000
-	sta PAGETABLE, x
-	rts
-
-set_page_free:
-	lda #%00000000
-	sta PAGETABLE, x
-	rts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; alloc_page:
+; single page allocator
 
 alloc_page:
 	save_xy
@@ -51,7 +59,7 @@ alloc_page:
 	jmp @loop
 
 @empty_page:
-	jsr set_page_allocated
+	set_pagex_flag PF_ALLOCATED | PF_SPAN_END
 	txa
 	sec
 	jmp @exit
@@ -63,9 +71,20 @@ alloc_page:
 	restore_xy
 	rts
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; alloc_page_span:
+; page allocator for spans of 1..n pages
+
 alloc_page_span:
-	
+	; fast path: jmp directly into single page allocator. This also simplifies the code below
+	cmp #$01
+	bne @multi_page
+	jmp alloc_page
+@multi_page:
 	save_xy
+	cmp #$00
+	beq @out_of_memory
+	
 	sta A_TEMP ; A_TEMP contains requested span size
 
 	ldx #$00 ; counter for start of span (OPT: store smallest free page index)
@@ -95,12 +114,14 @@ alloc_page_span:
 
 ; mark pages as allocated
 	ldy A_TEMP
+	dey ; stop before last page. 
 	ldx X_TEMP 
 @mark_loop:
-	jsr set_page_allocated
+	set_pagex_flag PF_ALLOCATED
 	inx
 	dey
 	bne @mark_loop
+	set_pagex_flag PF_ALLOCATED | PF_SPAN_END ; also set 'span end' bit on last page
 
 	lda X_TEMP
 	sec
