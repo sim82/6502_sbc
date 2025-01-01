@@ -1,3 +1,4 @@
+.include "std.inc"
 
 PAGETABLE = $0200
 INPUT_LINE = $0300				; address of input line
@@ -12,7 +13,7 @@ RECEIVE_POS = NEXT_TOKEN_END + 1
 RECEIVE_SIZE = RECEIVE_POS + 2
 IO_FUN = RECEIVE_SIZE + 2
 
-ZP_PTR = $80
+ZP_PTR = TARGET_ADDR + 2
 
 IO_ADDR = ZP_PTR + 2
 FLETCH_1 = IO_ADDR + 2

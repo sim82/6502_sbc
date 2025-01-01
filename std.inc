@@ -4,7 +4,7 @@ NUM2 = $0002
 REM = $0004
 DISP_POSX = $0006
 DISP_POSY = $0007
-TARGET_ADDR = $08
+TARGET_ADDR = $08 ; must be the last global ZP entry! dos starts after this!
 
 IO_BASE = $fe00
 

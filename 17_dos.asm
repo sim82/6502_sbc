@@ -6,7 +6,6 @@
 .import print_message
 .import stream_bin
 .import init_pagetable, alloc_page, alloc_page_span
-.INCLUDE "std.inc"
 .INCLUDE "17_dos.inc"
 
 
@@ -362,9 +361,13 @@ cmd_j:
 	; sta RECEIVE_POS + 1
 	; lda #$00
 	; sta RECEIVE_POS
-	jmp (RECEIVE_POS)
+	; jmp (RECEIVE_POS)
+	jsr jsr_receive_pos
+	print_message_from_ptr @back_to_dos
 	rts
 	
+@back_to_dos:
+	.byte "Back in control..", $0A, $0D, $00
 
 ; alloc - test memory allocator
 cmd_alloc_str:
@@ -379,6 +382,10 @@ cmd_alloc:
 	; jmp @loop
 @end:
 	rts
+
+jsr_receive_pos:
+	jmp (RECEIVE_POS)
+	jmp jsr_receive_pos
 
 exec_input_line:
 	jsr fgetc_nonblocking

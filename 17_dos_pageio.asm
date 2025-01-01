@@ -2,7 +2,6 @@
 .import fgetc, fputc, putc, print_message, print_hex8
 .export read_file_paged, open_file_nonpaged, fgetc_buf
 .include "17_dos.inc"
-.include "std.inc"
 
 open_file_nonpaged:
 	save_regs

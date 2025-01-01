@@ -24,7 +24,7 @@ reset:
 	sta NUM_PRIMES
 
 	; jsr disp_init
-	jsr uart_init
+	; jsr uart_init
 	jsr putc
 	
 	lda #$00
@@ -160,7 +160,8 @@ exit:
 	lda #>message_done
 	sta STR_PTR+1
 	jsr out_string
-	jmp reset
+	; jmp reset
+	rts
 @loop:
 	jmp @loop
 

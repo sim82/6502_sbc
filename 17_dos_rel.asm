@@ -2,7 +2,6 @@
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
 .import alloc_page_span
 .include "17_dos.inc"
-.include "std.inc"
 .code
 
 

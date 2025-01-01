@@ -2,7 +2,6 @@
 .import fgetc, fputc, putc, print_message, print_hex8
 .export init_pagetable, alloc_page, alloc_page_span
 .include "17_dos.inc"
-.include "std.inc"
 
 PF_ALLOCATED = %10000000
 PF_SPAN_END = %01000000
