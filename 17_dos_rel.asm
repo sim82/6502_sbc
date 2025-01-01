@@ -233,8 +233,10 @@ reloc:
 	sta CH
 	lda CL
 	ldx CH
-	jsr print_hex16
-	jsr put_newline
+	lda #'.'
+	jsr putc
+	; jsr print_hex16
+	; jsr put_newline
 
 	; read type
 	jsr fgetc_buf
@@ -285,6 +287,7 @@ reloc:
 	clc
 	rts
 @done:
+	jsr put_newline
 	sec
 	rts
 
