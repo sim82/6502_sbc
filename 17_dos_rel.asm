@@ -1,6 +1,6 @@
 .export stream_bin
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
-.import alloc_page_spaen
+.import alloc_page_span
 .include "17_dos.inc"
 .include "std.inc"
 .code
@@ -23,6 +23,11 @@
 	bcc @eof
 	sta addr + 1
 .endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; skip16:
+; skip variable sized block: read 16bit value and use that as size to 
+; skip a block of data in the input file.
 
 skip16:
 	ldy BH
@@ -48,6 +53,10 @@ skip16:
 	sta IO_GPIO0
 @done:
 	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; skipx:
+; read & ignore X bytes from input file
 
 skipx:
 	txa
@@ -87,6 +96,10 @@ dumpx:
 @done:
 	jsr put_newline
 	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; skip_extra:
+; skip / read extra header fields (optionally dump some information)
 
 skip_extra:
 @extra_loop:
@@ -142,6 +155,10 @@ skip_extra:
 	; jsr put_newline
 	rts
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; check_header:
+; do crude verification that the binary header is exactly as expected
+
 check_header:
 	; check header
 	; 	non c64 marker
@@ -170,6 +187,10 @@ check_header:
 	sta IO_GPIO0
 	clc
 	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; reloc:
+; read relocation information and apply to loaded binary
 
 reloc:
 	lda #$cf
@@ -268,6 +289,42 @@ reloc:
 	rts
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; copy_code:
+; read code segment and put it into the target location.
+
+copy_code:
+	lda #$d0
+	sta CH
+	lda #$00
+	sta CL
+
+@loop:
+	lda AH
+	jsr print_hex8
+	jsr put_newline
+	lda AH
+	beq @single_page
+
+	; jsr print_hex8
+	; jsr put_newline
+
+	jsr copy_code_full_page
+	dec AH
+	; inc CH
+	jmp @loop
+
+@single_page:
+	ldx AL
+	jsr copy_code_single_page
+
+	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; copy_code_full_page:
+; internal helper for reading a whole page of code
+
 copy_code_full_page:
 	; lda #$d0
 	; sta CH
@@ -277,6 +334,10 @@ copy_code_full_page:
 	ldx #$00
 	lda #$01 ; super hacky: skip zero test on first iter...
 	jmp copy_code_loop
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; copy_code_single_page:
+; internal helper for reading a partially filled page of code
 
 copy_code_single_page:
 	; lda #$d0
@@ -319,35 +380,12 @@ copy_code_loop:
 	clc
 @done:
 	rts
-
-copy_code:
-	lda #$d0
-	sta CH
-	lda #$00
-	sta CL
-
-@loop:
-	lda AH
-	jsr print_hex8
-	jsr put_newline
-	lda AH
-	beq @single_page
-
-	; jsr print_hex8
-	; jsr put_newline
-
-	jsr copy_code_full_page
-	dec AH
-	; inc CH
-	jmp @loop
-
-@single_page:
-	ldx AL
-	jsr copy_code_single_page
-
-	rts
-
 	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; stream_bin:
+; main entry point into relocating o65 binary loader. Expects binary file
+; to be opened for buffered byte input.
+
 stream_bin:
 	jsr check_header
 	bcs @header_ok
@@ -359,7 +397,7 @@ stream_bin:
 	; 	tlen
 	read_word AL
 	
-	;	jump non txt base / len fields (14 bytes) for now
+	; jump non txt base / len fields (14 bytes) for now
 	ldx #14
 	jsr skipx
 	jsr skip_extra
