@@ -38,8 +38,15 @@ init_pagetable:
 	alloc_static >PAGETABLE
 	alloc_static >INPUT_LINE
 	alloc_static >IO_BUFFER
-	alloc_static $fe
-	alloc_static $ff
+
+	; f000-ffff is reserved (os, IO, bootloader)
+	ldx #$f0
+@upper_reserved_loop:
+	set_pagex_flag PF_ALLOCATED | PF_STATIC
+	inx
+	bne @upper_reserved_loop
+	
+	jsr clobber_free_pages
 	restore_regs
 	rts
 
@@ -135,4 +142,37 @@ alloc_page_span:
 
 @exit:
 	restore_xy
+	rts
+
+
+clobber_free_pages:
+	ldx #$00
+	stx AL
+@loop:
+	lda PAGETABLE, x
+	bmi @skip
+
+	sta IO_GPIO0
+	stx AH
+	ldy #$00
+@inner_loop:
+	; pure gimmick...
+	lda #$de
+	sta (AL), y
+	iny
+	lda #$ad
+	sta (AL), y
+	iny
+	lda #$be
+	sta (AL), y
+	iny
+	lda #$ef
+	sta (AL), y
+	iny
+	bne @inner_loop
+	
+@skip:
+	inx
+	bne @loop
+
 	rts
