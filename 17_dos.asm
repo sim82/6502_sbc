@@ -3,7 +3,7 @@
 .import fgetc_buf, open_file_nonpaged
 .import reset_tokenize, read_token, retire_token
 .import read_file_paged
-.import print_message
+.import print_message, decode_nibble, decode_nibble_high
 .import stream_bin
 .import init_pagetable, alloc_page, alloc_page_span
 .INCLUDE "17_dos.inc"
@@ -298,11 +298,44 @@ cmd_r:
 cmd_m_str:
 	.byte "m", $00
 cmd_m:
+	jsr retire_token
+	jsr read_token
+	bcc @no_addr
+
+	ldy NEXT_TOKEN_PTR
+	
+	lda INPUT_LINE, y
+	jsr decode_nibble_high
+	bcc @no_addr
+	sta A_TEMP
+
+	iny
+	lda INPUT_LINE, y
+	jsr decode_nibble
+	bcc @no_addr
+
+	ora A_TEMP
+	sta MON_ADDRH
+
+	iny
+	lda INPUT_LINE, y
+	jsr decode_nibble_high
+	bcc @no_addr
+	sta A_TEMP
+
+	iny
+	lda INPUT_LINE, y
+	jsr decode_nibble
+	bcc @no_addr
+
+	ora A_TEMP
+	sta MON_ADDRL
 	; lda #$00
 	; sta ZP_PTR
 	; lda #$d0
 	; sta ZP_PTR + 1
 	
+@no_addr:
 	ldx MON_ADDRH
 	lda MON_ADDRL
 	jsr print_hex16
@@ -374,7 +407,7 @@ cmd_alloc_str:
 	.byte "alloc", $00
 cmd_alloc:
 @loop:
-	lda #1
+	lda #5
 	jsr alloc_page_span
 	bcc @end
 	jsr print_hex8
