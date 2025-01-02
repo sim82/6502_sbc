@@ -53,8 +53,8 @@ $(BUILD_DIR)/20_uart_rel: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)
 	ld65 -o $@ -C my_sbc_rel.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/tir
 
-$(BUILD_DIR)/21_reltest_ram: $(BUILD_DIR)/21_reltest.o 	
-	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
+# $(BUILD_DIR)/21_reltest_ram: $(BUILD_DIR)/21_reltest.o 	
+# 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
 $(BUILD_DIR)/21_reltest_rel: $(BUILD_DIR)/21_reltest.o 	
 	ld65 -o $@ -C my_sbc_rel.cfg $^ 
 

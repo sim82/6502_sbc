@@ -190,6 +190,27 @@ check_header:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; reloc:
 ; read relocation information and apply to loaded binary
+import:
+	jsr fgetc_buf
+	bcc @eof
+	; expect less than 256 imports...
+	check_byte $00
+	jsr print_hex8
+
+	rts
+@eof:
+	lda #%00001101
+	sta IO_GPIO0
+	clc
+	rts
+@error:
+	lda #%00001110
+	sta IO_GPIO0
+	clc
+	rts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; reloc:
+; read relocation information and apply to loaded binary
 
 reloc:
 	; load reloc base address from D. Decrease by one since reloc info is
@@ -444,9 +465,10 @@ stream_bin:
 	; ldx AL
 	; jsr skipx
 	; expect empty missing symbol table
-	check_byte $00
-	check_byte $00
+	; check_byte $00
+	; check_byte $00
 
+	jsr import
 
 	jsr reloc
 	; preserve carry flag!

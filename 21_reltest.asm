@@ -1,15 +1,16 @@
 
 .INCLUDE "std.inc"
-
+.import os_alloc
 STR_PTR = $8b
 
 .CODE
-
+	jsr os_alloc
 	lda #<message
 	sta STR_PTR
 	lda #>message
 	sta STR_PTR+1
 	jsr out_string
+	rts
 	jmp loop
 .byte "0123456789abcdef"
 .byte "0123456789abcdef"
