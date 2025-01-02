@@ -3,7 +3,7 @@
 .import os_alloc
 	
 ; WORK = $1000
-LOW_PRIMES = $1100
+; LOW_PRIMES = $1100
 NEXT_START = $1200
 HIGH_PRIMES = $1300
 ; NUM1 = $0000
@@ -17,6 +17,7 @@ HIGH_BYTE = $008a
 STR_PTR = $8b
 
 PWORK = STR_PTR + 2
+PLOW_PRIMES = PWORK + 2
 
 .CODE
 reset:
@@ -25,9 +26,12 @@ reset:
 	sta NUM_PRIMES
 
 	sta PWORK 
-	lda #$01
+	sta PLOW_PRIMES
+	lda #$02
 	jsr os_alloc
 	sta PWORK + 1
+	sta PLOW_PRIMES + 1
+	inc PLOW_PRIMES + 1 ; page 2 in allocated buf
 	
 	; jsr disp_init
 	; jsr uart_init
@@ -69,8 +73,8 @@ calc_low:
 	tya ; a = current (prime * n) to filter forward
 
 	; store prime into LOW_PRIMES array
-	ldx NUM_PRIMES
-	sta LOW_PRIMES,X
+	ldy NUM_PRIMES
+	sta (PLOW_PRIMES), y
 	inc NUM_PRIMES
 	tay
 	; sta IO_GPIO0
@@ -111,7 +115,7 @@ calc_high:
 	cpy NUM_PRIMES
 	beq @break
 
-	lda LOW_PRIMES,Y
+	lda (PLOW_PRIMES),Y
 	sta CUR_PRIME
 	lda NEXT_START,Y
 @loop:
@@ -176,7 +180,7 @@ dump_primes:
 	pha
 	tya
 	pha
-	ldx #$00
+	ldy #$00
 	
 	lda #$00
 	sta NUM1+1
@@ -191,7 +195,7 @@ dump_primes:
 @dump_loop:
 	lda #$00
 	sta NUM1+1
-	lda LOW_PRIMES,X
+	lda (PLOW_PRIMES), y
 	sta NUM1
 	jsr out_dec
 			
@@ -202,10 +206,10 @@ dump_primes:
 	; sta NUM1
 	; jsr out_dec
 	
-	inx
-	cpx NUM_PRIMES
+	iny
+	cpy NUM_PRIMES
 	beq @break
-	txa
+	tya
 	and #$f
 	cmp #$f
 	bne @dump_loop
