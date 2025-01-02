@@ -75,6 +75,8 @@ alloc_page:
 ; page allocator for spans of 1..n pages
 
 alloc_page_span:
+	lda #%11001100
+	sta IO_GPIO0
 	; fast path: jmp directly into single page allocator. This also simplifies the code below
 	cmp #$01
 	bne @multi_page

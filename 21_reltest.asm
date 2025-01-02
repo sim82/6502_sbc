@@ -4,6 +4,7 @@
 STR_PTR = $8b
 
 .CODE
+	lda #5
 	jsr os_alloc
 	lda #<message
 	sta STR_PTR

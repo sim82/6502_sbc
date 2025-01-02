@@ -192,11 +192,36 @@ check_header:
 ; read relocation information and apply to loaded binary
 import:
 	jsr fgetc_buf
+	tax
 	bcc @eof
 	; expect less than 256 imports...
 	check_byte $00
+	lda #'i'
+	jsr putc
+	lda #':'
+	jsr putc
+	txa
+	beq @exit
 	jsr print_hex8
+	jsr put_newline
 
+	txa
+	beq @exit
+	
+@loop:
+	jsr fgetc_buf
+	tay ; zero test A
+	beq @symbol_end
+	jsr putc
+	jmp @loop
+
+@symbol_end:
+	jsr put_newline
+	dex
+	bne @loop
+	
+@exit:
+	sec
 	rts
 @eof:
 	lda #%00001101
@@ -286,6 +311,22 @@ reloc:
 	adc DH
 	sta (CL), y
 	jmp @loop
+; eeeeeeek... function is getting too large
+@eof:
+	lda #%00000101
+	sta IO_GPIO0
+	clc
+	rts
+@error:
+	lda #%00000110
+	sta IO_GPIO0
+	clc
+	rts
+@done:
+	jsr put_newline
+	sec
+	rts
+
 @not_word:
 	cmp #$42
 	bne @not_high
@@ -305,25 +346,29 @@ reloc:
 
 @not_high:
 	cmp #$22
+	bne @not_low
+	
 	; ignore...
+	jmp @loop
+@not_low:
+	cmp #$80
 	bne @error
+	; only supprt one import for now
+	check_byte $00
+	check_byte $00
+	; lda #$aa
+	lda #<alloc_page_span
+	ldy $00
+	sta (CL), y
+	
+	lda #>alloc_page_span
+	; lda #$bb
+	iny
+	sta (CL), y
+		
 	
 	jmp @loop
 
-@eof:
-	lda #%00000101
-	sta IO_GPIO0
-	clc
-	rts
-@error:
-	lda #%00000110
-	sta IO_GPIO0
-	clc
-	rts
-@done:
-	jsr put_newline
-	sec
-	rts
 
 
 
@@ -469,6 +514,7 @@ stream_bin:
 	; check_byte $00
 
 	jsr import
+	bcc @error
 
 	jsr reloc
 	; preserve carry flag!
