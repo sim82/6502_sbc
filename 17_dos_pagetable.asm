@@ -3,9 +3,10 @@
 .export init_pagetable, alloc_page, alloc_page_span
 .include "17_dos.inc"
 
-PF_ALLOCATED = %10000000
-PF_SPAN_END = %01000000
-PF_STATIC = %00100000
+PF_ALLOCATED = %10000000 ; OPT: use highest bit to enable bmi in scan loop
+PF_SPAN_START = %00000001
+PF_SPAN_END = %00000010
+PF_STATIC = %00000100
 
 .macro set_pagex_flag flag
 	lda #flag
@@ -52,13 +53,13 @@ alloc_page:
 
 @loop:
 	lda PAGETABLE, x
-	bpl @empty_page
+	bpl @empty_page ; OPT: check highest bit
 	inx
 	beq @out_of_memory ; inx overflow -> reached end of pagetable
 	jmp @loop
 
 @empty_page:
-	set_pagex_flag PF_ALLOCATED | PF_SPAN_END
+	set_pagex_flag PF_ALLOCATED | PF_SPAN_START | PF_SPAN_END
 	txa
 	sec
 	jmp @exit
@@ -93,7 +94,7 @@ alloc_page_span:
 	stx X_TEMP ; save start of current span (used in success case)
 @inner_loop:
 	lda PAGETABLE, x
-	bmi @non_empty
+	bmi @non_empty ; OPT: check highest bit
 	
 	dey
 	beq @empty_span ; x zero -> found empty span
@@ -121,8 +122,11 @@ alloc_page_span:
 	dey
 	bne @mark_loop
 	set_pagex_flag PF_ALLOCATED | PF_SPAN_END ; also set 'span end' bit on last page
+	ldx X_TEMP
 
-	lda X_TEMP
+	; a bit crappy, but keeps the loop simple: go back to first page and also set PF_SPAN_START
+	set_pagex_flag PF_ALLOCATED | PF_SPAN_START
+	txa 
 	sec
 	jmp @exit
 
