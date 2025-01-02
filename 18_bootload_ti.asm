@@ -48,6 +48,10 @@ BLINKENLIGHT = RECEIVE_SIZE + 2
 .endmacro
 
 .CODE
+	; reset undefined processor state
+	ldx $ff
+	txs
+	cld
 	; init display
 	; jsr check_busy
 	; lda #%00111000      ; 8bit, two row, default font?

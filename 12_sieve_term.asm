@@ -19,6 +19,7 @@ STR_PTR = $8b
 
 .CODE
 reset:
+	
 	lda #$00
 	sta CHECK_SUM
 	sta NUM_PRIMES
@@ -44,8 +45,9 @@ calc_low:
 	lda #$00
 	sta WORK     ; eliminate 0 & 1
 	sta WORK+1
-	lda #$FF
-	pha ; sentiel for output
+	; BAD:
+	; lda #$FF
+	; pha ; sentiel for output
 
 	ldx #$02
 	; stx LOW_PRIMES ; store 2 directly as first prime
@@ -62,7 +64,8 @@ calc_low:
 	sta CHECK_SUM
 
 	txa ; restore a	
-	pha ; store output (testing)
+	; BAD:
+	; pha ; store output (testing)
 	
 	
 	; store prime into LOW_PRIMES array
@@ -70,7 +73,7 @@ calc_low:
 	sta LOW_PRIMES,X
 	inc NUM_PRIMES
 	tax
-	sta IO_GPIO0
+	; sta IO_GPIO0
 	sta CUR_PRIME ; CUR_PRIME = current prime (for * n increments)
 @loop:
 	clc
@@ -160,12 +163,15 @@ exit:
 	lda #>message_done
 	sta STR_PTR+1
 	jsr out_string
+	tsx
+	stx IO_GPIO0
 	; jmp reset
 	rts
 @loop:
 	jmp @loop
 
 dump_primes:
+
 	pha
 	txa
 	pha
