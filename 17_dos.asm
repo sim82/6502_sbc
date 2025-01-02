@@ -374,7 +374,7 @@ cmd_alloc_str:
 	.byte "alloc", $00
 cmd_alloc:
 @loop:
-	lda #32
+	lda #1
 	jsr alloc_page_span
 	bcc @end
 	jsr print_hex8
