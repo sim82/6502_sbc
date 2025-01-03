@@ -4,8 +4,8 @@
 	
 ; WORK = $1000
 ; LOW_PRIMES = $1100
-NEXT_START = $1200
-HIGH_PRIMES = $1300
+; NEXT_START = $1200
+; HIGH_PRIMES = $1300
 ; NUM1 = $0000
 ; NUM2 = $0002
 ; REM = $0004
@@ -16,8 +16,10 @@ NUM_HIGH = $0088
 HIGH_BYTE = $008a
 STR_PTR = $8b
 
-PWORK = STR_PTR + 2
+PWORK = $90
 PLOW_PRIMES = PWORK + 2
+PNEXT_START = PLOW_PRIMES + 2
+PHIGH_PRIMES = PNEXT_START + 2
 
 .CODE
 reset:
@@ -27,12 +29,23 @@ reset:
 
 	sta PWORK 
 	sta PLOW_PRIMES
-	lda #$02
+	sta PNEXT_START
+	sta PHIGH_PRIMES
+	lda #$04
 	jsr os_alloc
 	sta PWORK + 1
+	; ok, this is pathetic...
 	sta PLOW_PRIMES + 1
 	inc PLOW_PRIMES + 1 ; page 2 in allocated buf
+	sta PNEXT_START + 1
+	inc PNEXT_START + 1 ; page 3 in allocated buf
+	inc PNEXT_START + 1 ; page 3 in allocated buf
 	
+	sta PHIGH_PRIMES + 1
+	inc PHIGH_PRIMES + 1 ; page 4 in allocated buf
+	inc PHIGH_PRIMES + 1 ; page 4 in allocated buf
+	inc PHIGH_PRIMES + 1 ; page 4 in allocated buf
+
 	; jsr disp_init
 	; jsr uart_init
 	jsr putc
@@ -90,8 +103,10 @@ calc_low:
 	tya
 	jmp @loop
 @end:
-	ldx NUM_PRIMES
-	sta NEXT_START-1,X
+	ldy NUM_PRIMES
+	dey
+	sta (PNEXT_START), y
+	; sta NEXT_START-1,X
 @skip:
 	inc CUR_PRIME
 	jmp @elim_loop
@@ -99,7 +114,7 @@ calc_low:
 @break:
 	jsr dump_primes
 	; jmp end_loop
-	rts
+	; rts
 
 	lda #$00
 	sta HIGH_BYTE
@@ -117,7 +132,8 @@ calc_high:
 
 	lda (PLOW_PRIMES),Y
 	sta CUR_PRIME
-	lda NEXT_START,Y
+	lda (PNEXT_START),Y
+	sty TMP1 ; save y. needs to be used in inner loop
 @loop:
 	tay
 	lda #$00
@@ -126,26 +142,32 @@ calc_high:
 	clc
 	adc CUR_PRIME
 	bcc @loop
-	sta NEXT_START, Y
 
+	ldy TMP1 ; restore y after inner loop
+	sta (PNEXT_START), Y
 	iny
 	jmp @elim_loop
 @break:
 
+	; rts
 	
 
 gen_high_primes:
 	ldy #$00
 @loop:
-	; TODO
-	; lda WORK,Y
+	lda (PWORK),y
 	beq @skip
 
-	ldx NUM_HIGH
 	tya
-	sta HIGH_PRIMES,X
-	inx
-	stx NUM_HIGH
+	tax
+	ldy NUM_HIGH
+	txa
+	sta (PHIGH_PRIMES),y
+	iny
+	sty NUM_HIGH
+
+	txa
+	tay
 
 @skip:
 	iny
@@ -158,6 +180,7 @@ gen_high_primes:
 	; sta STR_PTR+1
 	; jsr out_string
 	jsr dump_primes_high
+	; rts
 	jmp calc_high
 exit:
 
@@ -260,7 +283,7 @@ dump_primes_high:
 	sta STR_PTR+1
 	jsr out_string
 
-	ldx #$00
+	ldy #$00
 	
 	; lda #$00
 	; sta NUM1+1
@@ -273,7 +296,7 @@ dump_primes_high:
 @dump_loop:
 	lda HIGH_BYTE
 	sta NUM1+1
-	lda HIGH_PRIMES,X
+	lda (PHIGH_PRIMES),y
 	sta NUM1
 	jsr out_dec
 			
@@ -284,14 +307,19 @@ dump_primes_high:
 	; sta NUM1
 	; jsr out_dec
 	
-	inx
-	cpx NUM_HIGH
+	iny
+	cpy NUM_HIGH
 	beq @break
 	; txa
 	; and #$1
 	; cmp #$1
 	; bne @dump_loop
 	; jsr disp_linefeed
+	tya
+	and #$f
+	cmp #$f
+	bne @dump_loop
+	jsr put_newline
 	jmp @dump_loop
 @break:
 	pla
