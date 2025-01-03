@@ -274,7 +274,7 @@ reloc:
 	sta CH
 	lda CL
 	ldx CH
-	lda #'.'
+	lda #'>'
 	jsr putc
 	jsr put_newline
 	; restart
@@ -290,8 +290,6 @@ reloc:
 	sta CH
 	lda CL
 	ldx CH
-	lda #'.'
-	jsr putc
 	; jsr print_hex16
 	; jsr put_newline
 
@@ -310,6 +308,8 @@ reloc:
 	; adc #$d0
 	adc DH
 	sta (CL), y
+	lda #'.'
+	jsr putc
 	jmp @loop
 ; eeeeeeek... function is getting too large
 @eof:
@@ -342,6 +342,8 @@ reloc:
 	; skip low byte stored after reloc entry
 	jsr fgetc_buf
 	bcc @eof
+	lda #'^'
+	jsr putc
 	jmp @loop
 
 @not_high:
@@ -349,6 +351,8 @@ reloc:
 	bne @not_low
 	
 	; ignore...
+	lda #'.'
+	jsr putc
 	jmp @loop
 @not_low:
 	cmp #$80
@@ -358,7 +362,7 @@ reloc:
 	check_byte $00
 	; lda #$aa
 	lda #<alloc_page_span
-	ldy $00
+	ldy #$00
 	sta (CL), y
 	
 	lda #>alloc_page_span
@@ -366,7 +370,8 @@ reloc:
 	iny
 	sta (CL), y
 		
-	
+	lda #'i'
+	jsr putc
 	jmp @loop
 
 
