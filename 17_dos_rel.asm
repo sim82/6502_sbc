@@ -233,6 +233,7 @@ import:
 	sta IO_GPIO0
 	clc
 	rts
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; reloc:
 ; read relocation information and apply to loaded binary
@@ -262,25 +263,9 @@ reloc:
 
 	cmp #00
 	beq @done
-	cmp #$ff
 
-	bne @no_extended_inc
-	lda #254
-	clc
-	adc CL
-	sta CL
-	lda #00
-	adc CH
-	sta CH
-	lda CL
-	ldx CH
-	lda #'>'
-	jsr putc
-	jsr put_newline
-	; restart
-	jmp @loop
-	
-@no_extended_inc:
+	cmp #$ff
+	beq @extended_inc
 	clc
 	; add to reloc address
 	adc CL
@@ -296,22 +281,47 @@ reloc:
 	; read type
 	jsr fgetc_buf
 	bcc @eof
-	; only support WORD size in text segment
-	cmp #$82
-	bne @not_word
 
-	; super primitive: just add $d0 to high adress part...
+	cmp #$80
+	beq @import
+	and #$f0
+	cmp #$80
+	beq @word
+	
+	cmp #$40
+	beq @high
 
-	ldy #$01
-	lda (CL), y
-	clc
-	; adc #$d0
-	adc DH
-	sta (CL), y
+	cmp #$20
+	beq @low
+	jmp @error
+	
+@extended_inc:
+	jsr reloc_extended_inc
+	jmp @loop
+@import:
+	jsr reloc_import
+	bcc @error
+	jmp @loop
+@word:
+
+	jsr reloc_word
+	bcc @error
+	jmp @loop
+@high:
+	jsr reloc_high
+	bcc @error
+	jmp @loop
+@low:
+		; ignore...
 	lda #'.'
 	jsr putc
 	jmp @loop
-; eeeeeeek... function is getting too large
+
+@done:
+	jsr put_newline
+	sec
+	rts
+	
 @eof:
 	lda #%00000101
 	sta IO_GPIO0
@@ -322,41 +332,26 @@ reloc:
 	sta IO_GPIO0
 	clc
 	rts
-@done:
+
+
+reloc_extended_inc:
+	lda #254
+	clc
+	adc CL
+	sta CL
+	lda #00
+	adc CH
+	sta CH
+	lda CL
+	ldx CH
+	lda #'>'
+	jsr putc
 	jsr put_newline
 	sec
 	rts
 
-@not_word:
-	cmp #$42
-	bne @not_high
 
-	; lda #$d0
-	ldy #$00
-	lda (CL), y
-	clc
-	; adc #$d0
-	adc DH
-	sta (CL), y
-
-	; skip low byte stored after reloc entry
-	jsr fgetc_buf
-	bcc @eof
-	lda #'^'
-	jsr putc
-	jmp @loop
-
-@not_high:
-	cmp #$22
-	bne @not_low
-	
-	; ignore...
-	lda #'.'
-	jsr putc
-	jmp @loop
-@not_low:
-	cmp #$80
-	bne @error
+reloc_import:
 	; only supprt one import for now
 	check_byte $00
 	check_byte $00
@@ -372,10 +367,48 @@ reloc:
 		
 	lda #'i'
 	jsr putc
-	jmp @loop
+	sec
+	rts
 
+@eof:
+@error:
+	clc
+	rts
 
+reloc_word:
+	; super primitive: just add $d0 to high adress part...
 
+	ldy #$01
+	lda (CL), y
+	clc
+	; adc #$d0
+	adc DH
+	sta (CL), y
+	lda #'.'
+	jsr putc
+	sec
+	rts
+
+reloc_high:
+	; lda #$d0
+	ldy #$00
+	lda (CL), y
+	clc
+	; adc #$d0
+	adc DH
+	sta (CL), y
+
+	; skip low byte stored after reloc entry
+	jsr fgetc_buf
+	bcc @eof
+	lda #'^'
+	jsr putc
+	sec
+	rts
+@eof:
+@error:
+	clc
+	rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; copy_code:
@@ -487,30 +520,71 @@ stream_bin:
 	rts
 @header_ok:
 	; 	tbase
-	read_word AL
+	; expect tbase to be a 00
+	check_byte $00
+	check_byte $00
+	
 	; 	tlen
 	read_word AL
 	
-	; jump non txt base / len fields (14 bytes) for now
-	ldx #14
+	; jump data seg
+	ldx #4
 	jsr skipx
+
+	read_word BL
+	lda BL ; expect base of bss to be mod 256
+	bne @error
+	read_word CL
+	
+	lda CL ; expect size of bss to be mod 256
+	bne @error
+	; jump zbase / stack size
+	ldx #6
+	jsr skipx
+
 	jsr skip_extra
-	; now there should be the program code...
 	lda AL
 	ldx AH
 	
  	jsr print_hex16
 	jsr put_newline
 
+	lda CL
+	ldx CH
+	
+ 	jsr print_hex16
+	jsr put_newline
+
+	jmp stream_bin_p2 ; split due to cond branch bounds
+@eof:
+	lda #%00000001
+	sta IO_GPIO0
+	clc
+	rts
+@error:
+	lda #%00000010
+	sta IO_GPIO0
+	clc
+	rts
+
+stream_bin_p2:
 	lda AH
-	; round up page num (NOTE: handle case where size is mod 256)
+	ldx AL ; check if size is already mod 256
+	beq @no_plus1
+	; ldx #$00
+	; stx AL
 	clc
 	adc #$01
+@no_plus1:
+	clc
+	adc CH
+	
 	jsr alloc_page_span
 	sta DH
 	lda #$00
 	sta DL
 	
+	; now there should be the program code...
 	jsr copy_code
 	; ldx AL
 	; jsr skipx
@@ -529,12 +603,12 @@ stream_bin:
 	
 
 @eof:
-	lda #%00000001
+	lda #%00000101
 	sta IO_GPIO0
 	clc
 	rts
 @error:
-	lda #%00000010
+	lda #%00000110
 	sta IO_GPIO0
 	clc
 	rts

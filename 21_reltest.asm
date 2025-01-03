@@ -3,7 +3,14 @@
 .import os_alloc
 STR_PTR = $8b
 
+.BSS
+buf1:
+	.RES $100
+buf2:
+	.RES $100
 .CODE
+	lda buf1
+	lda buf2
 	lda #5
 	jsr os_alloc
 	lda #<message
@@ -24,20 +31,20 @@ loop:
 	jmp loop
 
 .byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
-.byte "0123456789abcdef"
+.byte "012344678"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
+; .byte "0123456789abcdef"
 .byte "0123456789abcdef"
 low:
 	lda #00

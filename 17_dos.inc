@@ -35,7 +35,10 @@ CH = CL + 1
 DL = CH + 1
 DH = DL + 1
 
-MON_ADDRL = DH + 1
+EL = DH + 1
+EH = EL + 1
+
+MON_ADDRL = EH + 1
 MON_ADDRH = MON_ADDRL + 1
 A_TEMP = MON_ADDRH + 1
 X_TEMP = A_TEMP + 1
