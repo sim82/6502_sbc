@@ -265,7 +265,11 @@ reloc:
 	beq @done
 
 	cmp #$ff
-	beq @extended_inc
+	bne @skip_extended_inc
+	jsr reloc_extended_inc
+	jmp @loop
+
+@skip_extended_inc:
 	clc
 	; add to reloc address
 	adc CL
@@ -283,37 +287,35 @@ reloc:
 	bcc @eof
 
 	cmp #$80
-	beq @import
-	and #$f0
-	cmp #$80
-	beq @word
-	
-	cmp #$40
-	beq @high
-
-	cmp #$20
-	beq @low
-	jmp @error
-	
-@extended_inc:
-	jsr reloc_extended_inc
-	jmp @loop
-@import:
+	bne @skip_import
 	jsr reloc_import
 	bcc @error
 	jmp @loop
-@word:
+
+@skip_import:
+	and #$f0
+	cmp #$80
+
+	bne @skip_word
 
 	jsr reloc_word
 	bcc @error
 	jmp @loop
-@high:
+
+@skip_word:
+	cmp #$40
+	bne @skip_high
+
 	jsr reloc_high
 	bcc @error
 	jmp @loop
-@low:
-		; ignore...
-	lda #'.'
+
+@skip_high:
+	cmp #$20
+	bne @error
+	
+	; ignore...
+	lda #','
 	jsr putc
 	jmp @loop
 
@@ -376,7 +378,7 @@ reloc_import:
 	rts
 
 reloc_word:
-	; super primitive: just add $d0 to high adress part...
+	; super primitive: just add base to high adress part...
 
 	ldy #$01
 	lda (CL), y

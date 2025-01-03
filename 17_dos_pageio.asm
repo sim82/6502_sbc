@@ -131,8 +131,6 @@ read_file_paged:
 ;   - x contains number of valid bytes in (IO_ADDR), 00 == 256 means a full page was read
 ; - if no more data was read carry is cleared, register / (IO_ADDR) content is undefined
 load_page_to_iobuf_gen:
-	lda #%0000000
-	sta IO_GPIO0
 	; print_message_from_ptr msg_read_full_page
 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
@@ -140,8 +138,6 @@ load_page_to_iobuf_gen:
 	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr fputc
 
-	lda #%0000001
-	sta IO_GPIO0
 	ldy #$00		; y: count byte inside page
 @loop_full_page:
 	jsr fgetc	; recv next byte
@@ -160,8 +156,6 @@ load_page_to_iobuf_gen:
 	; reminder, always less than 256 bytes
 	;
 @non_full_page:
-	lda #%0000010
-	sta IO_GPIO0
 	; print_message_from_ptr msg_read_page
 	ldy #00
 	; don't send 'b' if last page is empty (i.e. size is a multiple of 256)
@@ -193,8 +187,6 @@ load_page_to_iobuf_gen:
 	rts
 
 @end_empty:
-	lda #%0000100
-	sta IO_GPIO0
 	clc
 	rts
 
