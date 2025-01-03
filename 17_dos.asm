@@ -336,12 +336,13 @@ cmd_m:
 	; sta ZP_PTR + 1
 	
 @no_addr:
-	ldx MON_ADDRH
-	lda MON_ADDRL
-	jsr print_hex16
-	jsr put_newline
+	; ldx MON_ADDRH
+	; lda MON_ADDRL
+	; jsr print_hex16
+	; jsr put_newline
 	ldy #0
 
+	jmp @newline
 @loop:
 	lda (MON_ADDRL), y
 	
@@ -352,13 +353,27 @@ cmd_m:
 
 	tya
 	and #$f
-	beq @newline
-
+	beq @newline ; mod 16 == 0 -> print newline
+	cmp #$8 ; mod 16 == 8 -> print extra separator
+	bne @skip_extra_sep
+	lda #' '
+	jsr putc
+@skip_extra_sep:
 	lda #' '
 	jsr putc
 	jmp @loop
+
 @newline:
 	jsr put_newline
+	tya
+	clc
+	adc MON_ADDRL
+
+	ldx MON_ADDRH
+	jsr print_hex16
+	lda #' '
+	jsr putc
+	jsr putc
 	jmp @loop
 
 
