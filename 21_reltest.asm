@@ -1,6 +1,6 @@
 
 .INCLUDE "std.inc"
-.import os_alloc
+.import os_alloc, os_putc, os_getc
 STR_PTR = $8b
 
 .BSS
@@ -9,6 +9,15 @@ buf1:
 buf2:
 	.RES $100
 .CODE
+@getc_loop:
+	jsr os_getc
+	cmp #'q'
+	beq @leave
+
+	jsr os_putc
+
+	jmp @getc_loop
+@leave:
 	lda buf1
 	lda buf2
 	lda #5

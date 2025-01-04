@@ -23,7 +23,7 @@ $(BUILD_DIR)/12_sieve_dyn: $(BUILD_DIR)/12_sieve_dyn.o $(DEPS_ALL)
 	ld65 -o $@ -C my_sbc_rel.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/sieved
 
-$(BUILD_DIR)/12_sieve_bss: $(BUILD_DIR)/12_sieve_bss.o $(DEPS_ALL)	
+$(BUILD_DIR)/12_sieve_bss: $(BUILD_DIR)/12_sieve_bss.o
 	ld65 -o $@ -C my_sbc_rel.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/psb
 

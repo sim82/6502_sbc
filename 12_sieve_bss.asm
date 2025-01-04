@@ -1,5 +1,6 @@
-.IMPORT uart_init, div16, put_newline, putc
-.INCLUDE "std.inc"
+; .IMPORT uart_init, div16, put_newline
+.import os_putc, os_putnl, os_print_dec, os_print_string
+; .INCLUDE "std.inc"
 
 	
 ; WORK = $1000
@@ -31,11 +32,11 @@ DUMMY:
 
 .CODE
 reset:
-	
-	lda WORK
-	lda LOW_PRIMES
-	lda NEXT_START
-	lda HIGH_PRIMES
+	; lda WORK
+	; lda LOW_PRIMES
+	; lda NEXT_START
+	; lda HIGH_PRIMES
+	; lda DUMMY
 	lda #$00
 	sta CHECK_SUM
 	sta NUM_PRIMES
@@ -48,10 +49,8 @@ reset:
 	tax
 	tay
 	lda #<message
-	sta STR_PTR
-	lda #>message
-	sta STR_PTR+1
-	jsr out_string
+	ldx #>message
+	jsr os_print_string
 @after_hello:
 	; jsr disp_linefeed
 
@@ -161,31 +160,20 @@ gen_high_primes:
 	beq @break
 	jmp @loop
 @break:
-	; lda #<message2
-	; sta STR_PTR
-	; lda #>message2
-	; sta STR_PTR+1
-	; jsr out_string
 	jsr dump_primes_high
 	
 	jmp calc_high
 exit:
-
+	
 	lda #<message_done
-	sta STR_PTR
-	lda #>message_done
-	sta STR_PTR+1
-	jsr out_string
-	tsx
-	stx IO_GPIO0
-	; jmp reset
+	ldx #>message_done
+	jsr os_print_string
 	rts
 @loop:
 	jmp @loop
 
 
 dump_primes:
-
 	pha
 	txa
 	pha
@@ -193,30 +181,19 @@ dump_primes:
 	pha
 	ldy #$00
 	
-	lda #$00
-	sta NUM1+1
+	ldx #$00
 	lda NUM_PRIMES
-	sta NUM1
-	jsr out_dec
-	jsr put_newline
+	jsr os_print_dec
+	jsr os_putnl
 
 	; lda #$20
 	; lda IO_DISP_DATA
 	
 @dump_loop:
-	lda #$00
-	sta NUM1+1
+	ldx #$00
 	lda LOW_PRIMES, y
-	sta NUM1
-	jsr out_dec
-			
+	jsr os_print_dec
 
-	; lda #$00
-	; sta NUM1+1
-	; lda NEXT_START,X
-	; sta NUM1
-	; jsr out_dec
-	
 	iny
 	cpy NUM_PRIMES
 	beq @break
@@ -227,7 +204,7 @@ dump_primes:
 	jsr put_newline
 	jmp @dump_loop
 @break:
-	jsr put_newline
+	jsr os_putnl
 	pla
 	tay
 	pla
@@ -243,33 +220,23 @@ dump_primes_high:
 	pha
 
 	lda #<message_block
-	sta STR_PTR
-	lda #>message_block
-	sta STR_PTR+1
-	jsr out_string
+	ldx #>message_block
+	jsr os_print_string
 	lda #$00
-	sta NUM1
-	lda HIGH_BYTE
-	sta NUM1+1
-	jsr out_dec
+	ldx HIGH_BYTE
+	jsr os_print_dec
 	
 	lda #<message_and
-	sta STR_PTR
-	lda #>message_and
-	sta STR_PTR+1
-	jsr out_string
+	ldx #>message_and
+	jsr os_print_string
 
 	lda #$FF
-	sta NUM1
-	lda HIGH_BYTE
-	sta NUM1+1
-	jsr out_dec
+	ldx HIGH_BYTE
+	jsr os_print_dec
 
 	lda #<message_newline
-	sta STR_PTR
-	lda #>message_newline
-	sta STR_PTR+1
-	jsr out_string
+	ldx #>message_newline
+	jsr os_print_string
 
 	ldy #$00
 	
@@ -282,19 +249,10 @@ dump_primes_high:
 	; lda IO_DISP_DATA
 	
 @dump_loop:
-	lda HIGH_BYTE
-	sta NUM1+1
+	ldx HIGH_BYTE
 	lda HIGH_PRIMES,y
-	sta NUM1
-	jsr out_dec
-			
+	jsr os_print_dec
 
-	; lda #$00
-	; sta NUM1+1
-	; lda NEXT_START,X
-	; sta NUM1
-	; jsr out_dec
-	
 	iny
 	cpy NUM_HIGH
 	beq @break
@@ -307,7 +265,7 @@ dump_primes_high:
 	and #$f
 	cmp #$f
 	bne @dump_loop
-	jsr put_newline
+	jsr os_putnl
 	jmp @dump_loop
 @break:
 	pla
@@ -316,52 +274,6 @@ dump_primes_high:
 	tax
 	pla
 	rts
-
-out_dec:
-	pha
-	lda #$0
-	pha
-@loop:
-	lda #$0A
-	sta NUM2
-	lda #$0
-	sta NUM2+1
-
-	jsr div16
-	; jsr check_busy
-	lda REM
-	clc
-	adc #$30
-	; sta $e011
-	pha
-	lda NUM1
-	ora NUM1+1
-	bne @loop
-@revloop:
-	pla
-	beq @end
-	jsr putc
-	jmp @revloop
-	
-@end:
-	lda #$20
-	jsr putc
-	
-	pla
-	rts
-; uart_write_blocking:
-; 	pha
-; @loop:
-; 	lda IO_UART_ISR1
-; 	and #%01000000
-; 	beq @loop
-; 	pla
-; 	sta IO_UART_TDR1
-; 	rts
-
-end_loop: ; end
-	nop
-	jmp end_loop
 
 	; fill work are with 1
 fill_work:
@@ -374,17 +286,12 @@ fill_work:
 
 	rts
 		
-out_string:
-	ldy #$00
-@loop:
-	lda (STR_PTR), Y
-	beq @end
-	jsr putc
-	iny
-	jmp @loop
-@end:
-	rts
 
+putc:
+	jmp os_putc
+
+put_newline:
+	jmp os_putnl
 .RODATA
 message:
 	.byte $0D, $0A

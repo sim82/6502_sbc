@@ -1,6 +1,6 @@
 .export stream_bin
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
-.import alloc_page_span
+.import alloc_page_span, getc, putc, print_dec, put_newline, print_message
 .include "17_dos.inc"
 .code
 
@@ -355,14 +355,20 @@ reloc_extended_inc:
 
 reloc_import:
 	; only supprt one import for now
-	check_byte $00
+	; check_byte $00
+	jsr fgetc_buf
+	bcc @eof
+	asl
+	tax
 	check_byte $00
 	; lda #$aa
-	lda #<alloc_page_span
+	; lda #<alloc_page_span
+	lda os_func_table, x
 	ldy #$00
 	sta (CL), y
 	
-	lda #>alloc_page_span
+	; lda #>alloc_page_span
+	lda os_func_table + 1, x
 	; lda #$bb
 	iny
 	sta (CL), y
@@ -614,3 +620,14 @@ stream_bin_p2:
 	sta IO_GPIO0
 	clc
 	rts
+
+os_func_table:
+	.WORD alloc_page_span
+	.WORD getc
+	.WORD putc
+	.WORD $0000 ; 'fopen'
+	.WORD fgetc_buf
+	.WORD print_dec
+	.WORD put_newline
+	.WORD print_message
+
