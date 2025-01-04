@@ -1,9 +1,30 @@
 
-.import putc
-.export print_message, decode_nibble, decode_nibble_high, print_dec
+.import putc, fputc, fpurge, open_file_nonpaged
+.export print_message, decode_nibble, decode_nibble_high, print_dec, file_open_raw
 .include "17_dos.inc"
 .code
 
+
+file_open_raw:
+	sta ZP_PTR
+	stx ZP_PTR + 1
+	tya
+	pha
+	jsr fpurge
+	lda #'r'
+	jsr fputc
+	ldy #$00
+@send_filename_loop:
+	lda (ZP_PTR), y
+	jsr fputc
+	beq @end_of_filename ; meh, it is a bit of a stretch to expect fputc to preserve zero flag...
+	iny
+	jmp @send_filename_loop
+@end_of_filename:
+	jsr open_file_nonpaged
+	pla
+	tya
+	rts
 ; low in a, high in x,
 print_message:
 	sta ZP_PTR
