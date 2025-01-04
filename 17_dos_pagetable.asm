@@ -33,18 +33,14 @@ init_pagetable:
 	inx
 	bne @clear_loop
 	
-	alloc_static $00 ; zero page
-	alloc_static $01 ; stack
-	alloc_static >PAGETABLE
-	alloc_static >INPUT_LINE
-	alloc_static >IO_BUFFER
-
-	; f000-ffff is reserved (os, IO, bootloader)
-	ldx #$f0
-@upper_reserved_loop:
+	; mark pages $00 - $04 and $f0 - $ff as static / allocated
+	; (technically it is $04 'down to' $f0, via x underflow)
+	ldx #$04
+@lower_reserved_loop:
 	set_pagex_flag PF_ALLOCATED | PF_STATIC
-	inx
-	bne @upper_reserved_loop
+	dex
+	cpx #$ef
+	bne @lower_reserved_loop
 	
 	jsr clobber_free_pages
 	restore_regs
