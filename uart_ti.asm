@@ -82,6 +82,8 @@ fputc:
 	beq @loop
 	pla
 	sta IO_UART2_FIFOB
+	; NOTE: make sure that this function preserves the state of the zero flag according to the written byte!
+	; some code depends on this behavior.
 	rts
 
 fgetc:
