@@ -317,6 +317,11 @@ cmd_m:
 	ora A_TEMP
 	sta MON_ADDRH
 
+; if there was a valid high part of an address given, already set the low mon addr to $00.
+; this way the lower part is optional, allowing e.g. 'm 02' to monitor the second page. 
+	lda #$00
+	sta MON_ADDRL
+
 	iny
 	lda INPUT_LINE, y
 	jsr decode_nibble_high
@@ -330,10 +335,6 @@ cmd_m:
 
 	ora A_TEMP
 	sta MON_ADDRL
-	; lda #$00
-	; sta ZP_PTR
-	; lda #$d0
-	; sta ZP_PTR + 1
 	
 @no_addr:
 	; ldx MON_ADDRH
@@ -436,6 +437,10 @@ jsr_receive_pos:
 	jmp jsr_receive_pos
 
 exec_input_line:
+	; add null termination at end of input line to make parsing more convenient
+	ldx INPUT_LINE_PTR
+	lda #$00
+	sta INPUT_LINE, x
 	jsr fgetc_nonblocking
 	bcs exec_input_line
 	jsr fpurge

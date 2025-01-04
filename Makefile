@@ -9,7 +9,7 @@ $(BUILD_DIR)/%.o: %.asm
 	mkdir -p $(dir $@)
 	ca65 -o $@ $<
 
-all: $(BUILD_DIR)/12_sieve_term $(BUILD_DIR)/12_sieve_term_rel $(BUILD_DIR)/12_sieve_dyn $(BUILD_DIR)/12_sieve_bss $(BUILD_DIR)/14_memtest $(BUILD_DIR)/17_dos $(BUILD_DIR)/17_dos_rel $(BUILD_DIR)/18_bootload_ti $(BUILD_DIR)/19_memprobe $(BUILD_DIR)/basic $(BUILD_DIR)/20_uart $(BUILD_DIR)/20_uart_rel $(BUILD_DIR)/21_reltest_ram $(BUILD_DIR)/21_reltest_rel $(BUILD_DIR)/22_irq $(BUILD_DIR)/23_flow_control
+all: $(BUILD_DIR)/12_sieve_term $(BUILD_DIR)/12_sieve_term_rel $(BUILD_DIR)/12_sieve_dyn $(BUILD_DIR)/12_sieve_bss $(BUILD_DIR)/14_memtest $(BUILD_DIR)/17_dos $(BUILD_DIR)/17_dos_rel $(BUILD_DIR)/18_bootload_ti $(BUILD_DIR)/19_memprobe $(BUILD_DIR)/basic $(BUILD_DIR)/20_uart $(BUILD_DIR)/20_uart_rel $(BUILD_DIR)/21_reltest_rel $(BUILD_DIR)/22_irq $(BUILD_DIR)/23_flow_control
 
 $(BUILD_DIR)/12_sieve_term: $(BUILD_DIR)/12_sieve_term.o $(DEPS_ALL)	
 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
@@ -33,7 +33,7 @@ $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
 
 DOS_OBJS = $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(BUILD_DIR)/17_dos_pagetable.o 
 
-$(BUILD_DIR)/17_dos: $(DOS_OBJS) $(DEPS_NO_STD)	
+$(BUILD_DIR)/17_dos: $(DOS_OBJS) $(DEPS_NO_STD)
 	ld65 -o $@ -C my_sbc_dos.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/dos
 

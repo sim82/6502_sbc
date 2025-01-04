@@ -2,8 +2,8 @@
 
 PAGETABLE = $0200
 INPUT_LINE = $0300				; address of input line
-INPUT_LINE_LEN = $50				; capacity of input line
-INPUT_LINE_PTR = INPUT_LINE + INPUT_LINE_LEN	; address of current input line ptr 
+INPUT_LINE_LEN = $40 - $1			; capacity of input line (minus 1 for null termination)
+INPUT_LINE_PTR = INPUT_LINE + $1 + INPUT_LINE_LEN	; address of current input line ptr 
 						; (relative to address of input line)
 
 NEXT_TOKEN_PTR   = INPUT_LINE_PTR + 1
