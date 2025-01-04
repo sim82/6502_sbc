@@ -1,6 +1,6 @@
 .export stream_bin
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
-.import alloc_page_span, getc, putc, print_dec, put_newline, print_message, file_open_raw
+.import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, file_open_raw
 .include "17_dos.inc"
 .code
 
@@ -623,7 +623,7 @@ stream_bin_p2:
 
 os_func_table:
 	.WORD alloc_page_span
-	.WORD getc
+	.WORD getc_blocking
 	.WORD putc
 	.WORD file_open_raw
 	.WORD fgetc_buf

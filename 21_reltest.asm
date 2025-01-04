@@ -1,6 +1,6 @@
 
 .INCLUDE "std.inc"
-.import os_alloc, os_putc, os_getc, os_fopen, os_fgetc, os_print_string
+.import os_alloc, os_putc, os_getc, os_fopen, os_fgetc, os_print_string, os_putnl
 STR_PTR = $8b
 
 .BSS
@@ -16,17 +16,18 @@ buf2:
 	ldy #$00
 @getc_loop:
 	jsr os_getc
-	sta buf1, y
-	jsr os_putc
-	iny
 
 	cmp #$0d
 	beq @leave
+	sta buf1, y
+	jsr os_putc
+	iny
 	jmp @getc_loop
 @leave:
 	lda #$00
 	sta buf1, y
 	
+	jsr os_putnl
 	lda #<buf1
 	ldx #>buf1
 	jsr os_fopen
@@ -44,7 +45,6 @@ buf2:
 
 @eof:
 	
-	rts
 	lda buf1
 	lda buf2
 	lda #5

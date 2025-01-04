@@ -1,6 +1,6 @@
 
-.import putc, fputc, fpurge, open_file_nonpaged
-.export print_message, decode_nibble, decode_nibble_high, print_dec, file_open_raw
+.import putc, fputc, fpurge, open_file_nonpaged, getc
+.export print_message, decode_nibble, decode_nibble_high, print_dec, file_open_raw, getc_blocking
 .include "17_dos.inc"
 .code
 
@@ -142,4 +142,9 @@ decode_nibble:
 
 @bad_char:
 	clc
+	rts
+
+getc_blocking:
+	jsr getc
+	bcc getc_blocking
 	rts
