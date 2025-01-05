@@ -29,6 +29,8 @@ file_open_raw:
 print_message:
 	sta ZP_PTR
 	stx ZP_PTR + 1
+	tya
+	pha
 	ldy #$00
 @loop:
 	lda (ZP_PTR), y
@@ -37,6 +39,8 @@ print_message:
 	iny
 	jmp @loop
 @end:
+	pla
+	tay
 	rts
 
 decode_nibble_high:

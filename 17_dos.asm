@@ -1,11 +1,13 @@
 
 .IMPORT put_newline, uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, fpurge, print_hex16, print_hex8
 .import fgetc_buf, open_file_nonpaged
-.import reset_tokenize, read_token, retire_token
+.import file_open_raw
+.import reset_tokenize, read_token, retire_token, terminate_token
 .import read_file_paged
 .import print_message, decode_nibble, decode_nibble_high
-.import stream_bin
+.import load_relocatable_binary
 .import init_pagetable, alloc_page, alloc_page_span
+.export get_argn, get_arg
 .INCLUDE "17_dos.inc"
 
 
@@ -121,77 +123,6 @@ cmd_ls:
 	rts
 
 
-cmd_cat_str:
-	.byte "cat", $00
-cmd_cat:
-	print_message_from_ptr @purrrr
-	jsr retire_token
-	jsr read_token
-	jsr fpurge
-	lda #'r'
-	jsr fputc
-	ldy NEXT_TOKEN_PTR
-@send_filename_loop:
-	cpy NEXT_TOKEN_END
-	beq @end_of_filename
-	lda INPUT_LINE, y
-	jsr fputc
-	iny
-	jmp @send_filename_loop
-@end_of_filename:
-	lda #$00
-	jsr fputc
-	store_address IO_BUFFER, IO_ADDR
-	store_address cat_iobuffer, IO_FUN
-	jsr read_file_paged
-	rts
-@purrrr:
-	.byte "purrrr", $0A, $0D, $00
-
-cmd_rat_str:
-	.byte "rat", $00
-cmd_rat:
-	print_message_from_ptr @purrrr
-	jsr retire_token
-	jsr read_token
-	jsr fpurge
-	lda #'r'
-	jsr fputc
-	ldy NEXT_TOKEN_PTR
-@send_filename_loop:
-	cpy NEXT_TOKEN_END
-	beq @end_of_filename
-	lda INPUT_LINE, y
-	jsr fputc
-	iny
-	jmp @send_filename_loop
-@end_of_filename:
-	lda #$00
-	jsr fputc
-	jsr open_file_nonpaged
-	bcc @end
-@byte_loop:
-	jsr fgetc_buf
-	bcc @end
-
-	; jmp @byte_loop
-	cmp #$0A
-	bne @jump_linefeed
-	lda #$0d
-	jsr putc
-	lda #$0a
-
-@jump_linefeed:
-	jsr putc
-	jmp @byte_loop
-@end:
-	lda FLETCH_1
-	ldx FLETCH_2
-	jsr print_hex16
-	jsr put_newline
-	rts
-@purrrr:
-	.byte "squeeeek", $0A, $0D, $00
 
 cmd_bench_str:
 	.byte "bench", $00
@@ -241,47 +172,13 @@ cmd_r:
 	print_message_from_ptr @purrrr
 	jsr retire_token
 	jsr read_token
-	jsr fpurge
-	lda #'r'
-	jsr fputc
-	ldy NEXT_TOKEN_PTR
-@send_filename_loop:
-	cpy NEXT_TOKEN_END
-	beq @end_of_filename
-	lda INPUT_LINE, y
-	jsr fputc
-	iny
-	jmp @send_filename_loop
-@end_of_filename:
-	lda #$00
-	jsr fputc
-	jsr open_file_nonpaged
-	bcc @end
-	jsr stream_bin
-	bcc @error
-@end:
-	ldx DH
-	stx RECEIVE_POS + 1
-	stx MON_ADDRH
-	lda DL
-	sta RECEIVE_POS
-	sta MON_ADDRL
+	jsr terminate_token
+	lda NEXT_TOKEN_PTR
+	ldx #>INPUT_LINE
 	
-	jsr print_hex16
-	jsr put_newline
-	
-	print_message_from_ptr @fletch16_msg
-	lda FLETCH_1
-	ldx FLETCH_2
-	jsr print_hex16
-	jsr put_newline
-	
-	; lda #$d0
-	; sta MON_ADDRH
-	; lda #$00
-	; sta MON_ADDRL
-	
+	jsr load_relocatable_binary
 	rts
+
 @error:
 	print_message_from_ptr @error_msg
 	rts
@@ -291,8 +188,6 @@ cmd_r:
 @error_msg:
 	.byte "error.", $0A, $0D, $00
 
-@fletch16_msg:
-	.byte "done. ", $0A, $0D, "fletch16: ", $00
 
 ; m - monitor
 cmd_m_str:
@@ -405,68 +300,40 @@ cmd_m:
 cmd_j_str:
 	.byte "j", $00
 cmd_j:
-
-	; lda #$d0
-	; sta RECEIVE_POS + 1
-	; lda #$00
-	; sta RECEIVE_POS
-	; jmp (RECEIVE_POS)
 	jsr jsr_receive_pos
-	print_message_from_ptr @back_to_dos
+	print_message_from_ptr back_to_dos_message
 	rts
 	
-@back_to_dos:
-	.byte "Back in control..", $0A, $0D, $00
 
-; alloc - test memory allocator
-cmd_alloc_str:
-	.byte "alloc", $00
-cmd_alloc:
-@loop:
-	lda #5
-	jsr alloc_page_span
-	bcc @end
-	jsr print_hex8
-	jsr put_newline
-	; jmp @loop
-@end:
-	rts
 
 jsr_receive_pos:
 	jmp (RECEIVE_POS)
 	jmp jsr_receive_pos
 
-exec_input_line:
-	; add null termination at end of input line to make parsing more convenient
-	ldx INPUT_LINE_PTR
-	lda #$00
-	sta INPUT_LINE, x
-	jsr fgetc_nonblocking
-	bcs exec_input_line
-	jsr fpurge
-	jsr reset_tokenize
-	jsr read_token
-	bcs @dispatch_builtin
-	jmp @cleanup
+; alloc - test memory allocator
+cmd_alloc_str:
+	.byte "alloc", $00
+cmd_alloc:
+	lda #5
+	jsr alloc_page_span
+	bcc @end
+	jsr print_hex8
+	jsr put_newline
+@end:
+	rts
 
-@dispatch_builtin:
-	dispatch_command cmd_help_str, cmd_help
-	dispatch_command cmd_ls_str, cmd_ls
-	dispatch_command cmd_cat_str, cmd_cat
-	dispatch_command cmd_rat_str, cmd_rat
-	dispatch_command cmd_bench_str, cmd_bench
-	dispatch_command cmd_echo_str, cmd_echo
-	dispatch_command cmd_r_str, cmd_r
-	dispatch_command cmd_m_str, cmd_m
-	dispatch_command cmd_j_str, cmd_j
-	dispatch_command cmd_alloc_str, cmd_alloc
-	; fall through. successfull commands jump to @cleanup from macro
-; @end:
+; ra - run absolute
+cmd_ra_str:
+	.byte "ra", $00
+cmd_ra:
+; straight copy of the old 'execute binary' code.
+	jsr retire_token
+	jsr read_token
 ; purge any channel2 input buffer before starting IO
 	jsr fpurge
 	lda #'o'
 	jsr fputc
-	ldy #$0
+	ldy NEXT_TOKEN_PTR
 @send_filename_loop:
 	cpy NEXT_TOKEN_END
 	beq @end_of_filename
@@ -497,12 +364,6 @@ exec_input_line:
 
 @file_error:
 	print_message_from_ptr file_not_found_message
-@cleanup:
-
-	ldy #$0
-	sty INPUT_LINE_PTR
-	jsr put_newline
-	rts
 
 
 load_binary:
@@ -547,7 +408,61 @@ load_binary:
 	jsr print_windmill
 	inc IO_ADDR + 1	;  and inc io address by 256 each
 	rts
-	
+
+exec_input_line:
+	; add null termination at end of input line to make parsing more convenient
+	ldx INPUT_LINE_PTR
+	lda #$00
+	sta INPUT_LINE, x
+	jsr fgetc_nonblocking
+	bcs exec_input_line
+	jsr fpurge
+	jsr reset_tokenize
+	jsr read_token
+	bcs @dispatch_builtin
+	jmp @cleanup
+
+@dispatch_builtin:
+	dispatch_command cmd_help_str, cmd_help
+	dispatch_command cmd_ls_str, cmd_ls
+	dispatch_command cmd_bench_str, cmd_bench
+	dispatch_command cmd_echo_str, cmd_echo
+	dispatch_command cmd_r_str, cmd_r
+	dispatch_command cmd_m_str, cmd_m
+	dispatch_command cmd_j_str, cmd_j
+	dispatch_command cmd_alloc_str, cmd_alloc
+	dispatch_command cmd_ra_str, cmd_ra
+
+	; fall through. successfull commands jump to @cleanup from macro
+; @end:
+
+	lda #$00
+	sta ARGC
+		
+@arg_loop:
+	ldy ARGC
+	inc ARGC
+	lda NEXT_TOKEN_PTR
+	sta ARGV, y
+	jsr print_hex8
+	jsr terminate_token
+	jsr retire_token
+	jsr read_token
+	bcs @arg_loop
+
+ 	jsr put_newline
+	lda ARGV
+	ldx #>INPUT_LINE
+	jsr load_relocatable_binary
+	bcc @cleanup
+	jsr jsr_receive_pos
+	print_message_from_ptr back_to_dos_message
+@cleanup:
+
+	ldy #$0
+	sty INPUT_LINE_PTR
+	jsr put_newline
+	rts
 	
 cat_iobuffer:
 	stx ZP_PTR
@@ -576,12 +491,30 @@ print_windmill:
 	rts
 
 
+get_argn:
+	lda ARGC
+	rts
 
+get_arg:
+	cmp ARGC
+	bpl @out_of_range
+
+	tax
+	lda ARGV, x
+	ldx #>INPUT_LINE
+	sec
+	rts
+
+@out_of_range:
+	clc
+	rts
+	
+ 
 windmill:
 	.byte "-\|/"
 
 welcome_message:
-	.byte "dos v2.99", $0A, $0D, $00
+	.byte "dos v3.0", $0A, $0D, $00
 
 
 help_message:
@@ -590,3 +523,5 @@ help_message:
 file_not_found_message:
 	.byte "file not found.", $0A, $0D, $00
 
+back_to_dos_message:
+	.byte "Back in control..", $0A, $0D, $00

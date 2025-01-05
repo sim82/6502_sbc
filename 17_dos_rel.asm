@@ -1,6 +1,7 @@
-.export stream_bin
+.export load_relocatable_binary
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
 .import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, file_open_raw
+.import get_argn, get_arg
 .include "17_dos.inc"
 .code
 
@@ -621,6 +622,36 @@ stream_bin_p2:
 	clc
 	rts
 
+load_relocatable_binary:
+	jsr file_open_raw
+	bcc @error
+	jsr stream_bin
+	bcc @error
+
+	ldx DH
+	stx RECEIVE_POS + 1
+	stx MON_ADDRH
+	lda DL
+	sta RECEIVE_POS
+	sta MON_ADDRL
+	
+	jsr print_hex16
+	jsr put_newline
+	
+	print_message_from_ptr @fletch16_msg
+	lda FLETCH_1
+	ldx FLETCH_2
+	jsr print_hex16
+	jsr put_newline
+	sec
+	rts
+
+@error:
+	clc
+	rts
+@fletch16_msg:
+	.byte "done. ", $0A, $0D, "fletch16: ", $00
+
 os_func_table:
 	.WORD alloc_page_span
 	.WORD getc_blocking
@@ -630,4 +661,6 @@ os_func_table:
 	.WORD print_dec
 	.WORD put_newline
 	.WORD print_message
+	.WORD get_argn
+	.WORD get_arg
 

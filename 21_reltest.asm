@@ -1,7 +1,8 @@
 
 .INCLUDE "std.inc"
-.import os_alloc, os_putc, os_getc, os_fopen, os_fgetc, os_print_string, os_putnl
+.import os_alloc, os_putc, os_getc, os_fopen, os_fgetc, os_print_string, os_putnl, os_get_argn, os_get_arg, os_print_dec
 STR_PTR = $8b
+TMP1 = STR_PTR + 2
 
 .BSS
 buf1:
@@ -9,6 +10,30 @@ buf1:
 buf2:
 	.RES $100
 .CODE
+
+	jsr os_get_argn
+	sta TMP1
+	cmp #$01
+	beq @read_filename
+	ldx #$00
+	jsr os_print_dec
+	ldy #$00
+@arg_loop:
+	cpy TMP1
+	beq @after_args
+	tya
+	jsr os_get_arg
+	bcc @after_args
+	sta IO_GPIO0
+	; jsr os_print_string
+	; jsr os_putnl
+	iny
+	jmp @arg_loop
+
+@after_args:
+	jmp @cat_file	
+
+@read_filename:
 	lda #<msg_enter_file
 	ldx #>msg_enter_file
 	jsr os_print_string
@@ -30,6 +55,7 @@ buf2:
 	jsr os_putnl
 	lda #<buf1
 	ldx #>buf1
+@cat_file:
 	jsr os_fopen
 @file_loop:
 	jsr os_fgetc

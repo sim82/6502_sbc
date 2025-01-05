@@ -1,4 +1,4 @@
-.export reset_tokenize, read_token, retire_token
+.export reset_tokenize, read_token, retire_token, terminate_token
 .include "17_dos.inc"
 .code
 ; tokenizer
@@ -28,7 +28,7 @@ read_token:
 	beq @end_of_line
 
 	lda INPUT_LINE, y	; read character
-	cmp #$20		; and check for space
+	jsr is_separator
 	bne @after_space
 	inc NEXT_TOKEN_PTR
 	jmp read_token		; there was a space -> continue loop
@@ -66,4 +66,21 @@ retire_token:
 	sta NEXT_TOKEN_PTR	; advance topen pointer to previous token end ptr
 	lda #$00
 	sta NEXT_TOKEN_END	; invalidate previous token end ptr
+	rts
+
+terminate_token:
+	save_regs
+	ldy NEXT_TOKEN_END
+	lda #$00
+	sta INPUT_LINE, y
+	restore_regs
+	rts
+
+is_separator:
+	cmp #$20		; and check for space
+	beq @exit
+	cmp #$00
+	beq @exit
+
+@exit:
 	rts

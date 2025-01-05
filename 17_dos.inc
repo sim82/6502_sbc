@@ -1,7 +1,7 @@
 .include "std.inc"
 
 PAGETABLE = $0200
-INPUT_LINE = $0300				; address of input line
+INPUT_LINE = $0300				; address of input line. Keep at page start to simplify ptr calculations
 INPUT_LINE_LEN = $40 - $1			; capacity of input line (minus 1 for null termination)
 INPUT_LINE_PTR = INPUT_LINE + $1 + INPUT_LINE_LEN	; address of current input line ptr 
 						; (relative to address of input line)
@@ -12,6 +12,9 @@ NEXT_TOKEN_END   = NEXT_TOKEN_PTR + 1
 RECEIVE_POS = NEXT_TOKEN_END + 1
 RECEIVE_SIZE = RECEIVE_POS + 2
 IO_FUN = RECEIVE_SIZE + 2
+ARGC = IO_FUN + 2
+ARGV = ARGC + 1
+ARGV_NUM = 16
 
 ZP_PTR = TARGET_ADDR + 2
 
