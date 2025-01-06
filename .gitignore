@@ -8,6 +8,8 @@ pcb01/pcb01-backups/*
 mimonify/target/*
 mimonify/disk/*
 
+bs02/target/*
+
 **/*.lck
 **/*.bak
 
