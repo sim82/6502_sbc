@@ -1,12 +1,13 @@
 .code
 .import fgetc, fputc, putc, print_message, print_hex8
-.export init_pagetable, alloc_page, alloc_page_span
+.export init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
 .include "17_dos.inc"
 
-PF_ALLOCATED = %10000000 ; OPT: use highest bit to enable bmi in scan loop
+PF_ALLOCATED =  %10000000 ; OPT: use highest bit to enable bmi in scan loop
 PF_SPAN_START = %00000001
-PF_SPAN_END = %00000010
-PF_STATIC = %00000100
+PF_SPAN_END =   %00000010
+PF_USER =       %00000100
+PF_STATIC =     %01000000
 
 .macro set_pagex_flag flag
 	lda #flag
@@ -62,7 +63,16 @@ alloc_page:
 	jmp @loop
 
 @empty_page:
-	set_pagex_flag PF_ALLOCATED | PF_SPAN_START | PF_SPAN_END
+	lda USER_PROCESS
+	beq @no_user
+	lda #(PF_ALLOCATED | PF_SPAN_START | PF_SPAN_END | PF_USER)
+	jmp @write_entry
+
+@no_user:
+	lda #(PF_ALLOCATED | PF_SPAN_START | PF_SPAN_END)
+@write_entry:
+	sta PAGETABLE, x
+	; set_pagex_flag 
 	txa
 	sec
 	jmp @exit
@@ -119,16 +129,33 @@ alloc_page_span:
 	ldy A_TEMP
 	dey ; stop before last page. 
 	ldx X_TEMP 
+
+	lda USER_PROCESS
+	beq @no_user
+	lda #(PF_ALLOCATED | PF_USER)
+	jmp @cont
+
+@no_user:
+	lda #PF_ALLOCATED
+@cont:
+	sta A_TEMP
+	
 @mark_loop:
-	set_pagex_flag PF_ALLOCATED
+	; set_pagex_flag PF_ALLOCATED
+	sta PAGETABLE, x
 	inx
 	dey
 	bne @mark_loop
-	set_pagex_flag PF_ALLOCATED | PF_SPAN_END ; also set 'span end' bit on last page
+	ora #PF_SPAN_END
+	sta PAGETABLE, x
+	; set_pagex_flag PF_ALLOCATED | PF_SPAN_END ; also set 'span end' bit on last page
 	ldx X_TEMP
 
 	; a bit crappy, but keeps the loop simple: go back to first page and also set PF_SPAN_START
-	set_pagex_flag PF_ALLOCATED | PF_SPAN_START
+	; set_pagex_flag PF_ALLOCATED | PF_SPAN_START
+	lda A_TEMP
+	ora #PF_SPAN_START
+	sta PAGETABLE, x
 	txa 
 	sec
 	jmp @exit
@@ -140,6 +167,54 @@ alloc_page_span:
 	restore_xy
 	rts
 
+free_page_span:
+	sta A_TEMP
+	sta IO_GPIO0
+	tax
+
+	; check if a points towards a valid page span start
+	lda PAGETABLE, x
+
+	and #(PF_ALLOCATED | PF_SPAN_START)
+	cmp #(PF_ALLOCATED | PF_SPAN_START)
+	bne @error
+	
+	; clear until a page span end is found
+	; NOTE: span start / end may be on the same page.
+@loop:
+	lda PAGETABLE, x
+	tay
+	lda #$00
+	sta PAGETABLE, x
+	tya
+
+	inx 
+
+	and #(PF_ALLOCATED | PF_SPAN_END)
+	cmp #(PF_ALLOCATED | PF_SPAN_END)
+	bne @loop
+
+	sec
+	rts
+@error:
+	clc
+	rts
+
+
+free_user_pages:
+	ldx #$00
+	ldy #$00
+@loop:
+	lda #PF_USER
+	and PAGETABLE, x
+	beq @no_clear
+
+	tya
+	sta PAGETABLE, x
+@no_clear:
+	inx
+	bne @loop
+	rts
 
 clobber_free_pages:
 	ldx #$00

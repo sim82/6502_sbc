@@ -6,7 +6,7 @@
 .import read_file_paged
 .import print_message, decode_nibble, decode_nibble_high
 .import load_relocatable_binary
-.import init_pagetable, alloc_page, alloc_page_span
+.import init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
 .export get_argn, get_arg
 .INCLUDE "17_dos.inc"
 
@@ -16,7 +16,7 @@
 	; init local vars
 	lda #$00
 	sta INPUT_LINE_PTR
-
+	sta USER_PROCESS
 	
 	jsr uart_init
 	jsr init_pagetable
@@ -300,7 +300,11 @@ cmd_m:
 cmd_j_str:
 	.byte "j", $00
 cmd_j:
+	lda #$ff
+	sta USER_PROCESS
 	jsr jsr_receive_pos
+	lda #$00
+	sta USER_PROCESS
 	print_message_from_ptr back_to_dos_message
 	rts
 	
@@ -317,6 +321,15 @@ cmd_alloc:
 	lda #5
 	jsr alloc_page_span
 	bcc @end
+
+	pha
+	jsr print_hex8
+	jsr put_newline
+	pla
+	jsr free_page_span
+	
+	bcc @end
+
 	jsr print_hex8
 	jsr put_newline
 @end:
@@ -455,7 +468,14 @@ exec_input_line:
 	ldx #>INPUT_LINE
 	jsr load_relocatable_binary
 	bcc @cleanup
+	lda #$ff
+	sta USER_PROCESS
 	jsr jsr_receive_pos
+	lda #$00
+	sta USER_PROCESS
+	lda RECEIVE_POS + 1
+	jsr free_page_span
+	jsr free_user_pages
 	print_message_from_ptr back_to_dos_message
 @cleanup:
 

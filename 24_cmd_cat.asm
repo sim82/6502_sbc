@@ -9,6 +9,8 @@ TMP1 = STR_PTR + 2
 ; 	.RES $100
 .CODE
 
+	lda #$05
+	jsr os_alloc
 	jsr os_get_argn
 	sta TMP1
 	cmp #$01
