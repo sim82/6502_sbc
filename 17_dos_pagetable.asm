@@ -169,7 +169,6 @@ alloc_page_span:
 
 free_page_span:
 	sta A_TEMP
-	sta IO_GPIO0
 	tax
 
 	; check if a points towards a valid page span start
