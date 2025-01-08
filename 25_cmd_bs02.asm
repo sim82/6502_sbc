@@ -72,7 +72,7 @@ opcode_table:
 	.WORD op_bne16			; $10
 	.WORD 0000			; $12
 	.WORD op_blt16			; $14
-	.WORD 0000			; $16
+	.WORD op_bge16			; $16
 
 op_break:
 	rts
@@ -98,6 +98,16 @@ op_blt16:
 	bcc take_branch
 	jmp normal_return
 
+op_bge16:
+	jsr branch_setup2
+	lda OP1H
+	cmp OP2H
+	bcc normal_return
+	bne take_branch
+	lda OP1L
+	cmp OP2L
+	bcs take_branch
+	jmp normal_return
 
 take_branch:
 	lda code, y
@@ -160,6 +170,7 @@ branch_setup2:
 
 
 op_print:
+; rts
 	iny
 	ldx code, y
 	lda variables, x
