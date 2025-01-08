@@ -4,9 +4,8 @@
 
 IP = $90 ; meh, bootloaded clobbers ZP + $80... TODO: move it down to $00 to preserve more app state after reset
 JMP_ADDR = IP + 2
-TMP1 = JMP_ADDR + 2
-TMP2 = TMP1 + 1
-TMP3 = TMP2 + 1
+MEM_OPERAND = JMP_ADDR + 2
+TMP_A = MEM_OPERAND + 1
 
 .BSS
 variables:
@@ -15,8 +14,6 @@ variables:
 code:
 	.RES $100
 .CODE
-	lda #$ff
-	sta TMP2
 	; rts
 	lda #<filename
 	ldx #>filename
@@ -93,20 +90,19 @@ op_add_immediate:
 	jmp normal_return
 
 branch_setup:
-	stx TMP2 ; store opcode
 	iny
 	ldx code, y
 	lda variables, x
-	sta TMP3 ; first operand goes into A for comparison. save on stack
+	sta TMP_A ; first operand goes into A for comparison. save on stack
 
 	iny
 	ldx code, y
 	lda variables, x
-	; sta TMP1 ; second operand goes into MEM for comparison.
-	sta TMP1
+	; sta MEM_OPERAND ; second operand goes into MEM for comparison.
+	sta MEM_OPERAND
 	iny
-	lda TMP3
-	cmp TMP1
+	lda TMP_A
+	cmp MEM_OPERAND
 	rts
 
 op_bne:
@@ -123,44 +119,13 @@ op_bmi:
 	jmp normal_return
 op_bpl:
 	jsr branch_setup
-	bcs op_branch_do_jmp
+	bpl op_branch_do_jmp
 	jmp normal_return
-	; jump to comparison op 
-	; TODO: check if this is really a good idea, or if it is better to put the common code in function call
-; 	lda TMP2
-; 	and #$0f
-; 	tax
-; 	lda cmp_table, x
-; 	sta JMP_ADDR
-; 	lda cmp_table + 1, x
-; 	sta JMP_ADDR + 1
-; 	pla
-; 	cmp TMP1
-; 	jmp (JMP_ADDR)
 
 op_branch_do_jmp:
 	lda code, y
 	sta IP
 	jmp mod_ip_return
-
-; cmp_ne:
-; 	bne op_branch_do_jmp
-; 	jmp normal_return
-; cmp_eq:
-; 	beq op_branch_do_jmp
-; 	jmp normal_return
-; cmp_mi:
-; 	bmi op_branch_do_jmp
-; 	jmp normal_return
-; cmp_pl:
-; 	bpl op_branch_do_jmp
-; 	jmp normal_return
-; cmp_table:
-; 	.WORD cmp_ne
-; 	.WORD cmp_eq
-; 	.WORD cmp_mi
-; 	.WORD cmp_pl
-
 
 
 op_print:
