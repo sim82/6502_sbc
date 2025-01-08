@@ -6,6 +6,7 @@ IP = $90 ; meh, bootloaded clobbers ZP + $80... TODO: move it down to $00 to pre
 JMP_ADDR = IP + 2
 TMP1 = JMP_ADDR + 2
 TMP2 = TMP1 + 1
+TMP3 = TMP2 + 1
 
 .BSS
 variables:
@@ -65,10 +66,10 @@ opcode_table:
 	.WORD $0000			; $0a
 	.WORD $0000			; $0c
 	.WORD $0000			; $0e
-	.WORD op_branch			; $10
-	.WORD op_branch			; $12
-	.WORD op_branch			; $14
-	.WORD op_branch			; $16
+	.WORD op_bne			; $10
+	.WORD op_beq			; $12
+	.WORD op_bmi			; $14
+	.WORD op_bpl			; $16
 
 op_break:
 	rts
@@ -91,53 +92,74 @@ op_add_immediate:
 	sta variables, x
 	jmp normal_return
 
-op_branch:
+branch_setup:
 	stx TMP2 ; store opcode
 	iny
 	ldx code, y
 	lda variables, x
-	pha ; first operand goes into A for comparison. save on stack
+	sta TMP3 ; first operand goes into A for comparison. save on stack
 
 	iny
 	ldx code, y
 	lda variables, x
-	sta TMP1 ; second operand goes into MEM for comparison.
+	; sta TMP1 ; second operand goes into MEM for comparison.
+	sta TMP1
 	iny
+	lda TMP3
+	cmp TMP1
+	rts
+
+op_bne:
+	jsr branch_setup
+	bne op_branch_do_jmp
+	jmp normal_return
+op_beq:
+	jsr branch_setup
+	beq op_branch_do_jmp
+	jmp normal_return
+op_bmi:
+	jsr branch_setup
+	bmi op_branch_do_jmp
+	jmp normal_return
+op_bpl:
+	jsr branch_setup
+	bcs op_branch_do_jmp
+	jmp normal_return
 	; jump to comparison op 
 	; TODO: check if this is really a good idea, or if it is better to put the common code in function call
-	lda TMP2
-	and #$0f
-	tax
-	lda cmp_table, x
-	sta JMP_ADDR
-	lda cmp_table + 1, x
-	sta JMP_ADDR + 1
-	pla
-	cmp TMP1
-	jmp (JMP_ADDR)
+; 	lda TMP2
+; 	and #$0f
+; 	tax
+; 	lda cmp_table, x
+; 	sta JMP_ADDR
+; 	lda cmp_table + 1, x
+; 	sta JMP_ADDR + 1
+; 	pla
+; 	cmp TMP1
+; 	jmp (JMP_ADDR)
 
 op_branch_do_jmp:
 	lda code, y
 	sta IP
 	jmp mod_ip_return
 
-cmp_ne:
-	bne op_branch_do_jmp
-	jmp normal_return
-cmp_eq:
-	beq op_branch_do_jmp
-	jmp normal_return
-cmp_mi:
-	bmi op_branch_do_jmp
-	jmp normal_return
-cmp_pl:
-	bpl op_branch_do_jmp
-	jmp normal_return
-cmp_table:
-	.WORD cmp_ne
-	.WORD cmp_eq
-	.WORD cmp_mi
-	.WORD cmp_pl
+; cmp_ne:
+; 	bne op_branch_do_jmp
+; 	jmp normal_return
+; cmp_eq:
+; 	beq op_branch_do_jmp
+; 	jmp normal_return
+; cmp_mi:
+; 	bmi op_branch_do_jmp
+; 	jmp normal_return
+; cmp_pl:
+; 	bpl op_branch_do_jmp
+; 	jmp normal_return
+; cmp_table:
+; 	.WORD cmp_ne
+; 	.WORD cmp_eq
+; 	.WORD cmp_mi
+; 	.WORD cmp_pl
 
 
 
