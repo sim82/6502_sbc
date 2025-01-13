@@ -20,9 +20,20 @@ variables_high:
 code:
 	.RES $100
 .CODE
+
+	jsr os_get_argn
+	cmp #$01
+	beq @use_default_filename
+	lda #$01
+	jsr os_get_arg
+	jmp @read_input_file
+
+@use_default_filename:
 	; rts
 	lda #<filename
 	ldx #>filename
+
+@read_input_file:
 	jsr os_fopen
 	bcc exit
 	ldx #$00
@@ -60,19 +71,6 @@ mainloop:
 
 exit:
 	rts
-opcode_table:
-	.WORD op_break			; $00
-	.WORD op_store_immediate	; $02
-	.WORD op_add_immediate		; $04
-	.WORD op_store_immediate16	; $06
-	.WORD op_print			; $08
-	.WORD $0000			; $0a
-	.WORD $0000			; $0c
-	.WORD $0000			; $0e
-	.WORD op_bne16			; $10
-	.WORD 0000			; $12
-	.WORD op_blt16			; $14
-	.WORD op_bge16			; $16
 
 op_break:
 	rts
@@ -85,6 +83,16 @@ op_bne16:
 	lda OP1L
 	cmp OP2L
 	bne take_branch
+	jmp normal_return
+
+op_beq16:
+	jsr branch_setup2
+	lda OP1H
+	cmp OP2H
+	bne take_branch
+	lda OP1L
+	cmp OP2L
+	beq take_branch
 	jmp normal_return
 
 op_blt16:
@@ -185,7 +193,21 @@ op_print:
 	sta IP
 	jmp mainloop
 	
+
 .RODATA
+opcode_table:
+	.WORD op_break			; $00
+	.WORD op_store_immediate	; $02
+	.WORD op_add_immediate		; $04
+	.WORD op_store_immediate16	; $06
+	.WORD op_print			; $08
+	.WORD $0000			; $0a
+	.WORD $0000			; $0c
+	.WORD $0000			; $0e
+	.WORD op_bne16			; $10
+	.WORD op_beq16			; $12
+	.WORD op_blt16			; $14
+	.WORD op_bge16			; $16
 filename:
 	.byte "test1.bs02", $00
 
