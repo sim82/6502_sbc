@@ -3,13 +3,22 @@
 %%
 
 Block -> Result<Block, Error>:
-	Statement {
+	BlockElement {
 		$1.map( |x| Block(vec!(x)) )
 	}
-	| Block Statement { 
-		let Block(mut statements) = $1?;
-		statements.push($2?);
-		Ok(Block(statements))
+	| Block BlockElement { 
+		let Block(mut elements) = $1?;
+		elements.push($2?);
+		Ok(Block(elements))
+	}
+	;
+
+BlockElement -> Result<BlockElement, Error>: 
+	Statement {
+		Ok(BlockElement::Statement($1?))
+	}
+	| 'IDENTIFIER' ':' {
+		Ok(BlockElement::Label($1?.span()))
 	}
 	;
 
@@ -30,8 +39,30 @@ Statement -> Result<Statement, Error>:
 			}
 		)
 	}
+	| 'if' 'IDENTIFIER' Operator 'IDENTIFIER'  '{' Block '}' {
+		Ok(
+			Statement::If {
+				a: $2?.span(),
+				b: $4?.span(),
+				if_block: $6?,
+				operator: $3?,
+			}
+		)
+	}
+	| 'goto' 'IDENTIFIER' ';' {
+		Ok(
+			Statement::Goto {
+				target_label: $2?.span()
+			}
+		)
+	}
 	;
 
+Operator -> Result<Operator, Error>:
+	 '==' { Ok(Operator::Eq) }
+	 | '!=' { Ok(Operator::Neq) }
+
+	;
 Expression -> Result<Expression, Error>: 
 	Expression '+' Product {
 		Ok(
@@ -88,8 +119,13 @@ use anyhow::anyhow;
 use cfgrammar::Span;
 
 #[derive(Debug)]
-pub struct Block(Vec<Statement>);
+pub struct Block(pub Vec<BlockElement>);
 
+#[derive(Debug)]
+pub enum BlockElement {
+	Statement(Statement),
+	Label(Span),
+}
 #[derive(Debug)]
 pub struct File(i32);
 
@@ -103,6 +139,15 @@ pub enum Statement {
 		function: Span,
 		identifier: Span,
 		// expression: Expression,
+	},
+	If {
+		a: Span,
+		b: Span,
+		operator: Operator,
+		if_block: Block,
+	},
+	Goto {
+		target_label: Span,
 	}
 }
 #[derive(Debug)]
@@ -119,6 +164,15 @@ pub enum Expression {
 	}
 }
 
+#[derive(Debug)]
+pub enum Operator {
+	Eq,
+	Neq,
+	Lt,
+	Leq,
+	Gt,
+	Geq,
+}
 
 fn parse_int(s: &str) -> Result<i32, Error> {
     match s.parse::<i32>() {

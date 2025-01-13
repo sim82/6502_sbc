@@ -1,4 +1,5 @@
 use bs02::{
+    codegen::Codegen,
     diagnostic::{DiagnosticDesc, ErrorReporter},
     parser::{self, lexerdef},
 };
@@ -6,9 +7,14 @@ use lrpar::{LexError, Lexeme, Span};
 
 fn main() {
     let input = r#"
-        a = (666 + 123) * a; 
-        b = a + 1; 
+        a = 8447;
+        b = 8450; 
+    loop:
+        a = a + 1; 
         print a;
+        if a != b {
+            goto loop;
+        }
     "#;
     let error_reporter = ErrorReporter::new("input.bs02", &input);
     let lexerdef = lexerdef();
@@ -40,5 +46,8 @@ fn main() {
     }
     if let Some(Ok(res)) = res {
         println!("res: {:?}", res);
+        let mut codegen = Codegen::default();
+        codegen.generate(&res, input.as_bytes());
+        std::fs::write("out.bs02", codegen.get_code()).unwrap();
     }
 }
