@@ -175,6 +175,9 @@ branch_setup2:
 	rts
 	
 
+op_jmp:
+	iny
+	jmp take_branch
 
 
 op_print:
@@ -201,7 +204,7 @@ opcode_table:
 	.WORD op_add_immediate		; $04
 	.WORD op_store_immediate16	; $06
 	.WORD op_print			; $08
-	.WORD $0000			; $0a
+	.WORD op_jmp     		; $0a
 	.WORD $0000			; $0c
 	.WORD $0000			; $0e
 	.WORD op_bne16			; $10
