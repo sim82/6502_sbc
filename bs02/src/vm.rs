@@ -1,4 +1,4 @@
-const TRACE: bool = false;
+const TRACE: bool = !false;
 
 pub struct Vm {
     variables: [u16; 256],
@@ -25,6 +25,7 @@ pub mod opcodes {
     pub const OP_ADD_IMMEDIATE: u8 = 0x04;
     pub const OP_STORE_IMMEDIATE16: u8 = 0x06;
     pub const OP_PRINT: u8 = 0x08;
+    pub const OP_JMP: u8 = 0x0a;
     pub const OP_BNE16: u8 = 0x10;
     pub const OP_BEQ16: u8 = 0x12;
     pub const OP_BLT16: u8 = 0x14;
@@ -47,7 +48,7 @@ impl Vm {
         loop {
             let instr = self.code[self.ip];
             if TRACE {
-                println!("trace: {}: {}", self.ip, instr as usize);
+                println!("trace: {}: {:x}", self.ip, instr as usize);
             }
             let inc = match instr {
                 OP_STORE_IMMEDIATE => {
@@ -83,7 +84,7 @@ impl Vm {
                 OP_BEQ16 => {
                     let a = self.code[self.ip + 1] as usize;
                     let b = self.code[self.ip + 2] as usize;
-                    if self.variables[a] != self.variables[b] {
+                    if self.variables[a] == self.variables[b] {
                         let ip = self.code[self.ip + 3] as usize;
                         self.ip = ip;
                         0
@@ -124,6 +125,10 @@ impl Vm {
                         println!("{}", v);
                     }
                     2
+                }
+                OP_JMP => {
+                    self.ip = self.code[self.ip + 1] as usize;
+                    0
                 }
                 OP_BREAK => {
                     println!("break");

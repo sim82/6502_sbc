@@ -8,7 +8,7 @@ use lrpar::{LexError, Lexeme, Span};
 fn main() {
     let input = r#"
         a = 8447;
-        b = 8450; 
+        b = 8550; 
     loop:
         a = a + 1; 
         print a;
@@ -47,7 +47,9 @@ fn main() {
     if let Some(Ok(res)) = res {
         println!("res: {:?}", res);
         let mut codegen = Codegen::default();
-        codegen.generate(&res, input.as_bytes());
+        if let Err(e) = codegen.generate(&res, input.as_bytes()) {
+            panic!("codegen failed: {:?}", e);
+        }
         std::fs::write("out.bs02", codegen.get_code()).unwrap();
     }
 }
