@@ -19,9 +19,23 @@
 	sta INPUT_LINE_PTR
 	sta USER_PROCESS
 	
-	jsr uart_init
-	jsr init_pagetable
 
+	sei
+	
+	jsr uart_init
+	lda #%00000010
+	sta IO_UART2_IMR
+
+	lda #<irq
+	sta $fdfe
+	
+	lda #>irq
+	sta $fdfe+1
+	jsr init_pagetable
+	
+	jsr clear_resident
+
+	cli
 ; @loop:
 
 ; 	jsr getc
@@ -35,9 +49,91 @@
 
 	lda #'>'
 	jsr putc
-mainloop:
-	jsr read_input
-	jmp mainloop
+
+@wait_loop:
+	lda RESIDENT_STATE
+	beq @no_resident
+
+	cmp $01
+	bne @not_init
+	lda #$00
+	sta RESIDENT_EVENTDATA
+	jsr run_resident
+	lda #$02
+	sta RESIDENT_STATE
+	jmp @no_resident
+
+@not_init:
+	jsr getc
+	bcc @no_resident
+
+	sta RESIDENT_EVENTDATA
+	lda #$01
+	sta RESIDENT_EVENT
+	jsr run_resident
+
+@no_resident:
+	lda #%00001111
+	sta IO_GPIO0
+	wai ; look at me, I sleep all day like the big CPUs...
+	lda #%00000011
+	sta IO_GPIO0
+	jmp @wait_loop
+
+run_resident:
+	lda #$00
+	sta RESIDENT_RETURN
+	lda #$ff
+	sta USER_PROCESS
+	jsr jsr_receive_pos
+	lda #$00
+	sta USER_PROCESS
+	lda RESIDENT_RETURN
+	bne @keep_resident
+	jsr clear_resident
+	lda RECEIVE_POS + 1
+	jsr free_page_span
+	jsr free_user_pages
+	jsr clear_resident
+	jmp @exit ; skip printing '*'
+	
+@keep_resident:
+	lda #'*'
+	jsr putc
+	
+@exit:
+	print_message_from_ptr back_to_dos_message
+
+	rts
+
+jsr_resident:
+	jmp (RESIDENT_ENTRYPOINT)
+	jmp jsr_resident
+
+clear_resident:
+	lda #$00
+	sta RESIDENT_STATE
+	; sta RESIDENT_ENTRYPOINT
+	; sta RESIDENT_ENTRYPOINT + 1
+	rts
+
+irq:
+	meeeeeep
+	this is not working. just put char in a queue (or buffer) and let the mainloop decide what to do with it...
+	lda RESIDENT_STATE
+	beq @no_resident
+	cmp #$02
+	bne @skip
+	jsr getc
+	sta RESIDENT_EVENTDATA
+	jmp @skip
+
+@no_resident:
+	jsr getc
+	bcc @skip
+	jsr process_input
+@skip:
+	rti
 
 read_input:
 	jsr getc
@@ -46,6 +142,7 @@ read_input:
 	; jsr print_hex8
 	; jsr put_newline
 	; pla
+process_input:
 	cmp #$0a 		; ignore LF / \n
 	beq read_input
 	cmp #$0d 		; enter key is CR / \r 
@@ -55,11 +152,12 @@ read_input:
 	lda #'>'
 	jsr putc
 	rts
+
 @no_enter_key:
 	cmp #$08		; handle backspace
 	bne @normal_char
 	ldy INPUT_LINE_PTR	; check if input line is empty -> ignore backspace
-	beq mainloop
+	beq @exit
 	dec INPUT_LINE_PTR	; delete last char (dec ptr)
 
 	; rub-out character on terminal
@@ -68,7 +166,10 @@ read_input:
 	jsr putc
 	lda #$08		; send another backspace to move cursor back onto space
 	jsr putc
-	jmp mainloop
+	; jmp mainloop
+
+@exit:
+	rts
 @normal_char:
 	; TODO: ignore non-printable chars
 	ldy INPUT_LINE_PTR	; append normal char to input line
@@ -201,17 +302,14 @@ exec_input_line:
 	ldx #>INPUT_LINE
 	jsr load_relocatable_binary
 	bcc @cleanup
-	lda #$ff
-	sta USER_PROCESS
-	jsr jsr_receive_pos
-	lda #$00
-	sta USER_PROCESS
+	lda RECEIVE_POS
+	sta RESIDENT_ENTRYPOINT
 	lda RECEIVE_POS + 1
-	jsr free_page_span
-	jsr free_user_pages
-	print_message_from_ptr back_to_dos_message
+	sta RESIDENT_ENTRYPOINT + 1
+	lda #$01
+	sta RESIDENT_STATE
+	
 @cleanup:
-
 	ldy #$0
 	sty INPUT_LINE_PTR
 	jsr put_newline
@@ -267,7 +365,7 @@ windmill:
 	.byte "-\|/"
 
 welcome_message:
-	.byte "dos v3.1", $0A, $0D, $00
+	.byte "dos v3.2", $0A, $0D, $00
 
 
 

@@ -88,6 +88,8 @@ irq:
 	sta IO_GPIO0
 	jsr getc
 	jsr putc
+	lda #'!'
+	jsr putc
 	rti
 	
 .RODATA

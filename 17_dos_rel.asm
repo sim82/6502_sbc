@@ -2,6 +2,7 @@
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
 .import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, file_open_raw
 .import get_argn, get_arg
+.import get_event, event_return
 .include "17_dos.inc"
 .code
 
@@ -663,4 +664,6 @@ os_func_table:
 	.WORD print_message
 	.WORD get_argn
 	.WORD get_arg
+	.WORD get_event
+	.WORD event_return
 
