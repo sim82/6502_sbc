@@ -7,7 +7,7 @@
 .import print_message, decode_nibble, decode_nibble_high
 .import load_relocatable_binary
 .import init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
-.import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m
+.import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m, cmd_fg_str, cmd_fg
 .export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message
 .INCLUDE "17_dos.inc"
 
@@ -18,6 +18,7 @@
 	lda #$00
 	sta INPUT_LINE_PTR
 	sta USER_PROCESS
+	sta INPUT_CHAR
 	
 
 	sei
@@ -35,15 +36,18 @@
 	
 	jsr clear_resident
 
-	cli
 ; @loop:
-
+; 	jsr getc
+; 	bcc @loop
+; 	jsr print_hex8
+; 	jmp @loop
+; @loop:
 ; 	jsr getc
 ; 	bcc @loop
 ; 	jsr putc
 ; 	jmp @loop
 
-	
+	cli
 	jsr put_newline
 	print_message_from_ptr welcome_message
 
@@ -54,25 +58,48 @@
 	lda RESIDENT_STATE
 	beq @no_resident
 
-	cmp $01
+	cmp #$01
 	bne @not_init
 	lda #$00
 	sta RESIDENT_EVENTDATA
 	jsr run_resident
+
+	lda RESIDENT_STATE
+	beq @sleep
+	
 	lda #$02
 	sta RESIDENT_STATE
-	jmp @no_resident
 
 @not_init:
-	jsr getc
-	bcc @no_resident
-
+	cmp #$02
+	bne @no_resident
+	
+	lda INPUT_CHAR
+	
+	cmp #$03
+	bne @no_interrupt
+	lda #$03
+	sta RESIDENT_STATE 
+	jsr put_newline
+	jsr print_prompt
+	jmp @sleep
+	
+@no_interrupt:
 	sta RESIDENT_EVENTDATA
 	lda #$01
 	sta RESIDENT_EVENT
 	jsr run_resident
+	jmp @sleep
 
 @no_resident:
+	lda INPUT_CHAR
+	beq @sleep
+	jsr process_input
+	lda RESIDENT_STATE
+	cmp #$01
+	beq @wait_loop
+
+@sleep:
 	lda #%00001111
 	sta IO_GPIO0
 	wai ; look at me, I sleep all day like the big CPUs...
@@ -100,10 +127,12 @@ run_resident:
 @keep_resident:
 	lda #'*'
 	jsr putc
+	rts
 	
 @exit:
 	print_message_from_ptr back_to_dos_message
 
+	jsr print_prompt
 	rts
 
 jsr_resident:
@@ -118,22 +147,38 @@ clear_resident:
 	rts
 
 irq:
-	meeeeeep
-	this is not working. just put char in a queue (or buffer) and let the mainloop decide what to do with it...
+; 	meeeeeep
+; 	this is not working. just put char in a queue (or buffer) and let the mainloop decide what to do with it...
+; 	lda RESIDENT_STATE
+; 	beq @no_resident
+; 	cmp #$02
+; 	bne @skip
+; 	jsr getc
+; 	sta RESIDENT_EVENTDATA
+; 	jmp @skip
+
+; @no_resident:
+; 	jsr getc
+; 	bcc @skip
+; 	jsr process_input
+; @skip:
+	jsr getc
+	bcs @use_char
+
+	lda #$00
+@use_char:
+	sta INPUT_CHAR
+	rti
+
+print_prompt:
 	lda RESIDENT_STATE
 	beq @no_resident
-	cmp #$02
-	bne @skip
-	jsr getc
-	sta RESIDENT_EVENTDATA
-	jmp @skip
-
+	lda #'*'
+	jsr putc
 @no_resident:
-	jsr getc
-	bcc @skip
-	jsr process_input
-@skip:
-	rti
+	lda #'>'
+	jsr putc
+	rts
 
 read_input:
 	jsr getc
@@ -149,10 +194,9 @@ process_input:
 	bne @no_enter_key
 	jsr put_newline		; handle enter: - put newline
 	jsr exec_input_line     ;               - execute input line
-	lda #'>'
-	jsr putc
+	jsr print_prompt
 	rts
-
+	
 @no_enter_key:
 	cmp #$08		; handle backspace
 	bne @normal_char
@@ -279,6 +323,7 @@ exec_input_line:
 	dispatch_command cmd_j_str, cmd_j
 	dispatch_command cmd_alloc_str, cmd_alloc
 	dispatch_command cmd_ra_str, cmd_ra
+	dispatch_command cmd_fg_str, cmd_fg
 
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:

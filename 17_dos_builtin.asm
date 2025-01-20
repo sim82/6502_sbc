@@ -8,7 +8,7 @@
 .import load_relocatable_binary
 .import alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import load_binary, jsr_receive_pos, welcome_message, back_to_dos_message
-.export cmd_help_str, cmd_help, cmd_m_str, cmd_m, cmd_j_str, cmd_j, cmd_alloc_str, cmd_alloc, cmd_ra_str, cmd_ra, cmd_r_str, cmd_r
+.export cmd_help_str, cmd_help, cmd_m_str, cmd_m, cmd_j_str, cmd_j, cmd_alloc_str, cmd_alloc, cmd_ra_str, cmd_ra, cmd_r_str, cmd_r, cmd_fg_str, cmd_fg
 .INCLUDE "17_dos.inc"
 
 	
@@ -227,8 +227,28 @@ cmd_ra:
 
 @file_error:
 	print_message_from_ptr file_not_found_message
+	rts
 
 
+; fg - foreground
+cmd_fg_str:
+	.byte "fg", $00
+cmd_fg:
+	lda RESIDENT_STATE
+	cmp #$03
+	bne @no_background
+	lda #$02
+	sta RESIDENT_STATE
+	rts
+	
+@no_background:
+	print_message_from_ptr no_background_message
+	rts
+
+
+
+no_background_message:
+	.byte "no background process.", $0A, $0D, $00
 
 help_message:
 	.byte "sorry, you're on your own...", $0A, $0D, $00
