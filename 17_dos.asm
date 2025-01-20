@@ -61,7 +61,7 @@
 	cmp #$01
 	bne @not_init
 	lda #$00
-	sta RESIDENT_EVENTDATA
+	sta RESIDENT_EVENT
 	jsr run_resident
 
 	lda RESIDENT_STATE
@@ -69,6 +69,7 @@
 	
 	lda #$02
 	sta RESIDENT_STATE
+	jmp @sleep
 
 @not_init:
 	cmp #$02
@@ -76,7 +77,7 @@
 	
 	lda INPUT_CHAR
 	
-	cmp #$03
+	cmp #$1a
 	bne @no_interrupt
 	lda #$03
 	sta RESIDENT_STATE 
@@ -85,6 +86,18 @@
 	jmp @sleep
 	
 @no_interrupt:
+	cmp #03
+	bne @no_cancel
+	; meeeep! redundant!
+	lda RECEIVE_POS + 1
+	jsr free_page_span
+	jsr free_user_pages
+	jsr clear_resident
+	jsr put_newline
+	jsr print_prompt
+	jmp @sleep
+
+@no_cancel:
 	sta RESIDENT_EVENTDATA
 	lda #$01
 	sta RESIDENT_EVENT

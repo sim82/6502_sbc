@@ -1,7 +1,7 @@
 
 .INCLUDE "std.inc"
 
-.IMPORT os_putc, os_getc, os_putnl, os_event_return, os_get_event
+.IMPORT os_putc, os_getc, os_putnl, os_event_return, os_get_event, os_print_string
 STR_PTR = $8b
 
 .CODE
@@ -16,11 +16,10 @@ STR_PTR = $8b
 
 
 @event_init:
-	lda #<message
-	sta STR_PTR
-	lda #>message
-	sta STR_PTR+1
-	jsr out_string
+	lda #<init_message
+	ldx #>init_message
+	jsr os_print_string
+	jsr os_putnl
 
 	lda #$01
 	jsr os_event_return
@@ -31,7 +30,15 @@ STR_PTR = $8b
 	txa
 	cmp #'q'
 	beq @exit
+	pha
+
+	lda #<input_message
+	ldx #>input_message
+	jsr os_print_string
+
+	pla
 	jsr os_putc
+	jsr os_putnl
 	lda #$01
 	jsr os_event_return
 
@@ -52,7 +59,12 @@ out_string:
 
 	
 .RODATA
-message:
-	.byte "Hello, Relocator! I'm data...", $00
+init_message:
+	.byte "got init event", $00
+
+
+input_message:
+	.byte "got input event: ", $00
+
 	; .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqqrstuvwxyz"
 ; .byte "0123456789abcdef"
