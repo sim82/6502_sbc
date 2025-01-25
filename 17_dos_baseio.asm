@@ -82,8 +82,8 @@ print_dec:
 	jmp @revloop
 	
 @end:
-	lda #$20
-	jsr putc
+	; lda #$20
+	; jsr putc
 	
 	rts
 

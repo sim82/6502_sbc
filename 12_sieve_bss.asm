@@ -193,6 +193,8 @@ dump_primes:
 	ldx #$00
 	lda LOW_PRIMES, y
 	jsr os_print_dec
+	lda #' '
+	jsr os_putc
 
 	iny
 	cpy NUM_PRIMES
@@ -225,6 +227,8 @@ dump_primes_high:
 	lda #$00
 	ldx HIGH_BYTE
 	jsr os_print_dec
+	lda #' '
+	jsr os_putc
 	
 	lda #<message_and
 	ldx #>message_and
@@ -252,6 +256,8 @@ dump_primes_high:
 	ldx HIGH_BYTE
 	lda HIGH_PRIMES,y
 	jsr os_print_dec
+	lda #' '
+	jsr os_putc
 
 	iny
 	cpy NUM_HIGH
