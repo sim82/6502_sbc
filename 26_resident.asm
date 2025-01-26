@@ -111,10 +111,14 @@ event_init_draw:
 	rts
 
 event_char_draw:
+	; draw snake in a wonderfully spaghetti way
 	lda DIR
 	sta DIR_OLD
+	; update direction index: shift up old movement by 2 bits
 	asl DIR
 	asl DIR
+
+	; put new movement into lowest 2 bits
 	cpx #'a'
 	bne @no_a
 	; start a: left
@@ -151,25 +155,30 @@ event_char_draw:
 	cmp #'q'
 	beq @exit
 
-
+	; now the lowest 4 bit of DIR contain an index into the various tables.
+	;;;;
+	; look up what to do next in main 'snake_table'
 	lda DIR
 	and #%1111
 	tax
 	lda snake_table, x
-	cmp #'x'
+	cmp #$ff
 	beq @not_allowed
-	cmp #'.'
+	cmp #$fe
 	beq @no_redraw
 
+	; instruction to overdraw old coordinate with direction change character
 	stx TMP_X
 	ldx AX
 	ldy AY
 	jsr goto_xy
 
 	lda TMP_X
+	; multiply by 4 to correctly index into utf8 table
 	asl
 	asl
 	tax
+	; output utf8 codepoint
 	ldy #3
 @loop:
 	lda snake_utf8, x
@@ -180,6 +189,7 @@ event_char_draw:
 
 	ldx TMP_X
 @no_redraw:
+	; update coordinate
 	lda snakex_table, x
 	clc
 	adc AX
@@ -194,6 +204,7 @@ event_char_draw:
 	ldy AY
 	jsr goto_xy
 
+	; draw either horizontal or vertical line, based on lower 2 bit of DIR
 	lda DIR
 	and #%10
 	bne @vert
@@ -210,7 +221,9 @@ event_char_draw:
 	jsr os_event_return
 @exit:
 	rts
+
 @not_allowed:
+	; illegal movement, rollback DIR modification
 	lda DIR_OLD
 	sta DIR
 	lda #$01
@@ -345,31 +358,40 @@ char_vline:
 	.byte "║"
 	; .byte "═"
 
+;;;;; 
+; snake tables.
+; common to all tables: they are indexed by a 4bit index formed form the last movement (upper 2bits, aka. fr(om)) and 
+; next movement (lower 2bits, aka. to).
+; e.g. entry number 7 means what to do on a transition from right to u.
+
+; table with 'instruction' what to do on the next step.
+; values meaning:
+;  $ff: not allowed. don't move, don't draw anything (e.g. on direct movement into opposite direction)
+;  $fe: just draw the next character on the updated coordinate (e.g. left to left, up to up)
+;  $00 - $03: overdraw last coordinate with utf character snake_utf8 table at index $00 - $03 (multiplied by 4),
+;             then update coordinate and draw next character based on new movement direction
 snake_table:
-	; from:l   r   u   d
-	; to:  lrudlrudlrudlrud
-	.byte ".x31x.4221.x43x."
+	; fr: l                   r                   u                   d
+	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
+	.byte $fe, $ff, $02, $00, $ff, $fe, $03, $01, $01, $00, $fe, $ff, $03, $02, $ff, $fe
 
-
+; characters to overdraw old coordinate in case of (legal) direction change. indexed by value
+; from snake_table (the values in the 'same direction' e.g. l-to-l, slots are just placeholders)
+; NOTE: table contains utf8 characters, which are encoded as 3 bytes. space added after each character
+;       to align character starts. make sure that this is assembled correctly.
 snake_utf8:
 	; fr:  l       r       u       d
 	; to:  l r u d l r u d l r u d l r u d 
 	.byte "═ ═ ╚ ╔ ═ ═ ╝ ╗ ╗ ╔ ║ ║ ╝ ╚ ║ ║ "
 
-snake_table2:
-	; fr: l                   r                   u                   d
-	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
-	.byte $fe, $ff, $02, $00, $ff, $ff, $03, $01, $01, $00, $fe, $ff, $03, $02, $ff, $fe
-
-
+; x-coordinate offset
 snakex_table:
 	; fr: l                   r                   u                   d
 	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
 	.byte $ff, $00, $00, $00, $00, $01, $00, $00, $ff, $01, $00, $00, $ff, $01, $00, $00
 
+; y-coordinate offset
 snakey_table:
 	; fr: l                   r                   u                   d
 	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
 	.byte $00, $00, $ff, $01, $00, $00, $ff, $01, $00, $00, $ff, $00, $00, $00, $00, $01
-	; .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqqrstuvwxyz"
-; .byte "0123456789abcdef"
