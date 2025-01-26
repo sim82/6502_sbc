@@ -117,23 +117,23 @@ event_char_draw:
 	asl DIR
 	cpx #'a'
 	bne @no_a
-	; start d
+	; start a: left
 	lda DIR
 	ora #%00
 	sta DIR
-	; end d
+	; end a
 @no_a:
 	cpx #'d'
 	bne @no_d
-	; start a
+	; start d: right
 	lda DIR
 	ora #%01
 	sta DIR
-	; end a
+	; end d
 @no_d:
 	cpx #'w'
 	bne @no_w
-	; start w
+	; start w: up
 	lda DIR
 	ora #%10
 	sta DIR
@@ -141,7 +141,7 @@ event_char_draw:
 @no_w:
 	cpx #'s'
 	bne @no_s
-	; start s
+	; start s: down
 	lda DIR
 	ora #%11
 	sta DIR
@@ -158,6 +158,28 @@ event_char_draw:
 	lda snake_table, x
 	cmp #'x'
 	beq @not_allowed
+	cmp #'.'
+	beq @no_redraw
+
+	stx TMP_X
+	ldx AX
+	ldy AY
+	jsr goto_xy
+
+	lda TMP_X
+	asl
+	asl
+	tax
+	ldy #3
+@loop:
+	lda snake_utf8, x
+	jsr os_putc
+	inx
+	dey
+	bne @loop
+
+	ldx TMP_X
+@no_redraw:
 	lda snakex_table, x
 	clc
 	adc AX
@@ -168,14 +190,20 @@ event_char_draw:
 	adc AY
 	sta AY
 	
-	lda snake_table, x
-	pha
 	ldx AX
 	ldy AY
 	jsr goto_xy
-	pla
-	jsr os_putc
-	; lda #'o'
+
+	lda DIR
+	and #%10
+	bne @vert
+	send_utf8 char_hline
+	jmp @skip_vert
+@vert:
+	send_utf8 char_vline
+	
+@skip_vert:
+	
 @skip:
 	jsr os_putnl
 	lda #$01
@@ -318,12 +346,30 @@ char_vline:
 	; .byte "═"
 
 snake_table:
-	.byte "hx14xh2134vx12xv"
+	; from:l   r   u   d
+	; to:  lrudlrudlrudlrud
+	.byte ".x31x.4221.x43x."
+
+
+snake_utf8:
+	; fr:  l       r       u       d
+	; to:  l r u d l r u d l r u d l r u d 
+	.byte "═ ═ ╚ ╔ ═ ═ ╝ ╗ ╗ ╔ ║ ║ ╝ ╚ ║ ║ "
+
+snake_table2:
+	; fr: l                   r                   u                   d
+	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
+	.byte $fe, $ff, $02, $00, $ff, $ff, $03, $01, $01, $00, $fe, $ff, $03, $02, $ff, $fe
+
 
 snakex_table:
-	.byte $ff, $00, $ff, $ff, $00, $01, $01, $01, $00, $00, $00, $00, $00, $00, $00, $00
+	; fr: l                   r                   u                   d
+	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
+	.byte $ff, $00, $00, $00, $00, $01, $00, $00, $ff, $01, $00, $00, $ff, $01, $00, $00
 
 snakey_table:
-	.byte $00, $00, $00, $00, $00, $00, $00, $00, $ff, $00, $ff, $ff, $01, $01, $00, $01
+	; fr: l                   r                   u                   d
+	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
+	.byte $00, $00, $ff, $01, $00, $00, $ff, $01, $00, $00, $ff, $00, $00, $00, $00, $01
 	; .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqqrstuvwxyz"
 ; .byte "0123456789abcdef"
