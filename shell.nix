@@ -7,7 +7,10 @@ mkShell rec {
     pkg-config
   ];
   buildInputs = [
-    cargo rustc rust-analyzer rustfmt
+    udev alsa-lib vulkan-loader
+    xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr # To use the x11 feature
+    libxkbcommon wayland # To use the wayland feature
+    SDL2 SDL2_mixer rustc cargo rust-analyzer rustfmt clippy
   ];
   LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
 }
