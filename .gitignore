@@ -9,6 +9,7 @@ mimonify/target/*
 mimonify/disk/*
 
 bs02/target/*
+osgen/target/*
 
 **/*.lck
 **/*.bak
