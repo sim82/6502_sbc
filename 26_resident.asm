@@ -1,7 +1,8 @@
 
 .INCLUDE "std.inc"
+.INCLUDE "os.inc"
 
-.IMPORT os_putc, os_getc, os_putnl, os_event_return, os_get_event, os_print_string, os_print_dec
+; .IMPORT os_putc, os_getc, os_putnl, os_event_return, os_get_event, os_print_string, os_print_dec
 AX = $80
 AY = AX + 1
 BX = AY + 1

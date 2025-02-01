@@ -1,6 +1,6 @@
 
 .INCLUDE "std.inc"
-.import os_alloc, os_putc, os_getc, os_fopen, os_fgetc, os_print_string, os_putnl, os_get_argn, os_get_arg, os_print_dec
+.INCLUDE "os.inc"
 
 IP = $90 ; meh, bootloaded clobbers ZP + $80... TODO: move it down to $00 to preserve more app state after reset
 JMP_ADDR = IP + 2

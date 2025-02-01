@@ -85,7 +85,7 @@ $(BUILD_DIR)/25_cmd_bs02: $(BUILD_DIR)/25_cmd_bs02.o
 	ln -sf $(shell pwd)/$@ mimonify/disk/bs02
 
 $(BUILD_DIR)/26_resident: $(BUILD_DIR)/26_resident.o 	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/res
 
 clean:
