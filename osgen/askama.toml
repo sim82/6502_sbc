@@ -1,4 +1,4 @@
 
 [[escaper]]
 path = "askama::Text"
-extensions = ["cfg"]
+extensions = ["cfg", "inc"]

@@ -1,0 +1,4 @@
+
+.IMPORT {%- for call in os_calls %} {{ call.exported_name }} 
+{%- if !call.is_last -%}, {%- endif -%}
+{%- endfor -%}
