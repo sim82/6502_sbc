@@ -37,7 +37,7 @@ struct ImportsInc {
 }
 
 #[derive(Template)]
-#[template(path = "func_table.inc")]
+#[template(path = "func_table.asm.jinja")]
 struct FuncTableInc {
     os_calls: Vec<OsCall>,
 }

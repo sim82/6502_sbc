@@ -1,0 +1,10 @@
+.IMPORT {%- for call in os_calls %} {{ call.implementation}} 
+{%- if !call.is_last -%}, {%- endif -%}
+{%- endfor %}
+.EXPORT os_func_table
+
+os_func_table:
+{%- for call in os_calls %}
+    .WORD {{ call.implementation }}
+{%- endfor %}
+

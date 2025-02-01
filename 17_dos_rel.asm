@@ -3,6 +3,7 @@
 .import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, file_open_raw
 .import get_argn, get_arg
 .import get_event, event_return
+.import os_func_table
 .include "17_dos.inc"
 .code
 
@@ -653,7 +654,7 @@ load_relocatable_binary:
 @fletch16_msg:
 	.byte "done. ", $0A, $0D, "fletch16: ", $00
 
-.INCLUDE "os_functable.inc"
+; .INCLUDE "os_functable.inc"
 ; os_func_table:
 ; 	.WORD alloc_page_span
 ; 	.WORD getc_blocking
