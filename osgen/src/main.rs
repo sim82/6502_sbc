@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 use askama::Template;
 use clap::Parser;
-use indexmap::IndexMap;
 use serde::Deserialize;
 
 #[derive(Parser)]
@@ -18,9 +19,11 @@ struct Args {
     functable: Option<String>,
 }
 
+#[derive(Debug)]
 struct OsCall {
     exported_name: String,
     implementation: String,
+    ordinal: usize,
     is_last: bool,
 }
 
@@ -62,24 +65,35 @@ impl FuncTableInc {
     }
 }
 fn read_os_calls(input_cfg: &Config) -> Vec<OsCall> {
-    let mut os_calls = Vec::new();
-    for (i, (name, call)) in input_cfg.os_calls.iter().enumerate() {
-        os_calls.push(OsCall {
+    let mut os_calls: Vec<_> = input_cfg
+        .os_calls
+        .iter()
+        .map(|(name, call)| OsCall {
             exported_name: name.clone(),
             implementation: call.implementation.clone(),
-            is_last: i == input_cfg.os_calls.len() - 1,
+            ordinal: call.ordinal,
+            is_last: false,
         })
+        .collect();
+
+    os_calls.sort_by_key(|call| call.ordinal);
+    for (i, call) in os_calls.iter().enumerate() {
+        if i != call.ordinal {
+            panic!("bad ordinal at {:?}", call);
+        }
     }
+    os_calls.last_mut().map(|last| last.is_last = true);
     os_calls
 }
 
 #[derive(Deserialize, Debug)]
 struct ConfigOsCall {
     implementation: String,
+    ordinal: usize,
 }
 #[derive(Deserialize, Debug)]
 struct Config {
-    os_calls: IndexMap<String, ConfigOsCall>,
+    os_calls: HashMap<String, ConfigOsCall>,
 }
 fn main() {
     let args = Args::parse();

@@ -6,6 +6,5 @@ edition = "2021"
 [dependencies]
 askama = "0.12.1"
 clap = { version = "4.5.27", features = ["derive"] }
-indexmap = { version = "2.7.1", features = ["serde"] }
 serde = { version = "1.0.217", features = ["derive"] }
 toml = "0.8.19"
