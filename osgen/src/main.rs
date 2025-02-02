@@ -28,13 +28,13 @@ struct OsCall {
 }
 
 #[derive(Template)]
-#[template(path = "ld65_config.cfg")]
+#[template(path = "ld65_config.cfg.jinja")]
 struct CfgTemplate {
     os_calls: Vec<OsCall>,
 }
 
 #[derive(Template)]
-#[template(path = "import.inc")]
+#[template(path = "import.inc.jinja")]
 struct ImportsInc {
     os_calls: Vec<OsCall>,
 }
@@ -117,13 +117,4 @@ fn main() {
             .expect("failed to render functable inc");
         std::fs::write(functable, cfg).expect("failed to write functable inc");
     }
-    // let mut cfg = CfgTemplate {
-    //     os_calls: vec![
-    //         OsCall::new("os_call1"),
-    //         OsCall::new("os_call2"),
-    //         OsCall::new("os_call3"),
-    //     ],
-    // };
-    // let len = cfg.os_calls.len();
-    // cfg.os_calls[len - 1].is_last = true;
 }
