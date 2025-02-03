@@ -24,6 +24,7 @@ struct OsCall {
     exported_name: String,
     implementation: String,
     ordinal: usize,
+    docs: Vec<String>,
     is_last: bool,
 }
 
@@ -68,11 +69,23 @@ fn read_os_calls(input_cfg: &Config) -> Vec<OsCall> {
     let mut os_calls: Vec<_> = input_cfg
         .os_calls
         .iter()
-        .map(|(name, call)| OsCall {
-            exported_name: name.clone(),
-            implementation: call.implementation.clone(),
-            ordinal: call.ordinal,
-            is_last: false,
+        .map(|(name, call)| {
+            //
+            let mut docs = vec![call.description.clone()];
+            if let Some(calling) = &call.calling {
+                docs.append(&mut calling.clone());
+            }
+
+            OsCall {
+                exported_name: name.clone(),
+                implementation: call.implementation.clone(),
+                ordinal: call.ordinal,
+                // docu_string: call
+                //     .calling
+                //     .map_or(String::new(), |calling| get_docu_string(&calling)),
+                docs,
+                is_last: false,
+            }
         })
         .collect();
 
@@ -90,6 +103,8 @@ fn read_os_calls(input_cfg: &Config) -> Vec<OsCall> {
 struct ConfigOsCall {
     implementation: String,
     ordinal: usize,
+    description: String,
+    calling: Option<Vec<String>>,
 }
 #[derive(Deserialize, Debug)]
 struct Config {

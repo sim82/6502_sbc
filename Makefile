@@ -19,15 +19,15 @@ $(BUILD_DIR)/12_sieve_term: $(BUILD_DIR)/12_sieve_term.o $(DEPS_ALL)
 	ln -sf $(shell pwd)/$@ mimonify/disk/sieve
 
 $(BUILD_DIR)/12_sieve_term_rel: $(BUILD_DIR)/12_sieve_term.o $(DEPS_ALL)	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/sieve_rel
 
 $(BUILD_DIR)/12_sieve_dyn: $(BUILD_DIR)/12_sieve_dyn.o $(DEPS_ALL)	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/sieved
 
 $(BUILD_DIR)/12_sieve_bss: $(BUILD_DIR)/12_sieve_bss.o
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/psb
 
 $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
@@ -41,7 +41,7 @@ $(BUILD_DIR)/17_dos: $(DOS_OBJS) $(DEPS_NO_STD)
 	ln -sf $(shell pwd)/$@ mimonify/disk/dos
 
 $(BUILD_DIR)/17_dos_rel: $(DOS_OBJS) $(DEPS_NO_STD)	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/dosr
 
 $(BUILD_DIR)/18_bootload_ti: $(BUILD_DIR)/18_bootload_ti.o 
@@ -61,27 +61,27 @@ $(BUILD_DIR)/20_uart: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)
 	ln -sf $(shell pwd)/$@ mimonify/disk/ti
 
 $(BUILD_DIR)/20_uart_rel: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/tir
 
 # $(BUILD_DIR)/21_reltest_ram: $(BUILD_DIR)/21_reltest.o 	
 # 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
 $(BUILD_DIR)/21_reltest_rel: $(BUILD_DIR)/21_reltest.o 	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 
 $(BUILD_DIR)/22_irq: $(BUILD_DIR)/22_irq.o $(DEPS_ALL)
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/irq
 
 $(BUILD_DIR)/23_flow_control: $(BUILD_DIR)/23_flow_control.o $(DEPS_ALL)
 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
 
 $(BUILD_DIR)/24_cmd_cat : $(BUILD_DIR)/24_cmd_cat.o 	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/cat
 
 $(BUILD_DIR)/25_cmd_bs02: $(BUILD_DIR)/25_cmd_bs02.o 	
-	ld65 -o $@ -C my_sbc_rel.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/bs02
 
 $(BUILD_DIR)/26_resident: $(BUILD_DIR)/26_resident.o 	
