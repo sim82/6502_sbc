@@ -24,9 +24,18 @@
 	sei
 	
 	jsr uart_init
-	lda #%00000010
+	lda #%00001010
 	sta IO_UART2_IMR
+	lda #%01100000
+	sta IO_UART2_ACR
 
+	lda #%01110000
+	sta IO_UART2_CTPL
+	lda #%10010100
+	sta IO_UART2_CTPU
+
+	lda IO_UART2_CSTA
+	
 	lda #<irq
 	sta $fdfe
 	
@@ -181,6 +190,7 @@ irq:
 	lda #$00
 @use_char:
 	sta INPUT_CHAR
+	lda IO_UART2_CSTO
 	rti
 
 print_prompt:
