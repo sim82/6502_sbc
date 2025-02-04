@@ -13,6 +13,9 @@
 
 
 
+UART_CLK = 3686400 ; 3.6864 MHz
+TIMER_HZ = 100
+
 .CODE
 	; init local vars
 	lda #$00
@@ -26,12 +29,14 @@
 	jsr uart_init
 	lda #%00001010
 	sta IO_UART2_IMR
-	lda #%01100000
+	lda #%01110000
 	sta IO_UART2_ACR
 
 	lda #%01110000
+	lda #((UART_CLK / (TIMER_HZ * 16)) .MOD 256)
 	sta IO_UART2_CTPL
-	lda #%10010100
+	; lda #%10010100
+	lda #((UART_CLK / (TIMER_HZ * 16)) / 256)
 	sta IO_UART2_CTPU
 
 	lda IO_UART2_CSTA
