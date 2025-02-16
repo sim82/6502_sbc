@@ -14,7 +14,17 @@
 
 
 UART_CLK = 3686400 ; 3.6864 MHz
-TIMER_HZ = 100
+
+.macro uart_start_timer timer_hz
+	; setup timer divider low / high bytes
+	lda #((UART_CLK / (timer_hz * 16)) .MOD 256)
+	sta IO_UART2_CTPL
+	lda #((UART_CLK / (timer_hz * 16)) / 256)
+	sta IO_UART2_CTPU
+
+	; start timer
+	lda IO_UART2_CSTA
+.endmacro
 
 .CODE
 	; init local vars
@@ -32,14 +42,7 @@ TIMER_HZ = 100
 	lda #%01110000
 	sta IO_UART2_ACR
 
-	lda #%01110000
-	lda #((UART_CLK / (TIMER_HZ * 16)) .MOD 256)
-	sta IO_UART2_CTPL
-	; lda #%10010100
-	lda #((UART_CLK / (TIMER_HZ * 16)) / 256)
-	sta IO_UART2_CTPU
-
-	lda IO_UART2_CSTA
+	uart_start_timer 100
 	
 	lda #<irq
 	sta $fdfe
