@@ -16,6 +16,9 @@
 UART_CLK = 3686400 ; 3.6864 MHz
 
 .macro uart_start_timer timer_hz
+	lda #%01110000
+	sta IO_UART2_ACR
+
 	; setup timer divider low / high bytes
 	lda #((UART_CLK / (timer_hz * 16)) .MOD 256)
 	sta IO_UART2_CTPL
@@ -26,12 +29,25 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	lda IO_UART2_CSTA
 .endmacro
 
+.macro uart_start_timer_high timer_hz
+	lda #%01100000
+	sta IO_UART2_ACR
+	; setup timer divider low / high bytes
+	lda #((UART_CLK / (timer_hz)) .MOD 256)
+	sta IO_UART2_CTPL
+	lda #((UART_CLK / (timer_hz)) / 256)
+	sta IO_UART2_CTPU
+
+	; start timer
+	lda IO_UART2_CSTA
+.endmacro
 .CODE
 	; init local vars
 	lda #$00
 	sta INPUT_LINE_PTR
 	sta USER_PROCESS
 	sta INPUT_CHAR
+	sta IRQ_TIMER
 	
 
 	sei
@@ -39,10 +55,8 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	jsr uart_init
 	lda #%00001010
 	sta IO_UART2_IMR
-	lda #%01110000
-	sta IO_UART2_ACR
 
-	uart_start_timer 100
+	uart_start_timer 4
 	
 	lda #<irq
 	sta $fdfe
@@ -72,6 +86,14 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	jsr putc
 
 @wait_loop:
+	lda IRQ_TIMER
+	beq @no_timer
+	lda #'.'
+	jsr putc
+	lda #$00
+	sta IRQ_TIMER
+@no_timer:
+
 	lda RESIDENT_STATE
 	beq @no_resident
 
@@ -125,16 +147,15 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	lda INPUT_CHAR
 	beq @sleep
 	jsr process_input
+	lda #$00
+	sta INPUT_CHAR
 	lda RESIDENT_STATE
 	cmp #$01
-	beq @wait_loop
+	beq @skip_sleep ; @wait_loop is too far away for an indirect jump...
 
 @sleep:
-	lda #%00001111
-	sta IO_GPIO0
 	wai ; look at me, I sleep all day like the big CPUs...
-	lda #%00000011
-	sta IO_GPIO0
+@skip_sleep:
 	jmp @wait_loop
 
 run_resident:
@@ -177,28 +198,27 @@ clear_resident:
 	rts
 
 irq:
-; 	meeeeeep
-; 	this is not working. just put char in a queue (or buffer) and let the mainloop decide what to do with it...
-; 	lda RESIDENT_STATE
-; 	beq @no_resident
-; 	cmp #$02
-; 	bne @skip
-; 	jsr getc
-; 	sta RESIDENT_EVENTDATA
-; 	jmp @skip
-
-; @no_resident:
-; 	jsr getc
-; 	bcc @skip
-; 	jsr process_input
-; @skip:
+	pha
+	lda IO_UART2_ISR
+	sta IO_GPIO0
+	sta IRQ_TMP_A
+	and #%00000010
+	beq @no_char
 	jsr getc
 	bcs @use_char
 
 	lda #$00
 @use_char:
 	sta INPUT_CHAR
+
+@no_char:
+	lda IRQ_TMP_A
+	and #%00001000
+	sta IRQ_TIMER
+
+@no_timer:
 	lda IO_UART2_CSTO
+	pla
 	rti
 
 print_prompt:
