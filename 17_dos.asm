@@ -9,7 +9,13 @@
 .import init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m, cmd_fg_str, cmd_fg
 .export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message
-.INCLUDE "17_dos.inc"
+.include "17_dos.inc"
+.include "os.inc"
+
+RESIDENT_STATE_NONE = $00
+RESIDENT_STATE_INITIAL = $01
+RESIDENT_STATE_RUN = $02
+RESIDENT_STATE_SLEEP = $03
 
 
 
@@ -86,47 +92,59 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	jsr putc
 
 @wait_loop:
-	lda IRQ_TIMER
-	beq @no_timer
-	lda #'.'
-	jsr putc
-	lda #$00
-	sta IRQ_TIMER
-@no_timer:
-
+	; check if there is a resident process
 	lda RESIDENT_STATE
-	beq @no_resident
+	beq @no_resident_run
 
-	cmp #$01
+	; RESIDENT_STATE_INITIAL-> send OS_EVENT_INIT 
+	cmp #RESIDENT_STATE_INITIAL
 	bne @not_init
-	lda #$00
+	lda #OS_EVENT_INIT
 	sta RESIDENT_EVENT
 	jsr run_resident
+
+	; if resident state == 0 after run_resident -> process exited. go right to sleep
 
 	lda RESIDENT_STATE
 	beq @sleep
 	
-	lda #$02
+	; otherwise promote it to a resident process
+	lda #RESIDENT_STATE_RUN
 	sta RESIDENT_STATE
 	jmp @sleep
 
 @not_init:
-	cmp #$02
-	bne @no_resident
+	cmp #RESIDENT_STATE_RUN
+	bne @no_resident_run
 	
+	; check timer
+	
+	lda IRQ_TIMER
+	beq @no_timer
+	lda #OS_EVENT_TIMER
+	sta RESIDENT_EVENT
+	jsr run_resident
+	lda #$00
+	sta IRQ_TIMER
+@no_timer:
 	lda INPUT_CHAR
-	
+	; go right back to sleep if there is no input char (wakeup was due to timer)
+	; TODO: check / log if there are 'spurious' wakeups...
+	beq @sleep
+	; check ctrl-z	
 	cmp #$1a
-	bne @no_interrupt
-	lda #$03
+	bne @no_to_background
+	lda #RESIDENT_STATE_SLEEP
 	sta RESIDENT_STATE 
 	jsr put_newline
 	jsr print_prompt
 	jmp @sleep
 	
-@no_interrupt:
-	cmp #03
+@no_to_background:
+	; check ctrl-c
+	cmp #$03
 	bne @no_cancel
+	; cleanup process
 	; meeeep! redundant!
 	lda RECEIVE_POS + 1
 	jsr free_page_span
@@ -137,20 +155,25 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	jmp @sleep
 
 @no_cancel:
+	; send input char as OS_EVENT_KEY
 	sta RESIDENT_EVENTDATA
-	lda #$01
+	lda #OS_EVENT_KEY
 	sta RESIDENT_EVENT
 	jsr run_resident
+	; clear input char after one key event was sent
+	lda #$00
+	sta INPUT_CHAR
 	jmp @sleep
 
-@no_resident:
+@no_resident_run:
+	; if no resident program is running, process input with command processor
 	lda INPUT_CHAR
 	beq @sleep
 	jsr process_input
 	lda #$00
 	sta INPUT_CHAR
 	lda RESIDENT_STATE
-	cmp #$01
+	cmp #RESIDENT_STATE_INITIAL
 	beq @skip_sleep ; @wait_loop is too far away for an indirect jump...
 
 @sleep:
@@ -167,6 +190,7 @@ run_resident:
 	lda #$00
 	sta USER_PROCESS
 	lda RESIDENT_RETURN
+	; non-zero return code -> keep resident
 	bne @keep_resident
 	jsr clear_resident
 	lda RECEIVE_POS + 1
@@ -200,7 +224,6 @@ clear_resident:
 irq:
 	pha
 	lda IO_UART2_ISR
-	sta IO_GPIO0
 	sta IRQ_TMP_A
 	and #%00000010
 	beq @no_char
@@ -402,7 +425,7 @@ exec_input_line:
 	sta RESIDENT_ENTRYPOINT
 	lda RECEIVE_POS + 1
 	sta RESIDENT_ENTRYPOINT + 1
-	lda #$01
+	lda #RESIDENT_STATE_INITIAL
 	sta RESIDENT_STATE
 	
 @cleanup:

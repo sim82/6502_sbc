@@ -1,3 +1,10 @@
+OS_EVENT_INIT    = $00
+OS_EVENT_KEY     = $01
+OS_EVENT_TIMER   = $02
+
+OS_EVENT_RETURN_EXIT           = $00
+OS_EVENT_RETURN_KEEP_RESIDENT  = $01
+
 ; allocate contiguous span of pages
 ; a in: number pages
 ; a out: start page

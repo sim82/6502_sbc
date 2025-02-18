@@ -27,77 +27,81 @@ STR_PTR = DIR_OLD + 2
 .endmacro
 .CODE
 	jsr os_get_event
-	cmp #$00
+	cmp #OS_EVENT_INIT
 	beq event_init_draw
 	; beq event_init_boxtest
 
-	cmp #$01
+	cmp #OS_EVENT_KEY
 	beq event_char_draw
 	; beq event_char_boxtest
+
+	cmp #OS_EVENT_TIMER
+	beq event_timer_draw
+	
 	
 	rts
 
 
-event_init_boxtest:
-	jsr clear_screen
-	lda #15
-	jsr os_putc
-	lda #'#'
-	jsr os_putc
-	lda #20
-	sta AX
-	lda #10
-	sta AY
-	lda #40
-	sta BX
-	lda #20
-	sta BY
-	jsr draw_box
+; event_init_boxtest:
+; 	jsr clear_screen
+; 	lda #15
+; 	jsr os_putc
+; 	lda #'#'
+; 	jsr os_putc
+; 	lda #20
+; 	sta AX
+; 	lda #10
+; 	sta AY
+; 	lda #40
+; 	sta BX
+; 	lda #20
+; 	sta BY
+; 	jsr draw_box
 
-	lda #$01
-	jsr os_event_return
-	rts
+; 	lda #$01
+; 	jsr os_event_return
+; 	rts
 
 
-event_char_boxtest:
-	jsr clear_screen
-	cpx #'d'
-	bne @no_d
-	inc AX
-	inc BX
-@no_d:
-	cpx #'a'
-	bne @no_a
-	dec AX
-	dec BX
-@no_a:
-	cpx #'w'
-	bne @no_w
-	dec AY
-	dec BY
-@no_w:
-	cpx #'s'
-	bne @no_s
-	inc AY
-	inc BY
-@no_s:
-	txa
-	cmp #'q'
-	beq @exit
-	pha
-	jsr draw_box
+; event_char_boxtest:
+; 	jsr clear_screen
+; 	cpx #'d'
+; 	bne @no_d
+; 	inc AX
+; 	inc BX
+; @no_d:
+; 	cpx #'a'
+; 	bne @no_a
+; 	dec AX
+; 	dec BX
+; @no_a:
+; 	cpx #'w'
+; 	bne @no_w
+; 	dec AY
+; 	dec BY
+; @no_w:
+; 	cpx #'s'
+; 	bne @no_s
+; 	inc AY
+; 	inc BY
+; @no_s:
+; 	txa
+; 	cmp #'q'
+; 	beq @exit
+; 	pha
+; 	jsr draw_box
 
-	lda #<input_message
-	ldx #>input_message
-	jsr os_print_string
+; 	lda #<input_message
+; 	ldx #>input_message
+; 	jsr os_print_string
 
-	pla
-	jsr os_putc
-	jsr os_putnl
-	lda #$01
-	jsr os_event_return
-@exit:
-	rts
+; 	pla
+; 	jsr os_putc
+; 	jsr os_putnl
+; 	lda #$01
+; 	jsr os_event_return
+; @exit:
+; 	rts
 	
 event_init_draw:
 	jsr clear_screen
@@ -111,6 +115,11 @@ event_init_draw:
 	jsr os_event_return
 	rts
 
+event_timer_draw:
+	lda #OS_EVENT_RETURN_KEEP_RESIDENT
+	jsr os_event_return
+	rts 
+	
 event_char_draw:
 	; draw snake in a wonderfully spaghetti way
 	lda DIR

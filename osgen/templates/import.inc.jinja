@@ -1,4 +1,11 @@
-{%- for call in os_calls -%} 
+OS_EVENT_INIT    = $00
+OS_EVENT_KEY     = $01
+OS_EVENT_TIMER   = $02
+
+OS_EVENT_RETURN_EXIT           = $00
+OS_EVENT_RETURN_KEEP_RESIDENT  = $01
+
+{% for call in os_calls -%} 
 {%- for docs in call.docs -%}
 ; {{ docs }}
 {% endfor -%}
