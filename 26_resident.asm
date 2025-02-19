@@ -143,8 +143,6 @@ event_timer_draw:
 	lda DIR
 	ora #%00
 	sta DIR
-	dey
-	bne @repeat
 	; end a
 @no_a:
 	cpx #'d'
