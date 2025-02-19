@@ -11,6 +11,8 @@ TMP_X = BY + 1
 DIR = TMP_X + 1
 DIR_OLD = DIR + 1
 STR_PTR = DIR_OLD + 2
+INPUT = STR_PTR + 2
+REPEAT = INPUT + 1
 
 
 .macro send_utf8 ADDR
@@ -111,23 +113,29 @@ event_init_draw:
 	sta AY
 	lda #0
 	sta DIR
+	sta INPUT
 	lda #$01
 	jsr os_event_return
 	rts
 
-event_timer_draw:
+event_char_draw:
+	stx INPUT
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts 
 	
-event_char_draw:
+event_timer_draw:
 	; draw snake in a wonderfully spaghetti way
+	lda #$02
+	sta REPEAT
+@repeat:
 	lda DIR
 	sta DIR_OLD
 	; update direction index: shift up old movement by 2 bits
 	asl DIR
 	asl DIR
 
+	ldx INPUT
 	; put new movement into lowest 2 bits
 	cpx #'a'
 	bne @no_a
@@ -135,6 +143,8 @@ event_char_draw:
 	lda DIR
 	ora #%00
 	sta DIR
+	dey
+	bne @repeat
 	; end a
 @no_a:
 	cpx #'d'
@@ -151,6 +161,7 @@ event_char_draw:
 	lda DIR
 	ora #%10
 	sta DIR
+	dec REPEAT
 	; end w
 @no_w:
 	cpx #'s'
@@ -159,6 +170,7 @@ event_char_draw:
 	lda DIR
 	ora #%11
 	sta DIR
+	dec REPEAT
 	; end s
 @no_s:
 	txa
@@ -227,10 +239,14 @@ event_char_draw:
 	
 @skip:
 	jsr os_putnl
-	lda #$01
+	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 @exit:
+	dec REPEAT
+	bne @repeat_ind
 	rts
+@repeat_ind:
+	jmp @repeat
 
 @not_allowed:
 	; illegal movement, rollback DIR modification
