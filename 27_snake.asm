@@ -123,6 +123,7 @@ event_timer:
 	
 
 
+	jsr set_color
 	ldx APPLEX
 	ldy APPLEY
 	jsr goto_xy
@@ -180,50 +181,6 @@ event_timer:
 	cmp #'q'
 	beq @exit
 
-	; now the lowest 4 bit of DIR contain an index into the various tables.
-	;;;;
-	; look up what to do next in main 'snake_table'
-	lda DIR
-	and #%1111
-	tax
-	lda snake_table, x
-	cmp #$ff
-	beq @not_allowed
-	cmp #$fe
-	beq @no_redraw
-
-	; instruction to overdraw old coordinate with direction change character
-	stx TMP_X
-	ldx AX
-	ldy AY
-	jsr goto_xy
-
-	lda TMP_X
-	; multiply by 4 to correctly index into utf8 table
-	asl
-	asl
-	tax
-	; output utf8 codepoint
-	ldy #3
-@loop:
-	lda snake_utf8, x
-	jsr os_putc
-	inx
-	dey
-	bne @loop
-
-	ldx TMP_X
-@no_redraw:
-	; update coordinate
-	lda snakex_table, x
-	clc
-	adc AX
-	sta AX
-	
-	lda snakey_table, x
-	clc
-	adc AY
-	sta AY
 	
 	jsr check_collision
 	bcc game_over
@@ -232,18 +189,8 @@ event_timer:
 
 	ldx AX
 	ldy AY
-	jsr goto_xy
+	jsr gotov_xy
 
-	; draw either horizontal or vertical line, based on lower 2 bit of DIR
-	lda DIR
-	and #%10
-	bne @vert
-	send_utf8 char_hline
-	jmp @skip_vert
-@vert:
-	send_utf8 char_vline
-	
-@skip_vert:
 	
 @skip:
 	jsr os_putnl
@@ -350,8 +297,9 @@ clear_screen:
 	jsr os_putc
 	rts
 	
-goto_xy:
+gotov_xy:
 	jsr send_esc
+	shl
 	txa
 	pha
 	
@@ -378,7 +326,15 @@ send_esc:
 	rts
 
 	
-
+set_color:
+	jsr send_esc
+	lda #'4'
+	jsr os_putc
+	lda #'1'
+	jsr os_putc
+	lda #'m'
+	jsr os_putc
+	rts
 
 
 .RODATA
