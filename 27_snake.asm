@@ -21,6 +21,11 @@ GROW = QR + 1
 APPLEX = GROW + 1
 APPLEY = APPLEX + 1
 
+UP = $1
+DOWN = $2
+LEFT = $3
+RIGHT = $4
+
 .BSS
 QX:
 	.RES $100
@@ -71,10 +76,8 @@ event_init:
 	sta AX
 	lda #10
 	sta AY
-	lda #0
+	lda #1
 	sta DIR
-	sta INPUT
-	lda #$01
 	; init queues
 	lda #$ff
 	ldy #$00
@@ -101,10 +104,42 @@ event_init:
 	rts
 
 event_key:
-	stx INPUT
+	cpx #'a'
+	bne @no_a
+	lda #LEFT
+	sta DIR
+	jmp @exit_resident
+@no_a:
+	cpx #'d'
+	bne @no_d
+	lda #RIGHT
+	sta DIR
+	jmp @exit_resident
+@no_d:
+	cpx #'w'
+	bne @no_w
+	lda #UP
+	sta DIR
+	jmp @exit_resident
+@no_w:
+	cpx #'s'
+	bne @no_s
+	lda #DOWN
+	sta DIR
+	jmp @exit_resident
+@no_s:
+	txa
+	cmp #'q'
+	beq @exit_non_resident
+@exit_resident:
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts 
+@exit_non_resident:
+	lda #OS_EVENT_RETURN_EXIT
+	jsr os_event_return
+	rts 
+
 	
 event_timer:
 	; check apple
@@ -121,66 +156,20 @@ event_timer:
 
 @no_apple:
 	
-
-
-	jsr set_color
 	ldx APPLEX
 	ldy APPLEY
-	jsr goto_xy
-	lda #'O'
-	jsr os_putc
+	jsr draw_apple
 
-	; draw snake in a wonderfully spaghetti way
-	; FIXME: the repeat crap is not working: queue increas is different in x / y direction!
-	lda #$02
-	sta REPEAT
-@repeat:
-	lda DIR
-	sta DIR_OLD
-	; update direction index: shift up old movement by 2 bits
-	asl DIR
-	asl DIR
-
-	ldx INPUT
-	; put new movement into lowest 2 bits
-	cpx #'a'
-	bne @no_a
-	; start a: left
-	lda DIR
-	ora #%00
-	sta DIR
-	; end a
-@no_a:
-	cpx #'d'
-	bne @no_d
-	; start d: right
-	lda DIR
-	ora #%01
-	sta DIR
-	; end d
-@no_d:
-	cpx #'w'
-	bne @no_w
-	; start w: up
-	lda DIR
-	ora #%10
-	sta DIR
-	dec REPEAT
-	; end w
-@no_w:
-	cpx #'s'
-	bne @no_s
-	; start s: down
-	lda DIR
-	ora #%11
-	sta DIR
-	dec REPEAT
-	; end s
-@no_s:
-	txa
-	cmp #'q'
-	beq @exit
-
+	clc
+	ldx DIR
+	lda dirx_table, x
+	adc AX
+	sta AX
+	
+	clc
+	lda diry_table, x
+	adc AY
+	sta AY
 	
 	jsr check_collision
 	bcc game_over
@@ -189,21 +178,17 @@ event_timer:
 
 	ldx AX
 	ldy AY
-	jsr gotov_xy
-
+	jsr draw_snake
 	
-@skip:
-	jsr os_putnl
+	ldx #0
+	ldy #20
+	jsr gotov_xy
+	; jsr os_putnl
+	; jsr update_grow
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
-@exit:
-	dec REPEAT
-	bne @repeat_ind
 
-	jsr update_grow
 	rts
-@repeat_ind:
-	jmp @repeat
 
 @not_allowed:
 	; illegal movement, rollback DIR modification
@@ -222,10 +207,33 @@ update_grow:
 @no_grow:
 	rts
 
+draw_apple:
+	jsr gotov_xy
+	lda #'2'
+	jsr set_color
+	jsr draw_tile
+	lda #'9'
+	jsr set_color
+	rts
+
+draw_snake:
+	jsr gotov_xy
+	lda #'1'
+	jsr set_color
+	jsr draw_tile
+	lda #'9'
+	jsr set_color
+	rts
+draw_empty:
+	jsr gotov_xy
+	lda #'9'
+	jsr set_color
+	jsr draw_tile
+	rts
 game_over:
-	ldx #$20
+	ldx #$10
 	ldy #$10
-	jsr goto_xy
+	jsr gotov_xy
 	
 	lda #<game_over_message
 	ldx #>game_over_message
@@ -261,6 +269,12 @@ check_collision:
 	sec
 	rts
 
+draw_tile:
+	lda #' '
+	jsr os_putc
+	jsr os_putc
+	rts
+
 update_queue:
 	lda AX
 	ldx QW
@@ -278,9 +292,7 @@ update_queue:
 	beq @skip_delete
 	tax
 
-	jsr goto_xy
-	lda #' '
-	jsr os_putc
+	jsr draw_empty
 @skip_delete:
 	inc QR
 @grow:
@@ -299,8 +311,8 @@ clear_screen:
 	
 gotov_xy:
 	jsr send_esc
-	shl
 	txa
+	asl
 	pha
 	
 	ldx #$00
@@ -327,10 +339,11 @@ send_esc:
 
 	
 set_color:
+	pha
 	jsr send_esc
 	lda #'4'
 	jsr os_putc
-	lda #'1'
+	pla
 	jsr os_putc
 	lda #'m'
 	jsr os_putc
@@ -348,56 +361,10 @@ input_message:
 game_over_message:
 	.byte "GAME OVER", $00
 
-char_corner_lu:
-	.byte "╔"
-char_corner_ss:
-	.byte "╗"
-char_corner_ll:
-	.byte "╚"
-char_corner_rl:
-	.byte "╝"
 
-char_hline:
-	.byte "═"
-	; .byte "║"
-char_vline:
-	.byte "║"
-	; .byte "═"
 
-;;;;; 
-; snake tables.
-; common to all tables: they are indexed by a 4bit index formed form the last movement (upper 2bits, aka. fr(om)) and 
-; next movement (lower 2bits, aka. to).
-; e.g. entry number 7 means what to do on a transition from right to u.
+dirx_table:
+	.byte $00, $00, $00, $ff, $01
 
-; table with 'instruction' what to do on the next step.
-; values meaning:
-;  $ff: not allowed. don't move, don't draw anything (e.g. on direct movement into opposite direction)
-;  $fe: just draw the next character on the updated coordinate (e.g. left to left, up to up)
-;  $00 - $03: overdraw last coordinate with utf character snake_utf8 table at index $00 - $03 (multiplied by 4),
-;             then update coordinate and draw next character based on new movement direction
-snake_table:
-	; fr: l                   r                   u                   d
-	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
-	.byte $fe, $ff, $02, $00, $ff, $fe, $03, $01, $01, $00, $fe, $ff, $03, $02, $ff, $fe
-
-; characters to overdraw old coordinate in case of (legal) direction change. indexed by value
-; from snake_table (the values in the 'same direction' e.g. l-to-l, slots are just placeholders)
-; NOTE: table contains utf8 characters, which are encoded as 3 bytes. space added after each character
-;       to align character starts. make sure that this is assembled correctly.
-snake_utf8:
-	; fr:  l       r       u       d
-	; to:  l r u d l r u d l r u d l r u d 
-	.byte "═ ═ ╚ ╔ ═ ═ ╝ ╗ ╗ ╔ ║ ║ ╝ ╚ ║ ║ "
-
-; x-coordinate offset
-snakex_table:
-	; fr: l                   r                   u                   d
-	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
-	.byte $ff, $00, $00, $00, $00, $01, $00, $00, $ff, $01, $00, $00, $ff, $01, $00, $00
-
-; y-coordinate offset
-snakey_table:
-	; fr: l                   r                   u                   d
-	; to: l    r    u    d    l    r    u    d    l    r    u    d    l    r    u    d    
-	.byte $00, $00, $ff, $01, $00, $00, $ff, $01, $00, $00, $ff, $00, $00, $00, $00, $01
+diry_table:
+	.byte $00, $ff, $01, $00, $00
