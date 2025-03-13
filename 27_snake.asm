@@ -184,7 +184,7 @@ event_timer:
 	ldy #20
 	jsr gotov_xy
 	; jsr os_putnl
-	; jsr update_grow
+	jsr update_grow
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 
