@@ -69,6 +69,15 @@ TMP1 = STR_PTR + 2
 	jmp @file_loop
 
 @eof:
+	jsr os_putnl
+	jsr os_print_fstat
+	jsr os_putnl
+	; ldx #00
+	; jsr os_putnl
+	; lda FLETCH_1
+	; jsr os_print_dec
+	; lda FLETCH_2
+	; jsr os_print_dec
 	
 	rts
 

@@ -57,3 +57,6 @@ OS_EVENT_RETURN_KEEP_RESIDENT  = $01
 ; a in: start page
 .IMPORT os_free 
 
+; print stats of current file io
+.IMPORT os_print_fstat 
+

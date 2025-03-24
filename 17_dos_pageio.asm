@@ -1,6 +1,6 @@
 .code
-.import fgetc, fputc, putc, print_message, print_hex8
-.export read_file_paged, open_file_nonpaged, fgetc_buf
+.import fgetc, fputc, putc, print_message, print_hex8, print_hex16
+.export read_file_paged, open_file_nonpaged, fgetc_buf, print_fletch16
 .include "17_dos.inc"
 
 open_file_nonpaged:
@@ -204,6 +204,12 @@ update_fletch16:
 	; pla
 	rts
 
+print_fletch16:
+	lda FLETCH_1
+	ldx FLETCH_2
+	jsr print_hex16
+	rts
+	
 
 msg_read_full_page:
 	.byte "read full page", $0A, $0D, $00

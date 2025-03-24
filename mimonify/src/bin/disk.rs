@@ -177,7 +177,7 @@ fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<
         // std::thread::sleep(Duration::from_secs(1))
     }
     println!("\ndone.");
-    println!("fletch16: {:02x} {:02x}", sum1, sum2);
+    println!("fletch16: {:02x}{:02x}", sum2, sum1);
     Ok(())
     // loop {}
 }

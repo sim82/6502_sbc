@@ -62,7 +62,9 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	lda #%00001010
 	sta IO_UART2_IMR
 
-	uart_start_timer 4
+	; uart_start_timer 100
+
+	lda IO_UART2_CSTO
 	
 	lda #<irq
 	sta $fdfe
