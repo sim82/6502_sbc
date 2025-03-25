@@ -154,6 +154,13 @@ event_timer:
 	adc GROW
 	sta GROW
 
+	jsr os_rand
+	and #31
+	sta APPLEX
+	jsr os_rand
+	and #15
+	sta APPLEY
+
 @no_apple:
 	
 	ldx APPLEX

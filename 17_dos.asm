@@ -8,7 +8,7 @@
 .import load_relocatable_binary
 .import init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m, cmd_fg_str, cmd_fg
-.export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message
+.export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message, rand_8
 .include "17_dos.inc"
 .include "os.inc"
 
@@ -62,9 +62,9 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	lda #%00001010
 	sta IO_UART2_IMR
 
-	; uart_start_timer 100
+	uart_start_timer 10 
 
-	lda IO_UART2_CSTO
+	; lda IO_UART2_CSTO
 	
 	lda #<irq
 	sta $fdfe
@@ -481,6 +481,40 @@ get_arg:
 	clc
 	rts
 	
+rand_8:
+	tya
+	pha
+	txa
+	pha
+	LDA	RAND_SEED		; get seed
+	AND	#$b8		; mask non feedback bits
+				; for maximal length run with 8 bits we need
+				; taps at b7, b5, b4 and b3
+	LDX	#$05		; bit count (shift top 5 bits)
+	LDY	#$00		; clear feedback count
+@f_loop:
+	ASL	A		; shift bit into carry
+	BCC	@bit_clr	; branch if bit = 0
+
+	INY			; increment feedback count (b0 is XOR all the	
+				; shifted bits from A)
+@bit_clr:
+	DEX			; decrement count
+	BNE	@f_loop		; loop if not all done
+
+@no_clr:
+	TYA			; copy feedback count
+	LSR	A		; bit 0 into Cb
+	LDA	RAND_SEED	; get seed back
+	ROL	A		; rotate carry into byte
+	STA	RAND_SEED	; save number as next seed
+	pla
+	tax
+	pla
+	tay
+	lda RAND_SEED
+	RTS			; done
+
  
 windmill:
 	.byte "-\|/"

@@ -60,3 +60,7 @@ OS_EVENT_RETURN_KEEP_RESIDENT  = $01
 ; print stats of current file io
 .IMPORT os_print_fstat 
 
+; return pseudo random number
+; a out: random number
+.IMPORT os_rand 
+
