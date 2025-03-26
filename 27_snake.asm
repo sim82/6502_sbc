@@ -142,6 +142,7 @@ event_key:
 
 	
 event_timer:
+	jsr print_debug_pos
 	; check apple
 	lda AX
 	cmp APPLEX
@@ -154,12 +155,8 @@ event_timer:
 	adc GROW
 	sta GROW
 
-	jsr os_rand
-	and #31
-	sta APPLEX
-	jsr os_rand
-	and #15
-	sta APPLEY
+	jsr new_apple_position
+
 
 @no_apple:
 	
@@ -251,14 +248,21 @@ game_over:
 	rts
 
 check_collision:
-	ldx QR
-	
-@loop:
 	lda AX
+	sta BX
+	lda AY
+	sta BY
+	jmp check_snake_collision
+
+check_snake_collision:
+	; x,y in BX,BY
+	ldx QR
+@loop:
+	lda BX
 	cmp QX, x
 	bne @not_equal
 
-	lda AY
+	lda BY
 	cmp QY, x
 	bne @not_equal
 
@@ -270,7 +274,6 @@ check_collision:
 	cpx QW
 	beq @exit
 	jmp @loop
-
 
 @exit:
 	sec
@@ -318,12 +321,14 @@ clear_screen:
 	
 gotov_xy:
 	jsr send_esc
+	inx
 	txa
 	asl
 	pha
 	
 	ldx #$00
 
+	iny
 	tya
 	jsr os_print_dec
 	lda #';'
@@ -356,7 +361,59 @@ set_color:
 	jsr os_putc
 	rts
 
+	ldx QR
+	
 
+
+new_apple_position:
+	jsr os_rand
+	and #31
+	sta APPLEX
+	sta BX
+	jsr os_rand
+	and #15
+	sta APPLEY
+	sta BY
+
+	jsr check_snake_collision
+	bcc new_apple_position
+	
+	rts
+
+print_debug_pos:
+	ldx #10
+	ldy #30
+	jsr gotov_xy
+	lda AX
+	ldx #0
+	jsr os_print_dec
+	lda #','
+	jsr os_putc
+
+	lda AY
+	ldx #0
+	jsr os_print_dec
+	lda #' '
+	jsr os_putc
+	jsr os_putc
+	
+	
+	ldx #10
+	ldy #31
+	jsr gotov_xy
+	lda APPLEX
+	ldx #0
+	jsr os_print_dec
+	lda #','
+	jsr os_putc
+
+	lda APPLEY
+	ldx #0
+	jsr os_print_dec
+	lda #' '
+	jsr os_putc
+	jsr os_putc
+	rts
 .RODATA
 init_message:
 	.byte "got init event", $00
