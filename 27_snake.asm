@@ -21,10 +21,18 @@ GROW = QR + 1
 APPLEX = GROW + 1
 APPLEY = APPLEX + 1
 
+HEADX = APPLEY + 1
+HEADY = HEADX + 1
+
 UP = $1
 DOWN = $2
 LEFT = $3
 RIGHT = $4
+
+BORDER_UP = 0
+BORDER_LEFT = 0
+BORDER_DOWN = 25
+BORDER_RIGHT = 40
 
 .BSS
 QX:
@@ -73,9 +81,9 @@ dispatch_timer:
 event_init:
 	jsr clear_screen
 	lda #20
-	sta AX
+	sta HEADX
 	lda #10
-	sta AY
+	sta HEADY
 	lda #1
 	sta DIR
 	; init queues
@@ -98,6 +106,21 @@ event_init:
 	sta APPLEX
 	lda #$8
 	sta APPLEY
+
+	lda #BORDER_LEFT
+	sta AX
+	lda #BORDER_UP
+	sta AY
+	lda #BORDER_DOWN
+	sta BY
+	lda #BORDER_RIGHT
+	sta BX
+	lda #'1'
+	jsr set_color
+	jsr draw_box
+	lda #'9'
+	jsr set_color
+	
 
 	lda #$01
 	jsr os_event_return
@@ -144,10 +167,10 @@ event_key:
 event_timer:
 	jsr print_debug_pos
 	; check apple
-	lda AX
+	lda HEADX
 	cmp APPLEX
 	bne @no_apple
-	lda AY
+	lda HEADY
 	cmp APPLEY
 	bne @no_apple
 	lda #$04
@@ -167,21 +190,21 @@ event_timer:
 	clc
 	ldx DIR
 	lda dirx_table, x
-	adc AX
-	sta AX
+	adc HEADX
+	sta HEADX
 	
 	clc
 	lda diry_table, x
-	adc AY
-	sta AY
+	adc HEADY
+	sta HEADY
 	
 	jsr check_collision
 	bcc game_over
 	
 	jsr update_queue
 
-	ldx AX
-	ldy AY
+	ldx HEADX
+	ldy HEADY
 	jsr draw_snake
 	
 	ldx #0
@@ -248,14 +271,27 @@ game_over:
 	rts
 
 check_collision:
-	lda AX
+	lda HEADX
 	sta BX
-	lda AY
+	lda HEADY
 	sta BY
 	jmp check_snake_collision
 
 check_snake_collision:
 	; x,y in BX,BY
+	; 1. check againt borders
+	lda BX
+	cmp #BORDER_LEFT
+	beq @exit_bad
+	cmp #BORDER_RIGHT
+	beq @exit_bad
+	lda BY
+	cmp #BORDER_UP
+	beq @exit_bad
+	cmp #BORDER_DOWN
+	beq @exit_bad
+
+	; 2. check against snake queue
 	ldx QR
 @loop:
 	lda BX
@@ -266,8 +302,7 @@ check_snake_collision:
 	cmp QY, x
 	bne @not_equal
 
-	clc
-	rts
+	jmp @exit_bad
 
 @not_equal:
 	inx
@@ -278,6 +313,9 @@ check_snake_collision:
 @exit:
 	sec
 	rts
+@exit_bad:
+	clc
+	rts
 
 draw_tile:
 	lda #' '
@@ -286,10 +324,10 @@ draw_tile:
 	rts
 
 update_queue:
-	lda AX
+	lda HEADX
 	ldx QW
 	sta QX, x
-	lda AY
+	lda HEADY
 	sta QY, x
 
 	lda GROW
@@ -366,12 +404,40 @@ set_color:
 
 
 new_apple_position:
+	; kind of crappy modulo replacement
 	jsr os_rand
-	and #31
+	and #63
+	cmp #BORDER_LEFT
+	bcs @left_ok
+	clc
+	adc #3
+@left_ok:
+	cmp #BORDER_RIGHT	
+	bcc @right_ok
+	clc
+	sbc #3
+	jmp @left_ok
+
+@right_ok:
+
 	sta APPLEX
 	sta BX
 	jsr os_rand
-	and #15
+	inc
+	and #31
+
+	cmp #BORDER_UP
+	bcs @up_ok
+	clc
+	adc #3
+@up_ok:
+	cmp #BORDER_DOWN
+	bcc @down_ok
+	clc 
+	sbc #3
+	jmp @up_ok
+@down_ok:
+
 	sta APPLEY
 	sta BY
 
@@ -384,13 +450,13 @@ print_debug_pos:
 	ldx #10
 	ldy #30
 	jsr gotov_xy
-	lda AX
+	lda HEADX
 	ldx #0
 	jsr os_print_dec
 	lda #','
 	jsr os_putc
 
-	lda AY
+	lda HEADY
 	ldx #0
 	jsr os_print_dec
 	lda #' '
@@ -413,6 +479,51 @@ print_debug_pos:
 	lda #' '
 	jsr os_putc
 	jsr os_putc
+	rts
+draw_box:
+	ldx AX
+	ldy AY
+	jsr gotov_xy
+	jsr draw_xline
+	ldx AX
+	ldy AY
+	jsr gotov_xy
+	jsr draw_yline
+	ldx BX
+	ldy AY
+	jsr gotov_xy
+	jsr draw_yline
+	ldx AX
+	ldy BY
+	jsr gotov_xy
+	jsr draw_xline
+	rts
+
+draw_xline:
+	ldx AX
+@loop:
+	cpx BX
+	beq @end
+	jsr draw_tile
+	inx
+	jmp @loop
+@end:
+	rts
+
+draw_yline:
+	ldy AY
+@loop:
+	cpy BY
+	beq @end
+	jsr draw_tile
+	lda #8
+	jsr os_putc
+	jsr os_putc
+	lda #10
+	jsr os_putc
+	iny
+	jmp @loop
+@end:
 	rts
 .RODATA
 init_message:
