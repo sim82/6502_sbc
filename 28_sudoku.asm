@@ -3,35 +3,43 @@
 .INCLUDE "std.inc"
 .INCLUDE "os.inc"
 
-NUM_OPEN = $80
-STACK_PTR = NUM_OPEN + 1
+ZP = $80
+NUM_OPEN =                ZP + $00
+STACK_PTR =               ZP + $01
+SEL_OPEN_FIELD =          ZP + $02
+MIN =                     ZP + $03
+TMP_OPEN_FIELD =          ZP + $04
+CAND_L =                  ZP + $05
+CAND_H =                  ZP + $06
+CUR_NUM =                 ZP + $07
+
 
 STACK_SIZE = 9 * 9
-CAND_L_UND = %00000000
-CAND_H_UND = %10000000
-NUM_UND = $0
-FIELD_UND = $ff
+CAND_L_UNDEF = %00000000
+CAND_H_UNDEF = %10000000
+NUM_UNDEF = $0
+FIELD_UNDEF = $ff
 
 .CODE
         jsr init_stack
         jsr load_input
-        jst solve
+        jsr solve
         rts
 
 init_stack:
         ldx #0
         stx STACK_PTR
 @stack_init_loop:
-        lda #CAND_L_UND
+        lda #CAND_L_UNDEF
         sta cand_l_stack, x
         
-        lda #CAND_H_UND
+        lda #CAND_H_UNDEF
         sta cand_h_stack, x
 
-        lda #NUM_UND
+        lda #NUM_UNDEF
         sta num_stack, x
 
-        lda #FIELD_UND
+        lda #FIELD_UNDEF
         sta field_stack, x
 
         inx
@@ -48,9 +56,11 @@ load_input:
 solve:
         ldx STACK_PTR
         lda cand_h_stack, x
-        cmp #CAND_H_UND
+        cmp #CAND_H_UNDEF
         bne @clear_current_field
         ; no field selected -> select next best open field
+        jsr select_open_field
+        jsr remove_open
 
         jmp @select_next_best_candidate
 @clear_current_field:
@@ -60,8 +70,14 @@ solve:
 @select_next_best_candidate:
         ; select next candidate for current field and solve recursively
         jsr select_candidate
+
+        ; OPT: a already correct from selecte_candidate
         ldx STACK_PTR
         lda num_stack, x
+        ; ldx #0
+        ; jsr os_print_dec
+        ; jsr os_putnl
+        ; rts
         cmp #9
         bcs @unsolvable
         ; test next candidate
@@ -72,13 +88,13 @@ solve:
         ldx STACK_PTR
         inx
         stx STACK_PTR
-        lda #CAND_L_UND
+        lda #CAND_L_UNDEF
         sta cand_l_stack, x
-        lda #CAND_H_UND
+        lda #CAND_H_UNDEF
         sta cand_h_stack, x
         lda #0
         sta num_stack, x
-        lda #FIELD_UND
+        lda #FIELD_UNDEF
         sta field_stack, x
         ; end of loop
         jmp solve
@@ -91,12 +107,228 @@ solve:
         jmp solve
         rts
 
-clear_field:
+select_open_field:
+        lda #$ff
+        sta SEL_OPEN_FIELD
+        sta MIN
+        lda #00
+        sta TMP_OPEN_FIELD
+
+@loop:
+        lda TMP_OPEN_FIELD
+        cmp NUM_OPEN
+        bcs @end
+        jsr candidates_for_tmp_field
+        ldx CAND_L
+        lda count_ones, x
+        ldx CAND_H
+        clc
+        adc count_ones, x
+
+
+        cmp MIN
+        bcs @not_better
+        sta MIN
+        lda TMP_OPEN_FIELD
+        sta SEL_OPEN_FIELD
+        ldx STACK_PTR
+        lda CAND_L
+        sta cand_l_stack, x
+        lda CAND_H
+        sta cand_h_stack, x
+
+        lda MIN
+        cmp #1
+        beq @end
+@not_better:
+        inc TMP_OPEN_FIELD
+        jmp @loop
+
+@end:
+        lda SEL_OPEN_FIELD
+        ; pha
+        ; ldx #00
+        ; jsr os_print_dec
+        ; jsr os_putnl
+        ; pla
+        ; jmp endless_loop
+        cmp #$ff
+        beq sel_open_field_error
+
+        rts
+
+sel_open_field_error:
+	lda #<msg_sel_open_field_failed
+	ldx #>msg_sel_open_field_failed
+	jsr os_print_string
+	jsr os_putnl
+        jmp endless_loop
+        
+candidates_for_tmp_field:
+        ldy TMP_OPEN_FIELD
+        ldx open, y
+
+        ldy f2h, x
+        lda h_free_l, y
+        ldy f2v, x
+        and v_free_l, y
+        ldy f2b, x
+        and b_free_l, y
+        sta CAND_L
+
+        ldy f2h, x
+        lda h_free_h, y
+        ldy f2v, x
+        and v_free_h, y
+        ldy f2b, x
+        and b_free_h, y
+        sta CAND_H
+        rts
+
+remove_open:
+        ldx SEL_OPEN_FIELD
+        ldy STACK_PTR
+        lda open, x
+        sta field_stack, y
+        dec NUM_OPEN
+        ldy NUM_OPEN
+        lda open, y
+        sta open, x
+        rts
+
+push_open:
+        ldx STACK_PTR
+        lda field_stack, x
+        ldx NUM_OPEN
+        sta open, x
+        inx
+        stx NUM_OPEN
         rts
 
 select_candidate:
+        ldx STACK_PTR
+        lda cand_l_stack, x
+        beq @test_high
+        tay
+        lda trailing_zeros, y
+        sta num_stack, x
         rts
 
+@test_high:
+        lda cand_h_stack, x
+        tay
+        lda trailing_zeros, y
+        clc
+        adc #8
+        sta num_stack, x
+        rts
+
+.MACRO reset_kernel lu, free
+        ldx lu, y
+        lda free, x
+        ldx CUR_NUM
+        and reset_mask, x
+        ldx lu, y
+        sta free, x
+.ENDMACRO
+set_field:
+        ldx STACK_PTR
+        lda num_stack, x
+        cmp #8
+        bcs @high
+        ; low byte
+        sta CUR_NUM
+        ldy field_stack, x
+
+        reset_kernel f2h, h_free_l
+        reset_kernel f2v, v_free_l
+        reset_kernel f2b, b_free_l
+
+        jmp @end
+        ; ldx fh2, y
+        ; lda h_free_l, x
+        ; ldx CUR_NUM
+        ; and reset_mask, x
+        ; ldx fh2, y
+        ; sta h_free_l, x
+
+@high:
+        clc
+        sbc #8
+        sta CUR_NUM
+        ldy field_stack, x
+        ;high byte
+        reset_kernel f2h, h_free_h
+        reset_kernel f2v, v_free_h
+        reset_kernel f2b, b_free_h
+        
+        ; ldy field_stack, y
+        
+@end:
+        ldx STACK_PTR
+        lda num_stack, x
+        sta fields, y
+        
+        rts
+
+.MACRO set_kernel lu, free
+        ldx lu, y
+        lda free, x
+        ldx CUR_NUM
+        ora set_mask, x
+        ldx lu, y
+        sta free, x
+.ENDMACRO
+
+clear_field:
+        ldx STACK_PTR
+        lda num_stack, x
+        cmp #8
+        bcs @high
+        ; low byte
+        sta CUR_NUM
+        ldy field_stack, x
+
+        set_kernel f2h, h_free_l
+        set_kernel f2v, v_free_l
+        set_kernel f2b, b_free_l
+
+        jmp @end
+        ; ldx fh2, y
+        ; lda h_free_l, x
+        ; ldx CUR_NUM
+        ; and reset_mask, x
+        ; ldx fh2, y
+        ; sta h_free_l, x
+
+@high:
+        clc
+        sbc #8
+        sta CUR_NUM
+        ldy field_stack, x
+        ;high byte
+        set_kernel f2h, h_free_h
+        set_kernel f2v, v_free_h
+        set_kernel f2b, b_free_h
+        
+        ; ldy field_stack, y
+        
+@end:
+        lda FIELD_UNDEF
+        sta fields, y
+        
+        rts
+
+
+apply_candidate:
+        rts
+
+
+endless_loop:
+        jmp endless_loop
+        
+msg_sel_open_field_failed:
+.byte        "error: select open field", $00
 
 ; .BSS FIXME: BSS does not work for size != 256
 cand_l_stack:
@@ -246,3 +478,4 @@ open_initial:
 .byte        60,61,62,63,64,65,66,67,68,69
 .byte        70,71,72,73,74,75,76,77,78,79
 .byte        80
+
