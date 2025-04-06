@@ -4,6 +4,7 @@
 .INCLUDE "os.inc"
 
 NUM_OPEN = $80
+STACK_PTR = NUM_OPEN + 1
 
 STACK_SIZE = 9 * 9
 CAND_L_UND = %00000000
@@ -14,10 +15,12 @@ FIELD_UND = $ff
 .CODE
         jsr init_stack
         jsr load_input
+        jst solve
         rts
 
 init_stack:
         ldx #0
+        stx STACK_PTR
 @stack_init_loop:
         lda #CAND_L_UND
         sta cand_l_stack, x
@@ -42,6 +45,59 @@ load_input:
         sta NUM_OPEN ; test data
         rts
         
+solve:
+        ldx STACK_PTR
+        lda cand_h_stack, x
+        cmp #CAND_H_UND
+        bne @clear_current_field
+        ; no field selected -> select next best open field
+
+        jmp @select_next_best_candidate
+@clear_current_field:
+        ; field is currently selected contains previous candidate -> cleanup
+        jsr clear_field
+
+@select_next_best_candidate:
+        ; select next candidate for current field and solve recursively
+        jsr select_candidate
+        ldx STACK_PTR
+        lda num_stack, x
+        cmp #9
+        bcs @unsolvable
+        ; test next candidate
+        jsr apply_candidate
+        jsr set_field
+
+        ; push new empty stack frame (init 'recursion')
+        ldx STACK_PTR
+        inx
+        stx STACK_PTR
+        lda #CAND_L_UND
+        sta cand_l_stack, x
+        lda #CAND_H_UND
+        sta cand_h_stack, x
+        lda #0
+        sta num_stack, x
+        lda #FIELD_UND
+        sta field_stack, x
+        ; end of loop
+        jmp solve
+
+@unsolvable:
+        ; none of the candidates for the current field was solvable -> backtrack
+        jsr push_open
+        dec STACK_PTR
+        ; end of loop
+        jmp solve
+        rts
+
+clear_field:
+        rts
+
+select_candidate:
+        rts
+
+
 ; .BSS FIXME: BSS does not work for size != 256
 cand_l_stack:
 .RES STACK_SIZE
