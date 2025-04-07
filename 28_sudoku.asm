@@ -58,6 +58,10 @@ solve:
         lda cand_h_stack, x
         cmp #CAND_H_UNDEF
         bne @clear_current_field
+        ; check if we are done
+        lda NUM_OPEN
+        beq @done
+        sta IO_GPIO0
         ; no field selected -> select next best open field
         jsr select_open_field
         jsr remove_open
@@ -106,6 +110,19 @@ solve:
         ; end of loop
         jmp solve
         rts
+@done:
+        ldy #00
+@dump_loop:
+        lda fields, y
+        inc
+        ldx #00
+        jsr os_print_dec
+        lda #' '
+        jsr os_putc
+        iny
+        cpy #81
+        bne @dump_loop
+        rts
 
 select_open_field:
         lda #$ff
@@ -145,13 +162,21 @@ select_open_field:
         jmp @loop
 
 @end:
+; debug start
         lda SEL_OPEN_FIELD
-        ; pha
-        ; ldx #00
-        ; jsr os_print_dec
-        ; jsr os_putnl
-        ; pla
+        ldx #00
+        jsr os_print_dec
+        lda #' '
+        jsr os_putc
+        ldx SEL_OPEN_FIELD
+        lda open, x
+        ldx #00
+
+        jsr os_print_dec
+        jsr os_putnl
         ; jmp endless_loop
+; debug end
+        lda SEL_OPEN_FIELD
         cmp #$ff
         beq sel_open_field_error
 
@@ -314,13 +339,45 @@ clear_field:
         ; ldy field_stack, y
         
 @end:
-        lda FIELD_UNDEF
+        lda #FIELD_UNDEF
         sta fields, y
         
         rts
 
 
 apply_candidate:
+; debug start
+        ; ldy STACK_PTR
+        ; lda #'a'
+        ; jsr os_putc
+        
+        ; lda num_stack, y
+        ; ldx #00
+        ; jsr os_print_dec
+        ; lda #' '
+        ; jsr os_putc
+; debug end
+
+        ldy STACK_PTR
+        lda num_stack, y
+        
+        cmp #8
+
+        bcs @high
+        tax
+        lda cand_l_stack, y
+        and reset_mask, x
+        sta cand_l_stack, y
+        jmp @end
+
+@high:
+        clc
+        sbc #8
+        tax
+        lda cand_h_stack, y
+        and reset_mask, x
+        sta cand_h_stack, y
+@end:
         rts
 
 
@@ -432,6 +489,7 @@ count_ones:
 
 
 trailing_zeros:
+.byte        8,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
 .byte        4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
 .byte        5,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
 .byte        4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
