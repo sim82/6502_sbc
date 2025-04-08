@@ -12,6 +12,7 @@ TMP_OPEN_FIELD =          ZP + $04
 CAND_L =                  ZP + $05
 CAND_H =                  ZP + $06
 CUR_NUM =                 ZP + $07
+DBG_X =                   ZP + $08
 
 
 STACK_SIZE = 9 * 9
@@ -21,6 +22,8 @@ NUM_UNDEF = $0
 FIELD_UNDEF = $ff
 
 .CODE
+        ; nop
+        sei
         jsr init_stack
         jsr load_input
         jsr solve
@@ -54,6 +57,9 @@ load_input:
         rts
         
 solve:
+        ; nop
+        jsr os_getc
+        jsr os_putc
         ldx STACK_PTR
         lda cand_h_stack, x
         cmp #CAND_H_UNDEF
@@ -163,16 +169,15 @@ select_open_field:
 
 @end:
 ; debug start
-        lda SEL_OPEN_FIELD
-        ldx #00
-        jsr os_print_dec
-        lda #' '
+        lda #'s'
         jsr os_putc
+        lda SEL_OPEN_FIELD
+        jsr dbg_a
         ldx SEL_OPEN_FIELD
         lda open, x
-        ldx #00
-
-        jsr os_print_dec
+        jsr dbg_a
+        lda MIN
+        jsr dbg_a
         jsr os_putnl
         ; jmp endless_loop
 ; debug end
@@ -248,6 +253,8 @@ select_candidate:
         sta num_stack, x
         rts
 
+        
+        
 .MACRO reset_kernel lu, free
         ldx lu, y
         lda free, x
@@ -257,6 +264,18 @@ select_candidate:
         sta free, x
 .ENDMACRO
 set_field:
+; debug start
+        lda #'t'
+        jsr os_putc
+        ldx STACK_PTR
+        lda field_stack, x
+        jsr dbg_a
+        ldx STACK_PTR
+        lda num_stack, x
+        jsr dbg_a
+        jsr os_putnl
+
+; debug end
         ldx STACK_PTR
         lda num_stack, x
         cmp #8
@@ -306,6 +325,17 @@ set_field:
 .ENDMACRO
 
 clear_field:
+; debug start
+        lda #'c'
+        jsr os_putc
+        ldx STACK_PTR
+        lda field_stack, x
+        jsr dbg_a
+        ldx STACK_PTR
+        lda num_stack, x
+        jsr dbg_a
+        jsr os_putnl
+; debug end
         ldx STACK_PTR
         lda num_stack, x
         cmp #8
@@ -384,21 +414,34 @@ apply_candidate:
 endless_loop:
         jmp endless_loop
         
+dbg_a:
+        stx DBG_X
+        ldx #00
+        jsr os_print_dec
+        lda #' '
+        jsr os_putc
+        ldx DBG_X
+        rts
+
 msg_sel_open_field_failed:
 .byte        "error: select open field", $00
 
-; .BSS FIXME: BSS does not work for size != 256
+.BSS ; FIXME: BSS does not work for size != 256
 cand_l_stack:
-.RES STACK_SIZE
+; .RES STACK_SIZE
+.RES $100
 
 cand_h_stack:
-.RES STACK_SIZE
+; .RES STACK_SIZE
+.RES $100
 
 num_stack:
-.RES STACK_SIZE
+; .RES STACK_SIZE
+.RES $100
 
 field_stack:
-.RES STACK_SIZE
+; .RES STACK_SIZE
+.RES $100
 
 .RODATA
 ; RW state: deliver initial values in RODATA for now
