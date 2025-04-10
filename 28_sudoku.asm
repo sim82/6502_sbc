@@ -22,11 +22,14 @@ NUM_UNDEF = $0
 FIELD_UNDEF = $ff
 
 .CODE
-        ; nop
-        sei
+        jmp start
+start:
+        ; sei
         jsr init_stack
+        ; jsr test_dump
         jsr load_input
         jsr solve
+        ; cli
         rts
 
 init_stack:
@@ -50,6 +53,17 @@ init_stack:
         bne @stack_init_loop
         rts
 
+test_dump:
+        ldx #00
+@loop:
+        lda set_mask, x
+        jsr dbg_a
+        inx
+        cpx #(9*9)
+        bne @loop
+        rts
+
+        
 load_input:
         ; pseudo input, works with test data in open / free / field
         lda #58
@@ -58,8 +72,12 @@ load_input:
         
 solve:
         ; nop
-        jsr os_getc
-        jsr os_putc
+        ; jsr os_getc
+        ; cmp #'q'
+        ; bne @no_exit
+        ; rts
+; @no_exit:
+        ; jsr os_putc
         ldx STACK_PTR
         lda cand_h_stack, x
         cmp #CAND_H_UNDEF
@@ -169,16 +187,16 @@ select_open_field:
 
 @end:
 ; debug start
-        lda #'s'
-        jsr os_putc
-        lda SEL_OPEN_FIELD
-        jsr dbg_a
-        ldx SEL_OPEN_FIELD
-        lda open, x
-        jsr dbg_a
-        lda MIN
-        jsr dbg_a
-        jsr os_putnl
+        ; lda #'s'
+        ; jsr os_putc
+        ; lda SEL_OPEN_FIELD
+        ; jsr dbg_a
+        ; ldx SEL_OPEN_FIELD
+        ; lda open, x
+        ; jsr dbg_a
+        ; lda MIN
+        ; jsr dbg_a
+        ; jsr os_putnl
         ; jmp endless_loop
 ; debug end
         lda SEL_OPEN_FIELD
@@ -265,15 +283,15 @@ select_candidate:
 .ENDMACRO
 set_field:
 ; debug start
-        lda #'t'
-        jsr os_putc
-        ldx STACK_PTR
-        lda field_stack, x
-        jsr dbg_a
-        ldx STACK_PTR
-        lda num_stack, x
-        jsr dbg_a
-        jsr os_putnl
+        ; lda #'t'
+        ; jsr os_putc
+        ; ldx STACK_PTR
+        ; lda field_stack, x
+        ; jsr dbg_a
+        ; ldx STACK_PTR
+        ; lda num_stack, x
+        ; jsr dbg_a
+        ; jsr os_putnl
 
 ; debug end
         ldx STACK_PTR
@@ -297,7 +315,7 @@ set_field:
         ; sta h_free_l, x
 
 @high:
-        clc
+        sec
         sbc #8
         sta CUR_NUM
         ldy field_stack, x
@@ -326,15 +344,15 @@ set_field:
 
 clear_field:
 ; debug start
-        lda #'c'
-        jsr os_putc
-        ldx STACK_PTR
-        lda field_stack, x
-        jsr dbg_a
-        ldx STACK_PTR
-        lda num_stack, x
-        jsr dbg_a
-        jsr os_putnl
+        ; lda #'c'
+        ; jsr os_putc
+        ; ldx STACK_PTR
+        ; lda field_stack, x
+        ; jsr dbg_a
+        ; ldx STACK_PTR
+        ; lda num_stack, x
+        ; jsr dbg_a
+        ; jsr os_putnl
 ; debug end
         ldx STACK_PTR
         lda num_stack, x
@@ -357,7 +375,7 @@ clear_field:
         ; sta h_free_l, x
 
 @high:
-        clc
+        sec
         sbc #8
         sta CUR_NUM
         ldy field_stack, x
@@ -401,7 +419,7 @@ apply_candidate:
         jmp @end
 
 @high:
-        clc
+        sec
         sbc #8
         tax
         lda cand_h_stack, y
@@ -426,25 +444,12 @@ dbg_a:
 msg_sel_open_field_failed:
 .byte        "error: select open field", $00
 
-.BSS ; FIXME: BSS does not work for size != 256
-cand_l_stack:
-; .RES STACK_SIZE
-.RES $100
 
-cand_h_stack:
-; .RES STACK_SIZE
-.RES $100
-
-num_stack:
-; .RES STACK_SIZE
-.RES $100
-
-field_stack:
-; .RES STACK_SIZE
-.RES $100
+; .RODATA
+; RW state: deliver initial values in RODATA for now
 
 .RODATA
-; RW state: deliver initial values in RODATA for now
+.byte $00
 fields:
 .byte        255,255,255,255,255,255,3,255,4,5,1,255,255
 .byte        255,7,255,255,6,255,3,255,255,2,5,255,255
@@ -453,6 +458,7 @@ fields:
 .byte        255,255,8,2,255,255,255,1,255,255,255,255
 .byte        255,8,255,255,255,255,255,6,255,255,255,255
 .byte        5,255,255,2,255,7,255
+
 
 open:
 .byte        0,1,2,3,4,5,7,11,12,13,15,16,18,20
@@ -476,8 +482,8 @@ b_free_l:
 b_free_h:
 .byte        %00000001, %00000001, %00000001, %00000001, %00000000, %00000000, %00000000, %00000001, %00000001
 
-
 ; RO lookup tables
+; .align $100
 f2h:
 .byte        0,1,2,3,4,5,6,7,8
 .byte        0,1,2,3,4,5,6,7,8
@@ -511,7 +517,6 @@ f2b:
 .byte        6,6,6,7,7,7,8,8,8
 .byte        6,6,6,7,7,7,8,8,8
 .byte        6,6,6,7,7,7,8,8,8
-
 count_ones:
 .byte        0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4
 .byte        1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5
@@ -549,6 +554,7 @@ trailing_zeros:
 .byte        5,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
 .byte        4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
 
+
 set_mask:
 .byte        %00000001
 .byte        %00000010
@@ -558,6 +564,7 @@ set_mask:
 .byte        %00100000
 .byte        %01000000
 .byte        %10000000
+
 
 reset_mask:
 .byte        %11111110
@@ -569,6 +576,8 @@ reset_mask:
 .byte        %10111111
 .byte        %01111111
 
+
+; .byte $00
 open_initial:
 .byte         0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 .byte        10,11,12,13,14,15,16,17,18,19
@@ -580,3 +589,20 @@ open_initial:
 .byte        70,71,72,73,74,75,76,77,78,79
 .byte        80
 
+
+.BSS ; FIXME: BSS does not work for size != 256
+cand_l_stack:
+; .RES STACK_SIZE
+.RES $100
+
+cand_h_stack:
+; .RES STACK_SIZE
+.RES $100
+
+num_stack:
+; .RES STACK_SIZE
+.RES $100
+
+field_stack:
+; .RES STACK_SIZE
+.RES $100

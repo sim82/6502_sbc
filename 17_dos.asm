@@ -71,8 +71,11 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	
 	lda #>irq
 	sta $fdfe+1
+
+	; jmp @skip_init
 	jsr init_pagetable
 	
+; @skip_init:
 	jsr clear_resident
 
 ; @loop:
