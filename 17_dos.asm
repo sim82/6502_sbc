@@ -227,6 +227,7 @@ clear_resident:
 	rts
 
 irq:
+	; ooopsie. safe status flags?
 	pha
 	lda IO_UART2_ISR
 	sta IRQ_TMP_A

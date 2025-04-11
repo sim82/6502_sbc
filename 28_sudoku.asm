@@ -24,7 +24,7 @@ FIELD_UNDEF = $ff
 .CODE
         jmp start
 start:
-        sei
+        sei ; interrupt handling seems a bit flaky...
         jsr init_stack
         ; jsr test_dump
         ; jsr load_pseudo_input
