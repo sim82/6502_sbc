@@ -24,12 +24,17 @@ FIELD_UNDEF = $ff
 .CODE
         jmp start
 start:
-        ; sei
+        sei
         jsr init_stack
         ; jsr test_dump
+        ; jsr load_pseudo_input
         jsr load_input
+
+        jsr draw_board
+        ; rts
         jsr solve
-        ; cli
+        jsr draw_board
+        cli
         rts
 
 init_stack:
@@ -64,7 +69,7 @@ test_dump:
         rts
 
         
-load_input:
+load_pseudo_input:
         ; pseudo input, works with test data in open / free / field
         lda #58
         sta NUM_OPEN ; test data
@@ -133,19 +138,7 @@ solve:
         dec STACK_PTR
         ; end of loop
         jmp solve
-        rts
 @done:
-        ldy #00
-@dump_loop:
-        lda fields, y
-        inc
-        ldx #00
-        jsr os_print_dec
-        lda #' '
-        jsr os_putc
-        iny
-        cpy #81
-        bne @dump_loop
         rts
 
 select_open_field:
@@ -428,6 +421,178 @@ apply_candidate:
 @end:
         rts
 
+draw_board:
+
+        jsr os_putnl
+        lda NUM_OPEN
+
+        beq @solved
+        
+	lda #<msg_unsolved
+	ldx #>msg_unsolved
+        jmp @print_message
+@solved:
+	lda #<msg_solved
+	ldx #>msg_solved
+@print_message:
+	jsr os_print_string
+	jsr os_putnl
+
+        ldx #9
+        ldy #0
+
+@loop:
+        lda fields, y
+        iny
+        jsr print_field
+
+        dex
+        beq @newline
+
+        jsr print_space
+        jmp @loop
+
+@newline:
+        jsr os_putnl
+        cpy #81
+        beq @end_loop
+        ldx #9
+        jmp @loop
+
+
+        
+@end_loop:
+        
+        lda NUM_OPEN
+        beq @skip_num
+	lda #<msg_open
+	ldx #>msg_open
+        jsr os_print_string
+        lda NUM_OPEN
+        ldx #00
+        jsr os_print_dec
+        jsr os_putnl
+
+@skip_num:
+        rts
+
+print_field:
+        cmp #FIELD_UNDEF
+        beq print_empty_field
+        inc
+        jmp print_dec8
+
+print_empty_field:
+        lda #'.'
+        jsr os_putc
+        rts
+        
+print_dec8:
+        clc
+        adc #$30
+        jsr os_putc
+        rts
+
+print_space:
+        lda #' '
+        jsr os_putc
+        rts
+
+FREE_L_INIT = %11111111
+FREE_H_INIT = %00000001
+
+init_free_masks:
+        ldy #8
+@loop:
+        lda #FREE_L_INIT
+        sta h_free_l, y
+        sta v_free_l, y
+        sta b_free_l, y
+        lda #FREE_H_INIT
+        sta h_free_h, y
+        sta v_free_h, y
+        sta b_free_h, y
+
+        dey
+        bpl @loop ; right?
+        rts
+        
+load_input:
+        jsr init_free_masks
+        ldy #00
+        sty NUM_OPEN
+@loop:
+        lda test_input, y
+        jsr os_putc
+        cmp #'.'
+        beq @empty_field
+        ; set field
+        sec
+        sbc #$31 ; map '1' -> 0
+
+        sta fields, y
+
+        
+        jsr set_field_init
+        jmp @end
+
+@empty_field:
+        lda #$ff
+        sta fields, y
+        ldx NUM_OPEN
+        tya
+        sta open, x
+        inc NUM_OPEN
+        
+@end:
+        iny
+        cpy #81
+        bne @loop
+        rts
+
+set_field_init:
+        ; specialized version for init. can probabl be unified with other version
+        cmp #8
+        bcs @high
+        ; low byte
+        sta CUR_NUM
+
+        reset_kernel f2h, h_free_l
+        reset_kernel f2v, v_free_l
+        reset_kernel f2b, b_free_l
+
+        jmp @end
+        ; ldx fh2, y
+        ; lda h_free_l, x
+        ; ldx CUR_NUM
+        ; and reset_mask, x
+        ; ldx fh2, y
+        ; sta h_free_l, x
+
+@high:
+        sec
+        sbc #8
+        sta CUR_NUM
+        ;high byte
+        reset_kernel f2h, h_free_h
+        reset_kernel f2v, v_free_h
+        reset_kernel f2b, b_free_h
+@end:
+        rts
+
+test_input:
+; .byte "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......"
+; .byte "52...6.........7.13...........4..8..6......5...........418.........3..2...87....."
+; .byte "......4.562...8..7.4..36.......1..2...39.....51.....93...2.....9.....7....6..3.8."
+.byte "......52..8.4......3...9...5.1...6..2..7........3.....6...1..........7.4.......3."
+
+msg_unsolved:
+        .byte "un" ; muuuuuhahahahaaaaa
+msg_solved:
+        .byte "solved:", $00
+        
+msg_open:
+        .byte "open: ", $00
 
 endless_loop:
         jmp endless_loop
@@ -449,7 +614,6 @@ msg_sel_open_field_failed:
 ; RW state: deliver initial values in RODATA for now
 
 .RODATA
-.byte $00
 fields:
 .byte        255,255,255,255,255,255,3,255,4,5,1,255,255
 .byte        255,7,255,255,6,255,3,255,255,2,5,255,255
