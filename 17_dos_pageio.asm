@@ -132,7 +132,7 @@ read_file_paged:
 ; - if no more data was read carry is cleared, register / (IO_ADDR) content is undefined
 load_page_to_iobuf_gen:
 	; print_message_from_ptr msg_read_full_page
-	sei
+	; sei
 	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
 
@@ -152,7 +152,7 @@ load_page_to_iobuf_gen:
 	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
 
 	sec
-	cli
+	; cli
 	rts
 
 	;
@@ -187,12 +187,12 @@ load_page_to_iobuf_gen:
 	ldy #$00
 	sty RECEIVE_SIZE
 	sec
-	cli
+	; cli
 	rts
 
 @end_empty:
 	clc
-	cli
+	; cli
 	rts
 
 

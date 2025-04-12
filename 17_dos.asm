@@ -62,7 +62,7 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	lda #%00001010
 	sta IO_UART2_IMR
 
-	uart_start_timer 10 
+	uart_start_timer 10
 
 	; lda IO_UART2_CSTO
 	
@@ -89,7 +89,6 @@ UART_CLK = 3686400 ; 3.6864 MHz
 ; 	jsr putc
 ; 	jmp @loop
 
-	cli
 	jsr put_newline
 	print_message_from_ptr welcome_message
 
@@ -171,6 +170,9 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	jmp @sleep
 
 @no_resident_run:
+	; chicken rivet: disable irq during os internal commands
+	; not sure if an irq is enough to mess up the bulk file read loop...
+	sei
 	; if no resident program is running, process input with command processor
 	lda INPUT_CHAR
 	beq @sleep
@@ -182,6 +184,7 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	beq @skip_sleep ; @wait_loop is too far away for an indirect jump...
 
 @sleep:
+	cli
 	wai ; look at me, I sleep all day like the big CPUs...
 @skip_sleep:
 	jmp @wait_loop
@@ -227,8 +230,7 @@ clear_resident:
 	rts
 
 irq:
-	; ooopsie. safe status flags?
-	pha
+	; NOTE: no pha, since A is already pushed in 1st level irq handler in rom (bootloader)!
 	lda IO_UART2_ISR
 	sta IRQ_TMP_A
 	and #%00000010
@@ -239,14 +241,15 @@ irq:
 	lda #$00
 @use_char:
 	sta INPUT_CHAR
+	sta IO_GPIO0
 
 @no_char:
+	lda IO_UART2_CSTO
 	lda IRQ_TMP_A
 	and #%00001000
 	sta IRQ_TIMER
 
 @no_timer:
-	lda IO_UART2_CSTO
 	pla
 	rti
 

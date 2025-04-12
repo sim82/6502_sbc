@@ -261,11 +261,13 @@ purge_channel2_input:
 
 
 irq:
+	pha
 	lda $fdfe
 	ora $fdff
 	beq @skip
 	jmp ($fdfe)
 @skip:
+	pla
 	rti
 	
 
