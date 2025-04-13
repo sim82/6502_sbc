@@ -804,19 +804,21 @@ open_initial:
 .byte        80
 
 
-.BSS ; FIXME: BSS does not work for size != 256 -> does only apply to size of whole segment (cause I was lazy...)
+.BSS
 cand_l_stack:
-; .RES STACK_SIZE
-.RES $100
+.RES STACK_SIZE
+; .RES $100
 
 cand_h_stack:
-; .RES STACK_SIZE
-.RES $100
+.RES STACK_SIZE
+; .RES $100
 
 num_stack:
-; .RES STACK_SIZE
-.RES $100
+.RES STACK_SIZE
+; .RES $100
 
 field_stack:
-; .RES STACK_SIZE
-.RES $100
+.RES STACK_SIZE
+; .RES $100
+pad: ; aaaahrg fix that!
+.RES (512 - 4 * STACK_SIZE)
