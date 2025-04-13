@@ -86,6 +86,7 @@ event_init:
 	sta HEADY
 	lda #1
 	sta DIR
+	sta DIR_OLD
 	; init queues
 	lda #$ff
 	ldy #$00
@@ -127,6 +128,8 @@ event_init:
 	rts
 
 event_key:
+	lda DIR
+	sta DIR_OLD
 	cpx #'a'
 	bne @no_a
 	lda #LEFT
@@ -187,6 +190,16 @@ event_timer:
 	ldy APPLEY
 	jsr draw_apple
 
+	ldx DIR
+	lda dir_forbidden_table, x
+	cmp DIR_OLD
+	bne @allowed
+	
+	; illegal movement, rollback DIR modification
+	lda DIR_OLD
+	sta DIR
+@allowed:
+	
 	clc
 	ldx DIR
 	lda dirx_table, x
@@ -217,13 +230,6 @@ event_timer:
 
 	rts
 
-@not_allowed:
-	; illegal movement, rollback DIR modification
-	lda DIR_OLD
-	sta DIR
-	lda #$01
-	jsr os_event_return
-	rts
 
 update_grow:
 
@@ -543,3 +549,6 @@ dirx_table:
 
 diry_table:
 	.byte $00, $ff, $01, $00, $00
+
+dir_forbidden_table:
+	.byte $00, $02, $01, $04, $03
