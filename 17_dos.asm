@@ -263,16 +263,21 @@ print_prompt:
 	jsr putc
 	rts
 
-read_input:
-	jsr getc
-	bcc read_input 		; busy wait for character
+; read_input:
+; 	jsr getc
+; 	bcc read_input 		; busy wait for character
 	; pha
 	; jsr print_hex8
 	; jsr put_newline
 	; pla
 process_input:
 	cmp #$0a 		; ignore LF / \n
-	beq read_input
+	beq @ignore_input
+	cmp #$03		; ignore ctrl-c
+	beq @ignore_input
+	cmp #$1a 		; ignore ctrl-z
+	beq @ignore_input
+	
 	cmp #$0d 		; enter key is CR / \r 
 	bne @no_enter_key
 	jsr put_newline		; handle enter: - put newline
@@ -294,7 +299,7 @@ process_input:
 	lda #$08		; send another backspace to move cursor back onto space
 	jsr putc
 	; jmp mainloop
-
+@ignore_input:
 @exit:
 	rts
 @normal_char:
