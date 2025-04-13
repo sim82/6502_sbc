@@ -551,4 +551,4 @@ diry_table:
 	.byte $00, $ff, $01, $00, $00
 
 dir_forbidden_table:
-	.byte $00, $02, $01, $04, $03
+	.byte $00, DOWN, UP, RIGHT, LEFT
