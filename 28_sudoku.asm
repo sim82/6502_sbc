@@ -2,6 +2,8 @@
 
 .INCLUDE "std.inc"
 .INCLUDE "os.inc"
+.export test_input, solver_run
+.import ui_init, ui_draw, ui_board, ui_key_event, ui_event_dispatch, print_space
 
 ZP = $80
 NUM_OPEN =                ZP + $00
@@ -13,7 +15,9 @@ CAND_L =                  ZP + $05
 CAND_H =                  ZP + $06
 CUR_NUM =                 ZP + $07
 DBG_X =                   ZP + $08
-
+UI_COUNT =                ZP + $09
+UI_COUNT_H =                ZP + $0a
+; NOTE: ui ZP starts at $90
 
 STACK_SIZE = 9 * 9
 CAND_L_UNDEF = %00000000
@@ -22,20 +26,25 @@ NUM_UNDEF = $0
 FIELD_UNDEF = $ff
 
 .CODE
-        jmp start
-start:
-        jsr init_stack
+        jsr ui_event_dispatch
+        ; jsr start
+        rts
+        
+
+solver_run:
+        jsr stack_init
         ; jsr test_dump
         ; jsr load_pseudo_input
-        jsr load_input
+        jsr ui_to_solver
 
         jsr draw_board
         ; rts
         jsr solve
+        jsr redraw_ui
         jsr draw_board
         rts
 
-init_stack:
+stack_init:
         ldx #0
         stx STACK_PTR
 @stack_init_loop:
@@ -54,6 +63,10 @@ init_stack:
         inx
         cpx #STACK_SIZE
         bne @stack_init_loop
+
+        lda $00
+        sta UI_COUNT
+        sta UI_COUNT_H
         rts
 
 test_dump:
@@ -74,13 +87,7 @@ load_pseudo_input:
         rts
         
 solve:
-        ; nop
-        ; jsr os_getc
-        ; cmp #'q'
-        ; bne @no_exit
-        ; rts
-; @no_exit:
-        ; jsr os_putc
+        jsr maybe_redraw_ui
         ldx STACK_PTR
         lda cand_h_stack, x
         cmp #CAND_H_UNDEF
@@ -491,10 +498,6 @@ print_dec8:
         jsr os_putc
         rts
 
-print_space:
-        lda #' '
-        jsr os_putc
-        rts
 
 FREE_L_INIT = %11111111
 FREE_H_INIT = %00000001
@@ -515,12 +518,12 @@ init_free_masks:
         bpl @loop ; right?
         rts
         
-load_input:
+ui_to_solver:
         jsr init_free_masks
         ldy #00
         sty NUM_OPEN
 @loop:
-        lda test_input, y
+        lda ui_board, y
         jsr os_putc
         cmp #'.'
         beq @empty_field
@@ -549,6 +552,7 @@ load_input:
         rts
 
 set_field_init:
+        ; TODO: add plausibility check
         ; specialized version for init. can probabl be unified with other version
         cmp #8
         bcs @high
@@ -577,6 +581,54 @@ set_field_init:
         reset_kernel f2b, b_free_h
 @end:
         rts
+
+solver_to_ui:
+        pha
+        phx
+        phy
+
+        ldx #80
+@loop:
+        lda fields, x
+        cmp #$ff
+        bne @number_field
+        lda #'.'
+        sta ui_board, x
+        jmp @end_loop
+@number_field:
+        clc
+        adc #$31 ; 0 -> '1', etc.
+        sta ui_board, x
+        
+@end_loop:
+        dex
+        bpl @loop
+
+        ply
+        plx
+        pla
+        rts
+        
+maybe_redraw_ui:
+        dec UI_COUNT
+        beq @dec_high
+        rts
+
+@dec_high:
+        lda UI_COUNT_H
+        dec
+        sta UI_COUNT_H
+        and #%00001111
+
+        beq redraw_ui
+        rts
+
+redraw_ui:        
+        jsr solver_to_ui
+        jsr ui_draw
+        rts
+
+
 
 test_input:
 ; .byte "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......"
@@ -752,7 +804,7 @@ open_initial:
 .byte        80
 
 
-.BSS ; FIXME: BSS does not work for size != 256
+.BSS ; FIXME: BSS does not work for size != 256 -> does only apply to size of whole segment (cause I was lazy...)
 cand_l_stack:
 ; .RES STACK_SIZE
 .RES $100

@@ -1,5 +1,5 @@
 BUILD_DIR=./build
-SRCS_CMD := 24_cmd_cat.asm 25_cmd_bs02.asm 27_snake.asm 28_sudoku.asm
+SRCS_CMD := 24_cmd_cat.asm 25_cmd_bs02.asm 27_snake.asm 28_sudoku.asm 28_sudoku_ui.asm
 SRCS := uart_ti.asm std.asm 12_sieve_term.asm 12_sieve_dyn.asm 12_sieve_bss.asm 14_memtest.asm 17_dos.asm 17_dos_token.asm 17_dos_pageio.asm 17_dos_baseio.asm 17_dos_pagetable.asm 17_dos_event.asm 17_dos_func_table.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm 22_irq.asm 23_flow_control.asm 26_resident.asm $(SRCS_CMD)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
@@ -92,7 +92,7 @@ $(BUILD_DIR)/27_snake: $(BUILD_DIR)/27_snake.o
 	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/sn
 
-$(BUILD_DIR)/28_sudoku: $(BUILD_DIR)/28_sudoku.o 	
+$(BUILD_DIR)/28_sudoku: $(BUILD_DIR)/28_sudoku.o $(BUILD_DIR)/28_sudoku_ui.o 
 	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/su
 
