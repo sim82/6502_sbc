@@ -48,16 +48,9 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	lda IO_UART2_CSTA
 .endmacro
 .CODE
+coldboot_entrypoint:
 	ldx #$ff
 	txs 
-	
-	; init local vars
-	lda #$00
-	sta INPUT_LINE_PTR
-	sta USER_PROCESS
-	sta INPUT_CHAR
-	sta IRQ_TIMER
-	
 
 	sei
 	
@@ -78,7 +71,19 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	; jmp @skip_init
 	jsr init_pagetable
 	
+	jmp skip_warmboot_message
+
 warmboot_entrypoint:
+	jsr put_newline
+	print_message_from_ptr warmboot_message
+
+skip_warmboot_message:
+	; init local vars
+	lda #$00
+	sta INPUT_LINE_PTR
+	sta USER_PROCESS
+	sta INPUT_CHAR
+	sta IRQ_TIMER
 ; @skip_init:
 	jsr clear_resident
 
@@ -176,7 +181,7 @@ warmboot_entrypoint:
 @no_resident_run:
 	; chicken rivet: disable irq during os internal commands
 	; not sure if an irq is enough to mess up the bulk file read loop...
-	sei
+	; sei
 	; if no resident program is running, process input with command processor
 	lda INPUT_CHAR
 	beq @sleep
@@ -245,7 +250,7 @@ irq:
 	lda #$00
 @use_char:
 	cmp #$18
-	beq warmboot
+	beq @handle_ctrlx
 	sta INPUT_CHAR
 	sta IO_GPIO0
 
@@ -259,6 +264,17 @@ irq:
 	pla
 	rti
 
+@handle_ctrlx:
+	lda USER_PROCESS
+	beq @cold_boot
+	ldx #$ff
+	txs
+	cld
+	sei
+	jmp warmboot_entrypoint
+@cold_boot:
+	jmp coldboot_entrypoint
+
 print_prompt:
 	lda RESIDENT_STATE
 	beq @no_resident
@@ -270,14 +286,7 @@ print_prompt:
 	rts
 
 
-warmboot:
-	ldx #$ff
-	txs
-	cld
-	sei
-	lda #$00
-	sta INPUT_CHAR
-	jmp warmboot_entrypoint
+	
 ; read_input:
 ; 	jsr getc
 ; 	bcc read_input 		; busy wait for character
@@ -555,3 +564,6 @@ welcome_message:
 
 back_to_dos_message:
 	.byte "Back in control..", $0A, $0D, $00
+warmboot_message:
+	.byte "entry via warmboot..", $0A, $0D, $00
+
