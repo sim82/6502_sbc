@@ -48,6 +48,9 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	lda IO_UART2_CSTA
 .endmacro
 .CODE
+	ldx #$ff
+	txs 
+	
 	; init local vars
 	lda #$00
 	sta INPUT_LINE_PTR
@@ -75,6 +78,7 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	; jmp @skip_init
 	jsr init_pagetable
 	
+warmboot_entrypoint:
 ; @skip_init:
 	jsr clear_resident
 
@@ -240,6 +244,8 @@ irq:
 
 	lda #$00
 @use_char:
+	cmp #$18
+	beq warmboot
 	sta INPUT_CHAR
 	sta IO_GPIO0
 
@@ -263,6 +269,15 @@ print_prompt:
 	jsr putc
 	rts
 
+
+warmboot:
+	ldx #$ff
+	txs
+	cld
+	sei
+	lda #$00
+	sta INPUT_CHAR
+	jmp warmboot_entrypoint
 ; read_input:
 ; 	jsr getc
 ; 	bcc read_input 		; busy wait for character
@@ -277,6 +292,8 @@ process_input:
 	beq @ignore_input
 	cmp #$1a 		; ignore ctrl-z
 	beq @ignore_input
+	cmp #$18
+	beq @ignore_input       ; ignore ctrl-x
 	
 	cmp #$0d 		; enter key is CR / \r 
 	bne @no_enter_key
