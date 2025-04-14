@@ -535,6 +535,7 @@ ui_to_solver:
 
         
         jsr set_field_init
+        ; bcc @empty_field ; pretend that an inconsistent field is just empty
         jmp @end
 
 @empty_field:
@@ -552,12 +553,27 @@ ui_to_solver:
         rts
 
 set_field_init:
+.MACRO check_kernel lu, free
+.local @success
+        ldx lu, y
+        lda free, x
+        ldx CUR_NUM
+        and set_mask, x
+        bne @success  
+        clc
+        rts
+@success:
+.ENDMACRO
         ; TODO: add plausibility check
         ; specialized version for init. can probabl be unified with other version
         cmp #8
         bcs @high
         ; low byte
         sta CUR_NUM
+
+        check_kernel f2h, h_free_l
+        check_kernel f2v, v_free_l
+        check_kernel f2b, b_free_l
 
         reset_kernel f2h, h_free_l
         reset_kernel f2v, v_free_l
@@ -576,11 +592,17 @@ set_field_init:
         sbc #8
         sta CUR_NUM
         ;high byte
+        check_kernel f2h, h_free_h
+        check_kernel f2v, v_free_h
+        check_kernel f2b, b_free_h
+
         reset_kernel f2h, h_free_h
         reset_kernel f2v, v_free_h
         reset_kernel f2b, b_free_h
 @end:
+        sec
         rts
+
 
 solver_to_ui:
         pha
