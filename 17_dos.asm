@@ -58,7 +58,7 @@ coldboot_entrypoint:
 	lda #%00001010
 	sta IO_UART2_IMR
 
-	uart_start_timer 10
+	uart_start_timer 10000
 
 	; lda IO_UART2_CSTO
 	
