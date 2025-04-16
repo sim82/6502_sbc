@@ -252,7 +252,7 @@ irq:
 	cmp #$18
 	beq @handle_ctrlx
 	sta INPUT_CHAR
-	sta IO_GPIO0
+	; sta IO_GPIO0
 
 @no_char:
 	lda IO_UART2_CSTO
