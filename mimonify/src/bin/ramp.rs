@@ -54,18 +54,23 @@ fn main() {
                 mf * 256.0 * 256.0
             );
             // m
-            (mf * 256.0 * 256.0) as u32
+            mf
         })
         .collect::<Vec<_>>();
     // let mut m = slope(0..=90, 0..=256); //((y1 - y0) << 8) / (x1 - x0);
-    let m = params[0];
+    let m = (params[13] * 256.0 * 256.0).round() as u32;
+    // let m = (params[13] * 256.0 * 256.0) as u32;
+    let mf = params[13];
 
     println!("m: {}", m);
     let mut y = 0;
+    let mut yf: f64 = 0.0;
     let mut s = 20;
-    for x in 0..=512 {
-        println!("{} {}", x, y >> (8));
+
+    for x in 0..=10000 {
+        println!("{} {} {}", x, y >> (8), yf.rem_euclid(1.0) * 256.0);
         y += m;
+        yf += mf;
         y %= 256 * 256;
     }
 }
