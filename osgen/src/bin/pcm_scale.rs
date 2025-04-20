@@ -7,6 +7,9 @@ use clap::Parser;
 #[command(version, about)]
 struct Args {
     output_file: String,
+
+    #[arg(long, short)]
+    sample_rate: Option<f64>,
 }
 fn main() {
     // let x0 = 0;
@@ -20,13 +23,14 @@ fn main() {
         std::fs::File::create(args.output_file).expect("failed to create output file");
     let scale = include!("scale.inc");
 
-    const SAMPLE_RATE: f64 = 10000.0;
+    // const SAMPLE_RATE: f64 = 10000.0;
+    let sample_rate = args.sample_rate.unwrap_or(10000.0);
     let params = scale
         .iter()
         .map(|freq| {
-            let p = SAMPLE_RATE / freq;
+            // let p = SAMPLE_RATE / freq;
 
-            let mf = 1.0 / p;
+            let mf = freq / sample_rate;
             // println!("{}, {}: {}", freq, p, mf * 256.0 * 256.0);
             // m
 
@@ -34,28 +38,35 @@ fn main() {
             (freq, mf, m)
         })
         .collect::<Vec<_>>();
+
+    writeln!(
+        output_file,
+        "; sawtooth slope as 8.8bit unsigned fixpoint values",
+    )
+    .unwrap();
+    writeln!(output_file, "; sample rate: {}", sample_rate).unwrap();
     writeln!(output_file, "SCALE_LEN = {}", scale.len()).unwrap();
-    writeln!(output_file, "scale_m_l:").unwrap();
-    for (freq, mf, m) in &params {
+    writeln!(output_file, "scale_l:").unwrap();
+    for (freq, _mf, m) in &params {
         writeln!(
             output_file,
-            ".byte ${:x}\t# {}Hz, {}, {}",
+            ".byte ${:02x}\t; {}Hz, {} = ${:04x}",
             m & 0xff,
             freq,
-            mf,
+            m,
             m
         )
         .unwrap();
         println!("{}: {}", freq, m);
     }
-    writeln!(output_file, "scale_m_h:").unwrap();
-    for (freq, mf, m) in &params {
+    writeln!(output_file, "\nscale_h:").unwrap();
+    for (freq, _mf, m) in &params {
         writeln!(
             output_file,
-            ".byte ${:x}\t# {}Hz, {}, {}",
+            ".byte ${:02x}\t; {}Hz, {} = ${:04x}",
             (m >> 8) & 0xff,
             freq,
-            mf,
+            m,
             m
         )
         .unwrap();
