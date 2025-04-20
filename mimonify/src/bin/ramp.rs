@@ -1,8 +1,5 @@
 use std::ops::RangeInclusive;
 
-fn slope(x: RangeInclusive<u32>, y: RangeInclusive<u32>, ps: u32) -> u32 {
-    ((y.end() - y.start()) << (8 + ps)) / ((x.end() - x.start()) << 0)
-}
 fn main() {
     // let x0 = 0;
     // let x1 = 45;
@@ -32,7 +29,7 @@ fn main() {
     let mut yf: f64 = 0.0;
     let mut s = 20;
 
-    for x in 0..=10000 {
+    for x in 0..=255 {
         println!("{} {} {}", x, y >> (8), yf.rem_euclid(1.0) * 256.0);
         y += m;
         yf += mf;
