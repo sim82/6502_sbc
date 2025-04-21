@@ -42,6 +42,7 @@ event_init:
 	sta COUNTER
 	sta YL
 	sta YH
+	lda #00
 	sta NOTE
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
@@ -51,6 +52,17 @@ event_key:
 	txa
 	cmp #'q'
 	beq @exit_non_resident
+	cmp #'a'
+	bne @not_dec
+
+	dec NOTE
+	jmp @exit_resident
+@not_dec:
+	cmp #'s'
+	bne @not_inc
+	inc NOTE
+	jmp @exit_resident
+@not_inc:
 @exit_resident:
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
