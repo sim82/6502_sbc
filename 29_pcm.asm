@@ -3,14 +3,6 @@
 .INCLUDE "os.inc"
 
 ZP = $80
-D = ZP + $00
-Y = ZP + $01
-
-X0 = 0
-X1 = 255
-Y0 = 0
-Y1 = 100
-
 COUNTER 	= ZP + $00
 YL              = ZP + $01
 YH              = ZP + $02
