@@ -217,8 +217,8 @@ run_resident:
 	jmp @exit ; skip printing '*'
 	
 @keep_resident:
-	lda #'*'
-	jsr putc
+	; lda #'*'
+	; jsr putc
 	rts
 	
 @exit:
