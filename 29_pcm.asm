@@ -10,6 +10,7 @@ NOTE            = ZP + $03
 DITHER_V	= ZP + $04
 DITHER_I        = ZP + $05
 DITHER_ENABLED  = ZP + $06
+BASE_NOTE       = ZP + $07
 
 .CODE
 	jsr os_get_event
@@ -49,6 +50,8 @@ event_init:
 	sta DITHER_ENABLED
 	lda #00
 	sta NOTE
+	lda #(60 - 24)
+	sta BASE_NOTE
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts
@@ -71,6 +74,23 @@ event_key:
 	
 
 @no_dither:
+
+	cmp #'n'
+	bne @no_transpose_down
+
+	lda BASE_NOTE
+	sec
+	sbc #12
+	sta BASE_NOTE
+@no_transpose_down:
+	cmp #'m'
+	bne @no_transpose_up
+	lda BASE_NOTE
+	clc
+	adc #12
+	sta BASE_NOTE
+
+@no_transpose_up:
 	jsr keyboard_input
 	jmp @exit_resident
 @not_inc:
@@ -102,12 +122,13 @@ event_timer:
 	sta YH
 	tax
 	lda sin, x
-	; lda #00
-	ldx DITHER_ENABLED
-	beq @no_dither
-	jsr dither
-	adc #00
-@no_dither:
+
+; 	; lda #00
+; 	ldx DITHER_ENABLED
+; 	beq @no_dither
+; 	jsr dither
+; 	adc #00
+; @no_dither:
 	sta IO_GPIO0
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
@@ -125,7 +146,8 @@ keyboard_input:
 @found:
 	stx NOTE
 	
-	lda #36
+	; lda #(36)
+	lda BASE_NOTE
 	sec
 	sbc NOTE
 	sta NOTE
