@@ -239,9 +239,20 @@ clear_resident:
 	rts
 
 irq:
+	; lda #$ff
+	; sta IO_GPIO0
+	; lda #$ff
+	; sta IO_GPIO0
 	; NOTE: no pha, since A is already pushed in 1st level irq handler in rom (bootloader)!
 	lda IO_UART2_ISR
 	sta IRQ_TMP_A
+	and #%00001000
+	sta IRQ_TIMER
+	beq @no_timer
+	lda IO_UART2_CSTO
+@no_timer:
+	
+	lda IRQ_TMP_A
 	and #%00000010
 	beq @no_char
 	jsr getc
@@ -255,13 +266,8 @@ irq:
 	; sta IO_GPIO0
 
 @no_char:
-	lda IRQ_TMP_A
-	and #%00001000
-	sta IRQ_TIMER
-	beq @no_timer
-	lda IO_UART2_CSTO
-
-@no_timer:
+	; lda #$00
+	; sta IO_GPIO0
 	pla
 	rti
 
