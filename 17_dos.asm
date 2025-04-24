@@ -255,10 +255,11 @@ irq:
 	; sta IO_GPIO0
 
 @no_char:
-	lda IO_UART2_CSTO
 	lda IRQ_TMP_A
 	and #%00001000
 	sta IRQ_TIMER
+	beq @no_timer
+	lda IO_UART2_CSTO
 
 @no_timer:
 	pla
