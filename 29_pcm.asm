@@ -14,6 +14,7 @@ BASE_NOTE       = ZP + $07
 ACC_L		= ZP + $08
 ACC_H 		= ZP + $09
 AMP		= ZP + $0a
+AMP_CT          = ZP + $0b
 
 .CODE
 	jsr os_get_event
@@ -115,9 +116,12 @@ event_key:
 
 @no_amp_up:
 	jsr keyboard_input
-	jmp @exit_resident
+
+	
 @not_inc:
 @exit_resident:
+
+
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts 
@@ -128,6 +132,8 @@ event_key:
 
 	
 event_timer:
+	; lda #$ff
+	; sta IO_GPIO0
 	; ldx COUNTER
 	; inx
 	; inx
@@ -155,6 +161,23 @@ event_timer:
 ; 	adc #00
 ; @no_dither:
 	sta IO_GPIO0
+
+	jmp @exit_resident
+	; crappy envelope
+	lda AMP
+	beq @exit_resident
+
+	dec AMP_CT
+	bne @exit_resident
+	lda #$40
+	sta AMP_CT
+	dec AMP
+	jsr calc_amp_ramp
+
+	
+@exit_resident:
+	; lda #00
+	; sta IO_GPIO0
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 
@@ -169,6 +192,10 @@ keyboard_input:
 	bpl @loop
 	rts
 @found:
+	lda #$ff
+	sta AMP
+	lda #40
+	sta AMP_CT 
 	stx NOTE
 	
 	; lda #(36)
