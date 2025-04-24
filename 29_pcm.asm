@@ -11,6 +11,9 @@ DITHER_V	= ZP + $04
 DITHER_I        = ZP + $05
 DITHER_ENABLED  = ZP + $06
 BASE_NOTE       = ZP + $07
+ACC_L		= ZP + $08
+ACC_H 		= ZP + $09
+AMP		= ZP + $0a
 
 .CODE
 	jsr os_get_event
@@ -52,6 +55,9 @@ event_init:
 	sta NOTE
 	lda #(60 - 24)
 	sta BASE_NOTE
+	lda #80
+	sta AMP
+	jsr calc_amp_ramp
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts
@@ -70,7 +76,6 @@ event_key:
 	lda #00
 @end:
 	sta DITHER_ENABLED
-
 	
 
 @no_dither:
@@ -91,6 +96,24 @@ event_key:
 	sta BASE_NOTE
 
 @no_transpose_up:
+	cmp #','
+	bne @no_amp_down
+	lda AMP
+	clc
+	sbc #16
+	sta AMP
+	jsr calc_amp_ramp
+
+@no_amp_down:
+	cmp #'.'
+	bne @no_amp_up
+	lda #16
+	clc
+	adc AMP
+	sta AMP
+	jsr calc_amp_ramp
+
+@no_amp_up:
 	jsr keyboard_input
 	jmp @exit_resident
 @not_inc:
@@ -122,6 +145,8 @@ event_timer:
 	sta YH
 	tax
 	lda sin, x
+	tax
+	lda amp_ramp, x
 
 ; 	; lda #00
 ; 	ldx DITHER_ENABLED
@@ -171,7 +196,29 @@ dither:
 	sta DITHER_I
 	jmp @cont
 
+calc_amp_ramp:
+	ldx #0
+	stx ACC_L
+	stx ACC_H
 	
+	ldy AMP
+
+@loop:
+	tya
+	clc
+	adc ACC_L
+	sta ACC_L
+	lda #00
+	adc ACC_H
+	sta ACC_H
+	sta amp_ramp, x
+	inx
+	bne @loop
+	rts
+	
+.BSS
+amp_ramp:
+	.RES $100
 
 .RODATA
 init_message:
