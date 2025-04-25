@@ -59,6 +59,10 @@ event_init:
 	lda #80
 	sta AMP
 	jsr calc_amp_ramp
+
+	lda #<direct_timer
+	ldx #>direct_timer
+	jsr os_set_direct_timer
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts
@@ -126,12 +130,17 @@ event_key:
 	jsr os_event_return
 	rts 
 @exit_non_resident:
+	lda #00
+	ldx #00
+	jsr os_set_direct_timer
 	lda #OS_EVENT_RETURN_EXIT
 	jsr os_event_return
 	rts 
 
 	
-event_timer:
+direct_timer:
+	phx
+	phy
 	; lda #$ff
 	; sta IO_GPIO0
 	; ldx COUNTER
@@ -162,7 +171,13 @@ event_timer:
 ; @no_dither:
 	sta IO_GPIO0
 
-	jmp @exit_resident
+	; jmp @exit_resident
+	ply
+	plx
+	rts
+
+event_timer:
+	; jmp @exit_resident
 	; crappy envelope
 	lda AMP
 	beq @exit_resident
@@ -182,6 +197,7 @@ event_timer:
 	jsr os_event_return
 
 	rts
+
 
 keyboard_input:
 	ldx #(KEYMAP_LEN - 1)

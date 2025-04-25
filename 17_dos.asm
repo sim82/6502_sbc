@@ -8,7 +8,7 @@
 .import load_relocatable_binary
 .import init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m, cmd_fg_str, cmd_fg
-.export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message, rand_8
+.export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message, rand_8, set_direct_timer
 .include "17_dos.inc"
 .include "os.inc"
 
@@ -250,6 +250,9 @@ irq:
 	sta IRQ_TIMER
 	beq @no_timer
 	lda IO_UART2_CSTO
+	lda direct_timer_h
+	beq @no_timer
+	jsr direct_timer_vector
 @no_timer:
 	
 	lda IRQ_TMP_A
@@ -560,7 +563,21 @@ rand_8:
 	lda RAND_SEED
 	RTS			; done
 
- 
+set_direct_timer:
+	sta direct_timer_l
+	stx direct_timer_h
+	rts
+	
+; hacky: vector pointer for direct timer
+direct_timer_vector:
+	jmp (direct_timer)
+	
+direct_timer:
+direct_timer_l:
+	.byte $00
+direct_timer_h: 
+	.byte $00 
+
 windmill:
 	.byte "-\|/"
 
