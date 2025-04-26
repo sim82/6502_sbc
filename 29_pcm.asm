@@ -62,6 +62,7 @@ event_init:
 
 	lda #<direct_timer
 	ldx #>direct_timer
+	ldy #3 ; set timer div to 6 * 16 = 96 ~ 100Hz (at 10kHz direct timer rate)
 	jsr os_set_direct_timer
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
@@ -141,15 +142,6 @@ event_key:
 direct_timer:
 	phx
 	phy
-	; lda #$ff
-	; sta IO_GPIO0
-	; ldx COUNTER
-	; inx
-	; inx
-	; inx
-	; inx
-	; stx COUNTER
-
 	ldx NOTE
 	lda YL
 	clc
@@ -177,15 +169,17 @@ direct_timer:
 	rts
 
 event_timer:
+	lda #'t'
+	jsr os_putc
 	; jmp @exit_resident
 	; crappy envelope
 	lda AMP
 	beq @exit_resident
 
-	dec AMP_CT
-	bne @exit_resident
-	lda #$40
-	sta AMP_CT
+	; dec AMP_CT
+	; bne @exit_resident
+	; lda #$40
+	; sta AMP_CT
 	dec AMP
 	jsr calc_amp_ramp
 

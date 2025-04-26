@@ -1,7 +1,8 @@
 .include "std.inc"
 
 PAGETABLE = $0200
-INPUT_LINE = $0300				; address of input line. Keep at page start to simplify ptr calculations
+OS_STATE = $300
+INPUT_LINE = OS_STATE				; address of input line. Keep at page start to simplify ptr calculations
 INPUT_LINE_LEN = $40 - $1			; capacity of input line (minus 1 for null termination)
 INPUT_LINE_PTR = INPUT_LINE + $1 + INPUT_LINE_LEN	; address of current input line ptr 
 						; (relative to address of input line)
@@ -23,8 +24,9 @@ IRQ_TIMER = INPUT_CHAR + 1
 ARGC = IRQ_TIMER + 1
 ARGV = ARGC + 1
 ARGV_NUM = 16
-RAND_SEED = ARGV + ARGV_NUM
-
+RAND_SEED = ARGV + ARGV_NUM 
+DT_DIV16 = RAND_SEED + 1
+.assert DT_DIV16 < $400, error, "os state too large"
 
 ZP_PTR = TARGET_ADDR + 2
 
@@ -55,6 +57,9 @@ MON_ADDRL = EH + 1
 MON_ADDRH = MON_ADDRL + 1
 A_TEMP = MON_ADDRH + 1
 X_TEMP = A_TEMP + 1
+DT_COUNT_L = X_TEMP + 1
+DT_COUNT_H = DT_COUNT_L + 1
+.assert DT_COUNT_H < $80, error, "os zp state too large"
 
 IO_BUFFER = $0400
 

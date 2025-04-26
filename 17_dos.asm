@@ -8,6 +8,7 @@
 .import load_relocatable_binary
 .import init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m, cmd_fg_str, cmd_fg
+.import print_dec
 .export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message, rand_8, set_direct_timer
 .include "17_dos.inc"
 .include "os.inc"
@@ -58,7 +59,7 @@ coldboot_entrypoint:
 	lda #%00001010
 	sta IO_UART2_IMR
 
-	uart_start_timer 10000
+	uart_start_timer 10
 
 	; lda IO_UART2_CSTO
 	
@@ -84,6 +85,9 @@ skip_warmboot_message:
 	sta USER_PROCESS
 	sta INPUT_CHAR
 	sta IRQ_TIMER
+	sta DT_COUNT_L
+	sta DT_COUNT_H
+	sta direct_timer_h
 ; @skip_init:
 	jsr clear_resident
 
@@ -157,6 +161,9 @@ skip_warmboot_message:
 	; check ctrl-c
 	cmp #$03
 	bne @no_cancel
+
+	jsr check_unclean_exit
+@no_direct_timer:
 	; cleanup process
 	; meeeep! redundant!
 	lda RECEIVE_POS + 1
@@ -198,6 +205,15 @@ skip_warmboot_message:
 @skip_sleep:
 	jmp @wait_loop
 
+check_unclean_exit:
+	; if process had direct timer running recover via coldboot
+	lda direct_timer_h
+	beq @no_direct_timer
+	print_message_from_ptr failed_exit_message
+	jmp coldboot_entrypoint
+@no_direct_timer:
+	rts
+
 run_resident:
 	lda #$00
 	sta RESIDENT_RETURN
@@ -209,6 +225,7 @@ run_resident:
 	lda RESIDENT_RETURN
 	; non-zero return code -> keep resident
 	bne @keep_resident
+	jsr check_unclean_exit
 	jsr clear_resident
 	lda RECEIVE_POS + 1
 	jsr free_page_span
@@ -246,13 +263,55 @@ irq:
 	; NOTE: no pha, since A is already pushed in 1st level irq handler in rom (bootloader)!
 	lda IO_UART2_ISR
 	sta IRQ_TMP_A
+	; check if timer interrupt
 	and #%00001000
-	sta IRQ_TIMER
+	; no? -> skip all timer code
 	beq @no_timer
+	; 1st thing: reset the uart timer (it is quite slow and resetting it too late can cause double interrupts)
 	lda IO_UART2_CSTO
+
+	; check if direct timer is enabled
 	lda direct_timer_h
-	beq @no_timer
+	; no direct timer -> just trigger os timer
+	beq @trigger_os_timer
+
+	; call direct timer vector
 	jsr direct_timer_vector
+
+	; check if os timer should also be triggered
+	; lda DT_COUNT_L
+	; sec
+	; sbc #1
+	; sta DT_COUNT_L
+	; lda DT_COUNT_H
+	; sbc #0
+	; sta DT_COUNT_H
+	; ora DT_COUNT_L
+	; uhm, is a 16bit count-down really that simple?
+	dec DT_COUNT_L
+	bne @no_timer
+	dec DT_COUNT_H
+	bmi @do_timer ; think about this again...
+
+@do_timer:
+	; reset os timer counters from divisor	
+
+	lda #0
+	sta DT_COUNT_H
+	lda DT_DIV16
+	sta DT_COUNT_L
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	
+@trigger_os_timer:
+	lda #1
+	sta IRQ_TIMER
 @no_timer:
 	
 	lda IRQ_TMP_A
@@ -566,6 +625,28 @@ rand_8:
 set_direct_timer:
 	sta direct_timer_l
 	stx direct_timer_h
+	beq @stop_direct_timer
+	
+	lda #0
+	sta DT_COUNT_H
+	sty DT_DIV16
+	sty DT_COUNT_L
+	
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	asl DT_COUNT_L
+	rol DT_COUNT_H
+	uart_start_timer 10000
+	lda DT_COUNT_L
+	ldx DT_COUNT_H
+	rts
+@stop_direct_timer:
+
+	uart_start_timer 10
 	rts
 	
 ; hacky: vector pointer for direct timer
@@ -590,4 +671,6 @@ back_to_dos_message:
 	.byte "Back in control..", $0A, $0D, $00
 warmboot_message:
 	.byte "entry via warmboot..", $0A, $0D, $00
+failed_exit_message:
+	.byte "Process exit recovery (coldboot)", $0A, $0D, $00
 
