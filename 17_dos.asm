@@ -589,10 +589,12 @@ get_arg:
 	rts
 	
 rand_8:
-	tya
-	pha
-	txa
-	pha
+	phy
+	phx
+	; tya
+	; pha
+	; txa
+	; pha
 	LDA	RAND_SEED		; get seed
 	AND	#$b8		; mask non feedback bits
 				; for maximal length run with 8 bits we need
@@ -615,10 +617,12 @@ rand_8:
 	LDA	RAND_SEED	; get seed back
 	ROL	A		; rotate carry into byte
 	STA	RAND_SEED	; save number as next seed
-	pla
-	tax
-	pla
-	tay
+	plx
+	ply
+	; pla
+	; tax
+	; pla
+	; tay
 	lda RAND_SEED
 	RTS			; done
 

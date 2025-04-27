@@ -15,6 +15,11 @@ ACC_L		= ZP + $08
 ACC_H 		= ZP + $09
 AMP		= ZP + $0a
 AMP_CT          = ZP + $0b
+BIAS_TYPE	= ZP + $0c
+WAVETABLE	= ZP + $0d
+
+
+
 
 .CODE
 	jsr os_get_event
@@ -52,6 +57,9 @@ event_init:
 	sta YH
 	sta DITHER_I
 	sta DITHER_ENABLED
+	sta BIAS_TYPE
+	lda #01
+	sta WAVETABLE
 	lda #00
 	sta NOTE
 	lda #(60 - 24)
@@ -120,6 +128,22 @@ event_key:
 	jsr calc_amp_ramp
 
 @no_amp_up:
+	cmp #'b'
+	bne @no_bias
+	lda BIAS_TYPE
+	; toggle between 0 / 1
+	inc
+	and #$01
+	sta BIAS_TYPE
+@no_bias:
+	cmp #'v'
+	bne @no_wavetable
+	lda WAVETABLE
+	inc
+	and #$01
+	sta WAVETABLE
+
+@no_wavetable:
 	jsr keyboard_input
 
 	
@@ -140,6 +164,7 @@ event_key:
 
 	
 direct_timer:
+	; NOTE: make sure not to clobber X/Y registers! only A is auto restored by irq handler! (but don't waste time...)
 	phx
 	phy
 	ldx NOTE
@@ -147,12 +172,27 @@ direct_timer:
 	clc
 	adc scale_l, x
 	sta YL
+	; crap dither
+; 	lda DITHER_ENABLED
+; 	beq @no_dither
+; 	jsr os_rand
+; 	clc
+; 	adc YL
+; @no_dither:
+	; crap dither end
+
+	; clc
 	lda YH
 	adc scale_h, x
 	sta YH
+
 	tax
+
+	lda WAVETABLE
+	beq @no_wavetable
 	lda sin, x
 	tax
+@no_wavetable:
 	lda amp_ramp, x
 
 ; 	; lda #00
@@ -163,14 +203,13 @@ direct_timer:
 ; @no_dither:
 	sta IO_GPIO0
 
-	; jmp @exit_resident
 	ply
 	plx
 	rts
 
 event_timer:
-	lda #'t'
-	jsr os_putc
+	; lda #'t'
+	; jsr os_putc
 	; jmp @exit_resident
 	; crappy envelope
 	lda AMP
@@ -236,9 +275,25 @@ dither:
 calc_amp_ramp:
 	ldx #0
 	stx ACC_L
-	stx ACC_H
-	
 	ldy AMP
+
+	lda BIAS_TYPE
+	beq @midpoint_bias
+	stx ACC_H
+	jmp @loop
+	
+@midpoint_bias:
+	; correctly bias output signal:
+	; push up amp ramp by 0.5 + amp/2 (i.e. null-point is a t $80)
+	tya ; AMP -> A
+	lsr
+	sta NUM1
+	lda #$80
+	sec
+	sbc NUM1
+	
+	sta ACC_H
+
 
 @loop:
 	tya
