@@ -72,6 +72,7 @@ event_init:
 	ldx #>direct_timer
 	ldy #3 ; set timer div to 6 * 16 = 96 ~ 100Hz (at 10kHz direct timer rate)
 	jsr os_set_direct_timer
+	; jsr random_wavetable
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts
@@ -306,6 +307,19 @@ calc_amp_ramp:
 	sta amp_ramp, x
 	inx
 	bne @loop
+	rts
+
+random_wavetable:
+	ldx #$00
+@loop:
+	dex
+	beq @end
+	
+	jsr os_rand
+	
+	sta sin, x
+	jmp @loop
+@end:
 	rts
 	
 .BSS
