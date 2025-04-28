@@ -17,8 +17,8 @@ AMP		= ZP + $0a
 AMP_CT          = ZP + $0b
 BIAS_TYPE	= ZP + $0c
 WAVETABLE	= ZP + $0d
-
-
+ADDRL		= ZP + $0e
+ADDRH		= ZP + $0f
 
 
 .CODE
@@ -72,6 +72,10 @@ event_init:
 	ldx #>direct_timer
 	ldy #3 ; set timer div to 6 * 16 = 96 ~ 100Hz (at 10kHz direct timer rate)
 	jsr os_set_direct_timer
+
+	lda #<sin
+	ldx #>sin
+	jsr copy_wavetable
 	; jsr random_wavetable
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
@@ -102,6 +106,7 @@ event_key:
 	sec
 	sbc #12
 	sta BASE_NOTE
+	jmp @input_end
 @no_transpose_down:
 	cmp #'m'
 	bne @no_transpose_up
@@ -109,6 +114,7 @@ event_key:
 	clc
 	adc #12
 	sta BASE_NOTE
+	jmp @input_end
 
 @no_transpose_up:
 	cmp #','
@@ -118,6 +124,7 @@ event_key:
 	sbc #16
 	sta AMP
 	jsr calc_amp_ramp
+	jmp @input_end
 
 @no_amp_down:
 	cmp #'.'
@@ -127,6 +134,7 @@ event_key:
 	adc AMP
 	sta AMP
 	jsr calc_amp_ramp
+	jmp @input_end
 
 @no_amp_up:
 	cmp #'b'
@@ -136,6 +144,7 @@ event_key:
 	inc
 	and #$01
 	sta BIAS_TYPE
+	jmp @input_end
 @no_bias:
 	cmp #'v'
 	bne @no_wavetable
@@ -143,8 +152,15 @@ event_key:
 	inc
 	and #$01
 	sta WAVETABLE
+	jmp @input_end
 
 @no_wavetable:
+	cmp #'l'
+	bne @no_load
+	jsr load_wavetable
+
+@no_load:
+@input_end:
 	jsr keyboard_input
 
 	
@@ -191,7 +207,7 @@ direct_timer:
 
 	lda WAVETABLE
 	beq @no_wavetable
-	lda sin, x
+	lda wavetable, x
 	tax
 @no_wavetable:
 	lda amp_ramp, x
@@ -317,13 +333,52 @@ random_wavetable:
 	
 	jsr os_rand
 	
-	sta sin, x
+	sta wavetable, x
 	jmp @loop
 @end:
 	rts
+
+copy_wavetable:
+	sta ADDRL
+	stx ADDRH
+	ldy #$00
+@loop:
+	lda (ADDRL), y
+	; lda sin, y
+	sta wavetable, y
+
+	iny
+	bne @loop
+
+@end:
+	rts
+
+load_wavetable:
+	lda #<filename
+	ldx #>filename
+	jsr os_fopen
 	
+
+	ldy #$00
+@loop:
+	jsr os_fgetc
+	bcc @end
+	; lda sin, y
+	sta wavetable, y
+
+	iny
+	; bne @loop
+	jmp @loop
+
+@end:
+	rts
+	
+
 .BSS
 amp_ramp:
+	.RES $100
+
+wavetable:
 	.RES $100
 
 .RODATA
@@ -338,3 +393,5 @@ KEYMAP_LEN = 13
 map_key:
 	.byte "awsedftgyhujk"
 	
+filename:
+	.byte "wavetable", $00
