@@ -19,6 +19,7 @@ BIAS_TYPE	= ZP + $0c
 WAVETABLE	= ZP + $0d
 ADDRL		= ZP + $0e
 ADDRH		= ZP + $0f
+OVERFLOW	= ZP + $10
 
 
 .CODE
@@ -189,6 +190,7 @@ direct_timer:
 	clc
 	adc scale_l, x
 	sta YL
+	
 	; crap dither
 ; 	lda DITHER_ENABLED
 ; 	beq @no_dither
@@ -204,6 +206,10 @@ direct_timer:
 	sta YH
 
 	tax
+	lda #00
+	adc #00
+	ora OVERFLOW
+	sta OVERFLOW
 
 	lda WAVETABLE
 	beq @no_wavetable
@@ -367,6 +373,12 @@ load_wavetable:
 	sta wavetable, y
 
 	iny
+	bne @loop
+	lda #00
+	sta OVERFLOW
+	@wait_loop:
+	lda OVERFLOW
+	beq @wait_loop
 	; bne @loop
 	jmp @loop
 
