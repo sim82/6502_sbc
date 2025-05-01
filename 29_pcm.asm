@@ -224,8 +224,8 @@ direct_timer:
 ; 	jsr dither
 ; 	adc #00
 ; @no_dither:
-	sta IO_GPIO0
 
+	sta IO_GPIO0
 	ply
 	plx
 	rts
