@@ -16,6 +16,8 @@ TARGET_ADDR = $09 ; must be the last global ZP entry! dos starts after this!
 IO_BASE = $fe00
 
 IO_GPIO0        = IO_BASE + $00
+IO_GPIO10        = IO_BASE + $80
+IO_GPIO11        = IO_BASE + $90
 
 IO_DISP_CTRL    = IO_BASE + $10
 IO_DISP_DATA    = IO_BASE + $11

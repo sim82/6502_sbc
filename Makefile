@@ -57,7 +57,7 @@ $(BUILD_DIR)/basic: $(BUILD_DIR)/basic.o $(BUILD_DIR)/basic_bios.o $(DEPS_NO_STD
 	ln -sf $(shell pwd)/$@ mimonify/disk/basic
 
 $(BUILD_DIR)/20_uart: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)	
-	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
+	ld65 -o $@ -C my_sbc_os.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/ti
 
 $(BUILD_DIR)/20_uart_rel: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)	

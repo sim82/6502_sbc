@@ -21,6 +21,7 @@ ADDRL		= ZP + $0e
 ADDRH		= ZP + $0f
 OVERFLOW	= ZP + $10
 
+IO		= IO_GPIO0
 
 .CODE
 	jsr os_get_event
@@ -225,7 +226,8 @@ direct_timer:
 ; 	adc #00
 ; @no_dither:
 
-	sta IO_GPIO0
+	sta IO
+	sta IO_GPIO10
 	ply
 	plx
 	rts
