@@ -20,6 +20,7 @@ WAVETABLE	= ZP + $0d
 ADDRL		= ZP + $0e
 ADDRH		= ZP + $0f
 OVERFLOW	= ZP + $10
+APPLY_VOLUME	= ZP + $11
 
 IO		= IO_GPIO0
 
@@ -62,6 +63,7 @@ event_init:
 	sta BIAS_TYPE
 	lda #01
 	sta WAVETABLE
+	sta APPLY_VOLUME
 	lda #00
 	sta NOTE
 	lda #(60 - 24)
@@ -86,7 +88,16 @@ event_init:
 event_key:
 	txa
 	cmp #'q'
-	beq @exit_non_resident
+	bne @no_quit
+	; exit non-resident
+	lda #00
+	ldx #00
+	jsr os_set_direct_timer
+	lda #OS_EVENT_RETURN_EXIT
+	jsr os_event_return
+	rts 
+
+@no_quit:
 	cmp #'p'
 	bne @no_dither
 	lda DITHER_ENABLED
@@ -148,7 +159,7 @@ event_key:
 	sta BIAS_TYPE
 	jmp @input_end
 @no_bias:
-	cmp #'v'
+	cmp #'c'
 	bne @no_wavetable
 	lda WAVETABLE
 	inc
@@ -157,6 +168,15 @@ event_key:
 	jmp @input_end
 
 @no_wavetable:
+	cmp #'v'
+	bne @no_volume
+	lda APPLY_VOLUME
+	inc
+	and #$01
+	sta APPLY_VOLUME
+	jmp @input_end
+
+@no_volume:
 	cmp #'l'
 	bne @no_load
 	jsr load_wavetable
@@ -168,18 +188,10 @@ event_key:
 	
 @not_inc:
 @exit_resident:
-
-
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts 
-@exit_non_resident:
-	lda #00
-	ldx #00
-	jsr os_set_direct_timer
-	lda #OS_EVENT_RETURN_EXIT
-	jsr os_event_return
-	rts 
+
 
 	
 direct_timer:
@@ -217,7 +229,10 @@ direct_timer:
 	lda wavetable, x
 	tax
 @no_wavetable:
+	ldy APPLY_VOLUME
+	beq @no_volume
 	lda amp_ramp, x
+@no_volume:
 
 ; 	; lda #00
 ; 	ldx DITHER_ENABLED
