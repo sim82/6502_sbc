@@ -21,6 +21,11 @@ ADDRL		= ZP + $0e
 ADDRH		= ZP + $0f
 OVERFLOW	= ZP + $10
 APPLY_VOLUME	= ZP + $11
+DWT_START	= ZP + $12
+DWT_CUR_L       = ZP + $13
+DWT_CUR_H       = ZP + $14
+DWT_ADVANCE	= ZP + $15
+DWT_SIZE	= 128
 
 IO		= IO_GPIO0
 
@@ -64,22 +69,24 @@ event_init:
 	lda #01
 	sta WAVETABLE
 	sta APPLY_VOLUME
-	lda #00
+	lda #36
 	sta NOTE
+	sta DWT_ADVANCE
 	lda #(60 - 24)
 	sta BASE_NOTE
 	lda #80
 	sta AMP
 	jsr calc_amp_ramp
 
-	lda #<direct_timer
-	ldx #>direct_timer
+	lda #<direct_timer_dwt
+	ldx #>direct_timer_dwt
 	ldy #3 ; set timer div to 6 * 16 = 96 ~ 100Hz (at 10kHz direct timer rate)
 	jsr os_set_direct_timer
 
 	lda #<sin
 	ldx #>sin
 	jsr copy_wavetable
+	jsr load_dwt
 	; jsr random_wavetable
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
@@ -247,6 +254,57 @@ direct_timer:
 	plx
 	rts
 
+direct_timer_dwt:
+	; NOTE: make sure not to clobber X/Y registers! only A is auto restored by irq handler! (but don't waste time...)
+	phx
+	phy
+	ldx NOTE
+	lda YL
+	clc
+	adc scale_l, x
+	sta YL
+	
+	lda YH
+	adc scale_h, x
+	sta YH
+
+	tay
+
+	bcc @no_page_inc
+	lda DWT_ADVANCE
+	beq @no_page_inc
+	lda DWT_CUR_H
+	adc #0
+	; sta IO_GPIO0
+	sta DWT_CUR_H
+	
+
+	lda DWT_START
+	clc
+	adc #DWT_SIZE
+	cmp DWT_CUR_H
+
+	bne @no_page_inc ; not past end
+
+	lda DWT_START
+	sta DWT_CUR_H
+
+@no_page_inc:
+
+	lda (DWT_CUR_L), y
+	tax
+	ldy APPLY_VOLUME
+	beq @no_volume
+	lda amp_ramp, x
+@no_volume:
+
+
+	sta IO
+	; sta IO_GPIO10
+	ply
+	plx
+	rts
+
 event_timer:
 	; lda #'t'
 	; jsr os_putc
@@ -281,9 +339,15 @@ keyboard_input:
 	bpl @loop
 	rts
 @found:
+	lda #00
+	sta YL
+	sta YH
+	lda DWT_START
+	sta DWT_CUR_H
+	
 	lda #$ff
 	sta AMP
-	lda #40
+	lda #20
 	sta AMP_CT 
 	stx NOTE
 	
@@ -403,6 +467,45 @@ load_wavetable:
 	rts
 	
 
+load_dwt:
+	lda #0
+	sta DWT_ADVANCE
+	lda #DWT_SIZE
+	jsr os_alloc
+	bcc error
+
+	sta DWT_START
+	sta DWT_CUR_H
+	lda #0
+	sta DWT_CUR_L
+
+	lda #<filename
+	ldx #>filename
+	jsr os_fopen
+
+	ldx #DWT_SIZE
+	ldy #0
+
+@outer_loop:
+@page_loop:
+	jsr os_fgetc
+	bcc error
+	sta (DWT_CUR_L), y
+	iny
+	bne @page_loop
+	inc DWT_CUR_H
+	dex
+	bne @outer_loop
+	
+	lda DWT_START
+	sta DWT_CUR_H
+	lda #$ff
+	sta DWT_ADVANCE
+	rts
+
+error:
+	jmp error ; meh...
+	
 .BSS
 amp_ramp:
 	.RES $100
@@ -413,6 +516,9 @@ wavetable:
 .RODATA
 init_message:
 	.byte "Press q to exit...", $00
+
+; error_message:
+; 	.byte "error: ", $00
 
 sin:
 	.byte    $80, $83, $86, $89, $8c, $8f, $92, $95, $98, $9b, $9e, $a2, $a5, $a7, $aa, $ad, $b0, $b3, $b6, $b9, $bc, $be, $c1, $c4, $c6, $c9, $cb, $ce, $d0, $d3, $d5, $d7, $da, $dc, $de, $e0, $e2, $e4, $e6, $e8, $e9, $eb, $ed, $ee, $f0, $f1, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fc, $fd, $fd, $fe, $fe, $fe, $fe, $fe, $fe, $fe, $fe, $fe, $fe, $fd, $fd, $fc, $fc, $fb, $fa, $fa, $f9, $f8, $f7, $f6, $f4, $f3, $f2, $f0, $ef, $ed, $ec, $ea, $e8, $e7, $e5, $e3, $e1, $df, $dd, $db, $d8, $d6, $d4, $d2, $cf, $cd, $ca, $c8, $c5, $c2, $c0, $bd, $ba, $b7, $b5, $b2, $af, $ac, $a9, $a6, $a3, $a0, $9d, $9a, $97, $94, $91, $8e, $8a, $87, $84, $81, $7e, $7b, $78, $75, $71, $6e, $6b, $68, $65, $62, $5f, $5c, $59, $56, $53, $50, $4d, $4a, $48, $45, $42, $3f, $3d, $3a, $37, $35, $32, $30, $2d, $2b, $29, $27, $24, $22, $20, $1e, $1c, $1a, $18, $17, $15, $13, $12, $10, $f, $d, $c, $b, $9, $8, $7, $6, $5, $5, $4, $3, $3, $2, $2, $1, $1, $1, $1, $1, $1, $1, $1, $1, $1, $2, $2, $3, $3, $4, $5, $6, $7, $8, $9, $a, $b, $c, $e, $f, $11, $12, $14, $16, $17, $19, $1b, $1d, $1f, $21, $23, $25, $28, $2a, $2c, $2f, $31, $34, $36, $39, $3b, $3e, $41, $43, $46, $49, $4c, $4f, $52, $55, $58, $5a, $5d, $61, $64, $67, $6a, $6d, $70, $73, $76, $79, $7c, $80
