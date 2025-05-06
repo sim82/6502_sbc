@@ -21,7 +21,13 @@ fn main() {
 
     let mut output_file =
         std::fs::File::create(args.output_file).expect("failed to create output file");
-    let scale = include!("scale.inc");
+    // let mut scale = include!("scale.inc");
+
+    let octaves = 5;
+    let num_notes = octaves * 12;
+    let scale = (0..num_notes)
+        .map(|note| 440.0 * 2f64.powf((note - 48) as f64 / 12.0))
+        .collect::<Vec<_>>();
 
     // const SAMPLE_RATE: f64 = 10000.0;
     let sample_rate = args.sample_rate.unwrap_or(10000.0);
@@ -30,7 +36,8 @@ fn main() {
         .map(|freq| {
             // let p = SAMPLE_RATE / freq;
 
-            let mf = freq / sample_rate;
+            // let mf = freq / sample_rate;
+            let mf = (freq / 440.0) / 256.0;
             // println!("{}, {}: {}", freq, p, mf * 256.0 * 256.0);
             // m
 
