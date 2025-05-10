@@ -1,9 +1,9 @@
 build/*
 tmp/*
 
-pcb01/gerber/*
-pcb01/production/*
-pcb01/pcb01-backups/*
+kicad/**/gerber/*
+kicad/**/production/*
+kicad/**/*-backups/*
 
 mimonify/target/*
 mimonify/disk/*
