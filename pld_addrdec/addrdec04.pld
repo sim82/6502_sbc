@@ -10,7 +10,7 @@ Ram1En    RwBout SysClk IoRdB IoB   RomB   Ram1B   Ram0B   OeB    WeB    NC   VC
 /Ram0B = /A15 
 /Ram1B = A15 * /A14 * Ram1En + A15 * /A13 * Ram1En + A15 * /A12 * Ram1En + A15 * /A11 * Ram1En + A15 * /A10 * Ram1En + A15 * /A09 * Ram1En 
 /IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock
-/IoRdB = /A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock * RWB
+/IoRdB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock * RWB
 /OeB = RWB * Clock
 /WeB = /RWB * Clock
 SysClk = Clock

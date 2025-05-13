@@ -190,6 +190,7 @@ cmd_ra_str:
 	.byte "ra", $00
 cmd_ra:
 ; straight copy of the old 'execute binary' code.
+	sei
 	jsr retire_token
 	jsr read_token
 ; purge any channel2 input buffer before starting IO
