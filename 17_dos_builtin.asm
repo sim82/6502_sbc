@@ -168,21 +168,21 @@ cmd_j:
 cmd_alloc_str:
 	.byte "alloc", $00
 cmd_alloc:
-	lda #5
-	jsr alloc_page_span
-	bcc @end
+; 	lda #5
+; 	jsr alloc_page_span
+; 	bcc @end
 
-	pha
-	jsr print_hex8
-	jsr put_newline
-	pla
-	jsr free_page_span
+; 	pha
+; 	jsr print_hex8
+; 	jsr put_newline
+; 	pla
+; 	jsr free_page_span
 	
-	bcc @end
+; 	bcc @end
 
-	jsr print_hex8
-	jsr put_newline
-@end:
+; 	jsr print_hex8
+; 	jsr put_newline
+; @end:
 	rts
 
 ; ra - run absolute
@@ -190,44 +190,44 @@ cmd_ra_str:
 	.byte "ra", $00
 cmd_ra:
 ; straight copy of the old 'execute binary' code.
-	sei
-	jsr retire_token
-	jsr read_token
-; purge any channel2 input buffer before starting IO
-	jsr fpurge
-	lda #'o'
-	jsr fputc
-	ldy NEXT_TOKEN_PTR
-@send_filename_loop:
-	cpy NEXT_TOKEN_END
-	beq @end_of_filename
-	lda INPUT_LINE, y
-	jsr fputc
-	iny
-	jmp @send_filename_loop
-@end_of_filename:
-	lda #$00
-	jsr fputc
-	jsr load_binary
-	bcc @file_error
-	lda RECEIVE_POS
-	ldx RECEIVE_POS + 1
-	jsr print_hex16
-	jsr put_newline
-	ldy 0
-@delay:
-	iny
-	bne @delay
+; 	sei
+; 	jsr retire_token
+; 	jsr read_token
+; ; purge any channel2 input buffer before starting IO
+; 	jsr fpurge
+; 	lda #'o'
+; 	jsr fputc
+; 	ldy NEXT_TOKEN_PTR
+; @send_filename_loop:
+; 	cpy NEXT_TOKEN_END
+; 	beq @end_of_filename
+; 	lda INPUT_LINE, y
+; 	jsr fputc
+; 	iny
+; 	jmp @send_filename_loop
+; @end_of_filename:
+; 	lda #$00
+; 	jsr fputc
+; 	jsr load_binary
+; 	bcc @file_error
+; 	lda RECEIVE_POS
+; 	ldx RECEIVE_POS + 1
+; 	jsr print_hex16
+; 	jsr put_newline
+; 	ldy 0
+; @delay:
+; 	iny
+; 	bne @delay
 
-	; put receive pos into monitor address, for inspection after reset
-	lda RECEIVE_POS + 1
-	sta MON_ADDRH
-	lda RECEIVE_POS
-	sta MON_ADDRL
-	jmp (RECEIVE_POS)
+; 	; put receive pos into monitor address, for inspection after reset
+; 	lda RECEIVE_POS + 1
+; 	sta MON_ADDRH
+; 	lda RECEIVE_POS
+; 	sta MON_ADDRL
+; 	jmp (RECEIVE_POS)
 
-@file_error:
-	print_message_from_ptr file_not_found_message
+; @file_error:
+; 	print_message_from_ptr file_not_found_message
 	rts
 
 
