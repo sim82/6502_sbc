@@ -15,8 +15,15 @@
 cmd_help_str:
 	.byte "help", $00
 cmd_help:
-	print_message_from_ptr welcome_message
-	print_message_from_ptr help_message
+
+	lda #00
+@loop2:
+	sta IO_UARTAUX_CSTO
+	ldx IO_UARTAUX_SRA
+	inc
+	jmp @loop2
+	; print_message_from_ptr welcome_message
+	; print_message_from_ptr help_message
 	rts
 
 

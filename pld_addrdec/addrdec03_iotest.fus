@@ -5,7 +5,7 @@ AR
 
 Pin 23 = OeBAux       S0 = 0   S1 = 1
   1  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-  2  x--- x--- ---- ---- ---- ---- ---- ---- ---- ---- ----
+  2  ---- x--- ---- ---- ---- ---- ---- ---- ---- ---- ----
   3  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   4  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   5  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -29,7 +29,7 @@ Pin 22 = WeB          S0 = 0   S1 = 1
 
 Pin 21 = OeB          S0 = 0   S1 = 1
  21  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 22  x--- x--- ---- ---- ---- ---- ---- ---- ---- ---- ----
+ 22  ---- x--- ---- ---- ---- ---- ---- ---- ---- ---- ----
  23  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  24  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  25  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -100,7 +100,7 @@ Pin 18 = RomB         S0 = 0   S1 = 1
 Pin 17 = IoB          S0 = 0   S1 = 1
  83  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
  84  x--- ---- ---- -x-- x--- x--- x--- x--- x--- x--- x---
- 85  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+ 85  ---- x--- ---- -x-- x--- x--- x--- x--- x--- x--- x---
  86  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  87  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  88  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -144,7 +144,7 @@ Pin 15 = SysClk       S0 = 1   S1 = 1
 
 Pin 14 = RwBout       S0 = 1   S1 = 1
 122  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-123  ---- x--- ---- ---- ---- ---- ---- ---- ---- ---- ----
+123  ---- x--- ---- -x-- x--- x--- x--- x--- x--- x--- x---
 124  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 125  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 126  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx

@@ -31,6 +31,12 @@ dispatch_timer:
 
 	
 event_init:
+	lda #00
+@loop2:
+	sta IO_GPIO0
+	ldx IO_GPIO0
+	inc
+	jmp @loop2
 	jsr uartaux_init
 
 @keyloop:
