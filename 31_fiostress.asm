@@ -87,7 +87,7 @@ event_timer:
 	tya
 	
 @next:
-	sta IO_GPIO0
+	; sta IO_GPIO0
 	inc
 	sta EXP
 	clc
@@ -114,6 +114,8 @@ event_timer:
 
 	rts
 
+; read_raw_stress:
+
 
 .RODATA
 error_message:
@@ -121,6 +123,9 @@ error_message:
 
 filename:
 	.byte "stress", $00
+
+open_command:
+	.byte "r stress", $00
 
 
 

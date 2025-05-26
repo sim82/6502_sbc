@@ -25,3 +25,7 @@ Changes:
  - 18.9.2024: remove Clock from IoB
  - 3.10.2024: re-order pins for Mark2 board
  - 22.12.2024: re-add clock to IoB: caused spurious IOs on certain address transitions
+ - 26.5.2025: the IoB signal currently is hacked to make it clock qualified on write cycles. This helps to get e.g. the ti uart working but this should be replaced by proper
+              read/write strobe generation locally to the uart. Same goes for output port latches: io-enable should be ored with the clock for proper write timing rater than
+              baking that into the io-enable signal (which makes it worse for switching the bus transceiver chips)
+              

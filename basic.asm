@@ -477,7 +477,7 @@ Ibuffs            = $0200; the $xx00 fix must be active
 Ibuffe            = Ibuffs + $50;
 
 Ram_base          = $0300; start of user RAM (page aligned)
-Ram_top           = $c000; end of user RAM+1 (page aligned)
+Ram_top           = $b000; end of user RAM+1 (page aligned)
 
 Stack_floor       = 16        ; bytes left free on stack for background interrupts
 

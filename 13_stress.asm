@@ -28,7 +28,7 @@ reset:
 	beq break_page_loop
 
 	sta CUR_PAGE + 1
-	sta IO_GPIO0
+	; sta IO_GPIO0
 
 	lda #$00
 	sta CUR_PAGE

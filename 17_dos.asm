@@ -50,6 +50,11 @@ UART_CLK = 3686400 ; 3.6864 MHz
 .endmacro
 .CODE
 coldboot_entrypoint:
+; 	lda #00
+; @loop:
+; 	sta IO_GPIO0
+; 	inc
+; 	jmp @loop
 	ldx #$ff
 	txs 
 

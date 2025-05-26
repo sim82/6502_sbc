@@ -138,8 +138,11 @@ fgetc_nonblocking:
 @loop:
 	; check transmit data register empty
 	lda IO_UARTAUX_SRA
+	; sta IO_GPIO0
 	and #%00000001
 	beq @no_keypress
+	and #%00010000
+	bne @error
 	lda IO_UARTAUX_FIFOA
         sec
 	rts
@@ -147,11 +150,26 @@ fgetc_nonblocking:
 @no_keypress:
         clc
 	rts
+@error:
+	lda #%01000000
+	sta IO_UARTAUX_CRA
+	lda DISP_POSX
+	sta IO_GPIO0
+	inc
+	sta DISP_POSX
+	jmp fgetc_nonblocking
 
 fpurge:
 ; purge any channel2 input buffer
 	jsr fgetc_nonblocking
-	bcs fpurge
+	bcc @end
+	lda #'X'
+	jsr putc
+	; sta IO_GPIO0
+	; jsr putc
+	jmp fpurge
+
+@end:
 	rts
 
 
