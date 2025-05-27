@@ -15,7 +15,7 @@ Ram1En    RwBout SysClk WeBAux    IoB   RomB   Ram0B   Ram1B   OeB    WeB    OeB
 /OeBAux = RWB 
 /WeBAux = /RWB * Clock
 SysClk = Clock
-RwBout = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
+/RwBout = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
 
 
 

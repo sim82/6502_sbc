@@ -21,15 +21,16 @@ cmd_help:
 	; jmp cmd_help
 	; lda #00
 	lda #00
-@loop:
-	sta IO_GPIO0
-	inc
-	jmp @loop
+; @loop:
+; 	sta IO_GPIO0
+; 	inc
+; 	jmp @loop
 @loop2:
 	lda #%01010101
 	sta IO_UARTAUX_CSTO
 	ldx IO_UARTAUX_SRA
 	inc
+	ldx IO_GPIO0
 	jmp @loop2
 	; print_message_from_ptr welcome_message
 	; print_message_from_ptr help_message
