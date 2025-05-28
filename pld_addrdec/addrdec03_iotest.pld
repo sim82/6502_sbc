@@ -9,7 +9,7 @@ Ram1En    RwBout SysClk WeBAux    IoB   RomB   Ram0B   Ram1B   OeB    WeB    OeB
 /RomB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 + A15 * /A14 * /Ram1En + A15 * /A13 * /Ram1En + A15 * /A12 * /Ram1En + A15 * /A11 * /Ram1En + A15 * /A10 * /Ram1En + A15 * /A09 * /Ram1En 
 /Ram0B = /A15 
 /Ram1B = A15 * /A14 * Ram1En + A15 * /A13 * Ram1En + A15 * /A12 * Ram1En + A15 * /A11 * Ram1En + A15 * /A10 * Ram1En + A15 * /A09 * Ram1En 
-/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock + A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
+/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 
 /OeB = RWB
 /WeB = /RWB * Clock
 /OeBAux = RWB 
@@ -29,3 +29,4 @@ Changes:
               read/write strobe generation locally to the uart. Same goes for output port latches: io-enable should be ored with the clock for proper write timing rater than
               baking that into the io-enable signal (which makes it worse for switching the bus transceiver chips)
               
+* Clock + A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB

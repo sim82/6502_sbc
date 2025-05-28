@@ -99,8 +99,8 @@ Pin 18 = RomB         S0 = 0   S1 = 1
 
 Pin 17 = IoB          S0 = 0   S1 = 1
  83  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 84  x--- ---- ---- -x-- x--- x--- x--- x--- x--- x--- x---
- 85  ---- x--- ---- -x-- x--- x--- x--- x--- x--- x--- x---
+ 84  ---- ---- ---- -x-- x--- x--- x--- x--- x--- x--- x---
+ 85  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  86  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  87  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  88  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx

@@ -27,10 +27,11 @@ cmd_help:
 ; 	jmp @loop
 @loop2:
 	lda #%01010101
-	sta IO_UARTAUX_CSTO
-	ldx IO_UARTAUX_SRA
+	sta IO_UART2_CSTO
+	ldx IO_UART2_SRB
+	sta IO_GPIO0
 	inc
-	ldx IO_GPIO0
+	sta IO_GPIO0
 	jmp @loop2
 	; print_message_from_ptr welcome_message
 	; print_message_from_ptr help_message
