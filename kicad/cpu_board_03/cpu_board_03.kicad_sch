@@ -9372,7 +9372,7 @@
 		)
 		(uuid "3b55140b-b2f6-408f-bed3-6943ee48d1a4")
 	)
-	(text_box "v3 update: swap ~{CS_RAM0} ~{CS_RAM1} on pld for easier routing"
+	(text_box "v3 update: swap ~{RAM0_SEL} ~{RAM1_SEL} on pld for easier routing"
 		(exclude_from_sim no)
 		(at 68.58 214.63 0)
 		(size 24.13 17.78)
@@ -13330,7 +13330,7 @@
 		)
 		(uuid "17c60d55-e8df-4875-9471-a110229af3b6")
 	)
-	(label "~{IO_RD_DIR}"
+	(label "~{IO_RD}"
 		(at 361.95 182.88 0)
 		(effects
 			(font
@@ -13370,7 +13370,7 @@
 		)
 		(uuid "1afa9e30-6355-45eb-9d54-490e69b2dc0b")
 	)
-	(label "~{QOE}"
+	(label "~{OE}"
 		(at 162.56 163.83 0)
 		(effects
 			(font
@@ -13600,7 +13600,7 @@
 		)
 		(uuid "3196bd94-6523-4403-a3bd-451559feb5f1")
 	)
-	(label "~{IO_RD_DIR}"
+	(label "~{IO_RD}"
 		(at 259.08 137.16 180)
 		(effects
 			(font
@@ -13700,7 +13700,7 @@
 		)
 		(uuid "39cc81dd-2146-448a-8727-94bdd53b831b")
 	)
-	(label "~{QOE}"
+	(label "~{OE}"
 		(at 62.23 241.3 0)
 		(effects
 			(font
@@ -13930,7 +13930,7 @@
 		)
 		(uuid "5092dd58-853e-4a1f-aa51-c8956f663cf2")
 	)
-	(label "~{CS_RAM1}"
+	(label "~{RAM1_SEL}"
 		(at 62.23 246.38 0)
 		(effects
 			(font
@@ -13990,7 +13990,7 @@
 		)
 		(uuid "562f04b7-747a-4985-b764-3134505dbeff")
 	)
-	(label "~{CS_RAM0}"
+	(label "~{RAM0_SEL}"
 		(at 279.4 262.89 0)
 		(effects
 			(font
@@ -14060,7 +14060,7 @@
 		)
 		(uuid "608558d4-4ad9-44f9-a712-dacb1ca27de5")
 	)
-	(label "~{QWE_RAM}"
+	(label "~{QWE}"
 		(at 110.49 163.83 0)
 		(effects
 			(font
@@ -14170,7 +14170,7 @@
 		)
 		(uuid "676419b3-e84e-4e89-b50b-e10653e9234e")
 	)
-	(label "~{QWE_RAM}"
+	(label "~{QWE}"
 		(at 62.23 238.76 0)
 		(effects
 			(font
@@ -14310,7 +14310,7 @@
 		)
 		(uuid "730a5c0e-2fb3-4560-a7d9-6d4ed3d1b917")
 	)
-	(label "~{CS_RAM0}"
+	(label "~{RAM0_SEL}"
 		(at 62.23 243.84 0)
 		(effects
 			(font
@@ -14320,7 +14320,7 @@
 		)
 		(uuid "7509cbf4-6b4b-4fb4-8ccc-8875b6606bc3")
 	)
-	(label "~{CS_RAM0}"
+	(label "~{RAM0_SEL}"
 		(at 110.49 156.21 0)
 		(effects
 			(font
@@ -14530,7 +14530,7 @@
 		)
 		(uuid "84fdf875-879d-4f5b-a7c7-dd7988261a1d")
 	)
-	(label "~{CS_RAM1}"
+	(label "~{RAM1_SEL}"
 		(at 279.4 265.43 0)
 		(effects
 			(font
@@ -14570,7 +14570,7 @@
 		)
 		(uuid "86ca06a3-ef4f-47a6-81de-46366ed6c1e9")
 	)
-	(label "~{QOE}"
+	(label "~{OE}"
 		(at 110.49 161.29 0)
 		(effects
 			(font
@@ -14950,7 +14950,7 @@
 		)
 		(uuid "a88c303d-6a30-4cb9-bce4-fde7e94b5496")
 	)
-	(label "~{QWE_RAM}"
+	(label "~{QWE}"
 		(at 279.4 270.51 0)
 		(effects
 			(font
@@ -15050,7 +15050,7 @@
 		)
 		(uuid "ad5219d6-ad07-4808-ae0d-9c2fba7c7790")
 	)
-	(label "~{SYS_CLK}"
+	(label "~{IO_WR}"
 		(at 62.23 259.08 0)
 		(effects
 			(font
@@ -15120,7 +15120,7 @@
 		)
 		(uuid "b1a9f502-15c8-460b-ac93-dfd5b460623c")
 	)
-	(label "~{IO_RD_DIR}"
+	(label "~{IO_RD}"
 		(at 62.23 254 0)
 		(effects
 			(font
@@ -15370,7 +15370,7 @@
 		)
 		(uuid "c80bb027-829e-4847-bfd2-758cf6e8b994")
 	)
-	(label "~{QWE_RAM}"
+	(label "~{QWE}"
 		(at 162.56 166.37 0)
 		(effects
 			(font
@@ -15440,7 +15440,7 @@
 		)
 		(uuid "cc954445-cfb4-4ccb-9813-d77acd0cbf16")
 	)
-	(label "~{CS_ROM}"
+	(label "~{ROM_SEL}"
 		(at 62.23 248.92 0)
 		(effects
 			(font
@@ -15590,7 +15590,7 @@
 		)
 		(uuid "dd3f4c10-9df7-4b1c-a1bb-6ad57d7f946f")
 	)
-	(label "~{QOE}"
+	(label "~{OE}"
 		(at 180.34 175.26 180)
 		(effects
 			(font
@@ -15700,7 +15700,7 @@
 		)
 		(uuid "e86080b2-ba2b-4aa5-8b99-2a6d7dfbdc13")
 	)
-	(label "~{CS_ROM}"
+	(label "~{ROM_SEL}"
 		(at 180.34 172.72 180)
 		(effects
 			(font
@@ -15710,7 +15710,7 @@
 		)
 		(uuid "e9b753ee-76a7-4a4e-87cd-939a6f11b88e")
 	)
-	(label "~{SYS_CLK}"
+	(label "~{IO_WR}"
 		(at 361.95 180.34 0)
 		(effects
 			(font
@@ -15770,7 +15770,7 @@
 		)
 		(uuid "edb9e21e-89f6-4dec-9894-49859d0d3e2e")
 	)
-	(label "~{CS_ROM}"
+	(label "~{ROM_SEL}"
 		(at 279.4 267.97 0)
 		(effects
 			(font
@@ -15900,7 +15900,7 @@
 		)
 		(uuid "fabdfa50-ff2d-467d-a7cf-1eccc6adc2d4")
 	)
-	(label "~{CS_RAM1}"
+	(label "~{RAM1_SEL}"
 		(at 162.56 158.75 0)
 		(effects
 			(font

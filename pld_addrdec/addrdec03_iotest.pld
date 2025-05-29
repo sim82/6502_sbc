@@ -1,8 +1,8 @@
 GAL22V10
 CombTest
 
-Clock     RWB    NC     A08   A09   A10    A11     A12     A13    A14   A15   GND 
-Ram1En    RwBout SysClk WeBAux    IoB   RomB   Ram0B   Ram1B   OeB    WeB    OeBAux   VCC
+Clock     RWB      NC      A08       A09  A10   A11    A12    A13  A14  A15  GND 
+Ram1En    IoReadB  SysClk  IoWriteB  IoB  RomB  Ram0B  Ram1B  OeB  WeB  NC   VCC
 
 
 
@@ -12,10 +12,9 @@ Ram1En    RwBout SysClk WeBAux    IoB   RomB   Ram0B   Ram1B   OeB    WeB    OeB
 /IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 
 /OeB = RWB
 /WeB = /RWB * Clock
-/OeBAux = RWB 
-/WeBAux = /RWB * Clock
+/IoWriteB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
 SysClk = Clock
-/RwBout = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
+/IoReadB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
 
 
 
