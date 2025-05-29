@@ -1395,161 +1395,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "74xGxx:74AHC1G04"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "U"
-				(at -2.54 3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "74AHC1G04"
-				(at 0 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Single NOT Gate, Low-Voltage CMOS"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "Single Gate NOT LVC CMOS"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "SOT* SG-*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "74AHC1G04_0_1"
-				(polyline
-					(pts
-						(xy -7.62 6.35) (xy -7.62 -6.35) (xy 5.08 0) (xy -7.62 6.35)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "74AHC1G04_1_1"
-				(pin input line
-					(at -15.24 0 0)
-					(length 7.62)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at -5.08 10.16 270)
-					(length 5.08)
-					(name "VCC"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at -5.08 -10.16 90)
-					(length 5.08)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin output inverted
-					(at 12.7 0 180)
-					(length 7.62)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "74xGxx:74AHC1G32"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -9787,6 +9632,10 @@
 		(uuid "017a021c-15ef-4f32-b0c5-08b46c34c507")
 	)
 	(no_connect
+		(at 349.25 185.42)
+		(uuid "0514c610-4fbd-441c-b2e7-9b5f127d195e")
+	)
+	(no_connect
 		(at 349.25 213.36)
 		(uuid "191b67e7-f873-41e5-a713-c5e6c892790c")
 	)
@@ -9809,10 +9658,6 @@
 	(no_connect
 		(at 54.61 66.04)
 		(uuid "a0f53075-25a2-4de8-b0a8-6bc7335434b9")
-	)
-	(no_connect
-		(at 349.25 185.42)
-		(uuid "b0415078-db56-4cab-8131-e6a0ce2f7b55")
 	)
 	(no_connect
 		(at 54.61 52.07)
@@ -13360,6 +13205,16 @@
 		)
 		(uuid "191fee0f-575e-4700-9cd0-fd87b733f1b8")
 	)
+	(label "~{IO_WR}"
+		(at 313.69 80.01 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "1a63f821-ce30-46df-8c07-ff453031b6af")
+	)
 	(label "GPIO00_O4"
 		(at 283.21 233.68 0)
 		(effects
@@ -15490,16 +15345,6 @@
 		)
 		(uuid "d0e55297-b039-402c-b973-05bea6a8ebf3")
 	)
-	(label "CLOCK"
-		(at 285.75 80.01 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "d3230d08-52ef-4475-a9f3-52b260113fd1")
-	)
 	(label "A10"
 		(at 308.61 172.72 0)
 		(effects
@@ -16217,80 +16062,6 @@
 			(project "cpu_board_03"
 				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
 					(reference "C13")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "74xGxx:74AHC1G04")
-		(at 300.99 80.01 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "090c3277-2f59-4c8e-960f-b24e9392de39")
-		(property "Reference" "U14"
-			(at 313.69 73.5898 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "74AHC1G04"
-			(at 313.69 76.1298 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5_HandSoldering"
-			(at 300.99 80.01 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
-			(at 300.99 80.01 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Single NOT Gate, Low-Voltage CMOS"
-			(at 300.99 80.01 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "3"
-			(uuid "59f01073-1417-491e-a69f-5e4293d69d4f")
-		)
-		(pin "4"
-			(uuid "d9e7e4ae-6994-4c0d-9ba2-6e4dcabf0cbb")
-		)
-		(pin "5"
-			(uuid "b735de5f-9015-494e-938d-eab93d292ef0")
-		)
-		(pin "2"
-			(uuid "6740ed40-fc90-452b-aa4a-6b6401485f11")
-		)
-		(instances
-			(project ""
-				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
-					(reference "U14")
 					(unit 1)
 				)
 			)
@@ -17449,6 +17220,83 @@
 		)
 	)
 	(symbol
+		(lib_id "74xGxx:74AHC1G32")
+		(at 328.93 82.55 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "319f34c3-deab-4e88-8d87-5effb5fbd990")
+		(property "Reference" "U13"
+			(at 341.63 76.1298 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74AHC1G32"
+			(at 341.63 78.6698 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5_HandSoldering"
+			(at 328.93 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
+			(at 328.93 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Single OR Gate, Low-Voltage CMOS"
+			(at 328.93 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "bfd9623c-caac-4c91-b976-176dfc5138a8")
+		)
+		(pin "3"
+			(uuid "3810acfb-7f5f-402e-a30b-b9f31917bbff")
+		)
+		(pin "4"
+			(uuid "ca82fbc9-6ce7-4bb3-8dbc-bc8cce888956")
+		)
+		(pin "5"
+			(uuid "d55abfba-c87f-4d8e-ae66-2ac5940eef95")
+		)
+		(pin "2"
+			(uuid "fdf4d4dd-fc87-4ba7-a7d1-52a67ffa4a26")
+		)
+		(instances
+			(project ""
+				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
+					(reference "U13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 46.99 185.42 0)
 		(unit 1)
@@ -17746,71 +17594,6 @@
 			(project "cpu_board_03"
 				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
 					(reference "C8")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 295.91 69.85 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "35e6da1a-f1df-4cd5-9c7c-2e727b9b3f70")
-		(property "Reference" "#PWR044"
-			(at 295.91 73.66 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "VCC"
-			(at 295.91 64.77 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 295.91 69.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 295.91 69.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 295.91 69.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b720248d-3c52-4425-b2b9-83f8b8d44dfc")
-		)
-		(instances
-			(project "cpu_board_03"
-				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
-					(reference "#PWR044")
 					(unit 1)
 				)
 			)
@@ -19380,83 +19163,6 @@
 		)
 	)
 	(symbol
-		(lib_id "74xGxx:74AHC1G32")
-		(at 328.93 82.55 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "7483f420-feaa-4ebf-a38c-bc82b93fffbc")
-		(property "Reference" "U13"
-			(at 341.63 76.1298 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "74AHC1G32"
-			(at 341.63 78.6698 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5_HandSoldering"
-			(at 328.93 82.55 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
-			(at 328.93 82.55 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Single OR Gate, Low-Voltage CMOS"
-			(at 328.93 82.55 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "802831dd-2414-4984-8100-be88a03a624e")
-		)
-		(pin "2"
-			(uuid "dd98c9f1-172c-4458-a3fb-1d7d5bc632a4")
-		)
-		(pin "3"
-			(uuid "5bd3162f-aa4d-4dd0-bc1f-30c966fdf777")
-		)
-		(pin "5"
-			(uuid "6004c3a2-e4f7-4dfa-897f-ef5a0aa934f9")
-		)
-		(pin "4"
-			(uuid "7c286b2d-796a-4d06-9925-d216b019c5b8")
-		)
-		(instances
-			(project ""
-				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
-					(reference "U13")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:LED_Small")
 		(at 280.67 243.84 0)
 		(mirror x)
@@ -20325,71 +20031,6 @@
 			(project "cpu_board_03"
 				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
 					(reference "#PWR034")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 295.91 90.17 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "9d7e92bc-d76b-408e-80f5-cf3271de48b5")
-		(property "Reference" "#PWR043"
-			(at 295.91 96.52 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 295.91 95.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 295.91 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 295.91 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 295.91 90.17 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "7cc592b7-c41c-4299-8a91-93c31952dc99")
-		)
-		(instances
-			(project "cpu_board_03"
-				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
-					(reference "#PWR043")
 					(unit 1)
 				)
 			)
