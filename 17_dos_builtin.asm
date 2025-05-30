@@ -26,9 +26,9 @@ cmd_help:
 ; 	inc
 ; 	jmp @loop
 @loop2:
-	lda #%01010101
+	lda #%00000000
 	sta IO_UART2_CSTO
-	ldx IO_UART2_SRB
+	ldx IO_UART2_FIFOA
 	sta IO_GPIO0
 	inc
 	sta IO_GPIO0
