@@ -12,11 +12,10 @@ Ram1En    IoReadB  SysClk  IoWriteB  IoB  RomB  Ram0B  Ram1B  OeB  WeB  NC   VCC
 /IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 
 /OeB = RWB
 /WeB = /RWB * Clock
+
 /IoWriteB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
 SysClk = Clock
 /IoReadB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
-
-
 
 DESCRIPTION
 Changes:
@@ -29,3 +28,6 @@ Changes:
               baking that into the io-enable signal (which makes it worse for switching the bus transceiver chips)
               
 * Clock + A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
+/IoWriteB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
+SysClk = Clock
+/IoReadB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
