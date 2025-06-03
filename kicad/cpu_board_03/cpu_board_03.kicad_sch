@@ -9249,14 +9249,14 @@
 			(embedded_fonts no)
 		)
 	)
-	(text_box "v2.1 update: connect ~{E2} to A7 to select onboard IO (IO0) only for io addresses 0x00 - 0x7f\n0x80-0xff can be used on external io board"
+	(text_box "v3 update: select IO port from highest 3 bits only."
 		(exclude_from_sim no)
 		(at 83.82 265.43 0)
 		(size 24.13 17.78)
 		(margins 0.9525 0.9525 0.9525 0.9525)
 		(stroke
 			(width 0)
-			(type default)
+			(type solid)
 		)
 		(fill
 			(type none)
@@ -13241,6 +13241,16 @@
 		)
 		(uuid "3b807bb5-0524-40a4-b514-622c1a65a859")
 	)
+	(label "CLOCK"
+		(at 59.69 82.55 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "3be9b667-1ead-487e-9f42-0c629c855388")
+	)
 	(label "DB7"
 		(at 361.95 167.64 0)
 		(effects
@@ -13650,16 +13660,6 @@
 			(justify left bottom)
 		)
 		(uuid "646754a5-d160-4e97-a647-d9c0a75deecb")
-	)
-	(label "CLOCK"
-		(at 349.25 180.34 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "65b980d7-c08f-459d-9521-1b155fb5826d")
 	)
 	(label "A3"
 		(at 134.62 143.51 180)
@@ -16185,6 +16185,71 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 59.69 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1c09155b-4a75-4204-8a58-dd6911ed4473")
+		(property "Reference" "#PWR027"
+			(at 59.69 91.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 59.69 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 59.69 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 59.69 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 59.69 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c98f588c-ecb3-4827-8ef4-fb4cb8097738")
+		)
+		(instances
+			(project "cpu_board_03"
+				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
+					(reference "#PWR027")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:C")
 		(at 265.43 45.72 0)
 		(unit 1)
@@ -18672,6 +18737,74 @@
 			(project "cpu_board_03"
 				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
 					(reference "#PWR016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Socket")
+		(at 64.77 85.09 0)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "751aefbe-5eaa-4a1d-824e-a2ceaa724ff6")
+		(property "Reference" "J2"
+			(at 67.818 86.868 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Clock"
+			(at 62.23 85.09 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x02_P2.54mm_Vertical"
+			(at 64.77 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 64.77 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 64.77 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "5738bdc9-e44b-4dca-9577-001e58aab845")
+		)
+		(pin "2"
+			(uuid "70f60c0f-5e0e-478f-8acc-2d847537e001")
+		)
+		(instances
+			(project "cpu_board_03"
+				(path "/a9a73dc6-7f92-4458-9da8-49621d12e480"
+					(reference "J2")
 					(unit 1)
 				)
 			)
