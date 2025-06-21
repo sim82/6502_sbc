@@ -168,6 +168,8 @@ exit:
 	lda #<message_done
 	ldx #>message_done
 	jsr os_print_string
+
+	jmp reset
 	rts
 @loop:
 	jmp @loop
