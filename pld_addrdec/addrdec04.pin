@@ -4,7 +4,7 @@
 -----------------------------
    1   | Clock    | Clock/Input
    2   | RWB      | Input
-   3   | NC       | Input
+   3   | PldI01   | Input
    4   | A08      | Input
    5   | A09      | Input
    6   | A10      | Input
@@ -15,15 +15,15 @@
   11   | A15      | Input
   12   | GND      | GND
   13   | Ram1En   | Input
-  14   | RwBout   | Output
-  15   | SysClk   | Output
-  16   | IoRdB    | Output
+  14   | PldO09   | NC
+  15   | IoWriteB08 | Output
+  16   | IoReadB07 | Output
   17   | IoB      | Output
   18   | RomB     | Output
   19   | Ram1B    | Output
   20   | Ram0B    | Output
   21   | OeB      | Output
   22   | WeB      | Output
-  23   | NC       | NC
+  23   | SysClk   | Output
   24   | VCC      | VCC
 

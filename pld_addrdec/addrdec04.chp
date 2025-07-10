@@ -5,9 +5,9 @@
                           -------\___/-------
                     Clock |  1           24 | VCC
                           |                 |
-                      RWB |  2           23 | NC
+                      RWB |  2           23 | SysClk
                           |                 |
-                       NC |  3           22 | WeB
+                   PldI01 |  3           22 | WeB
                           |                 |
                       A08 |  4           21 | OeB
                           |                 |
@@ -19,11 +19,11 @@
                           |                 |
                       A12 |  8           17 | IoB
                           |                 |
-                      A13 |  9           16 | IoRdB
+                      A13 |  9           16 | IoReadB07
                           |                 |
-                      A14 | 10           15 | SysClk
+                      A14 | 10           15 | IoWriteB08
                           |                 |
-                      A15 | 11           14 | RwBout
+                      A15 | 11           14 | PldO09
                           |                 |
                       GND | 12           13 | Ram1En
                           -------------------
