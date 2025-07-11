@@ -4,6 +4,9 @@
 	(generator_version "9.0")
 	(uuid "a9a73dc6-7f92-4458-9da8-49621d12e480")
 	(paper "A3")
+	(title_block
+		(rev "2")
+	)
 	(lib_symbols
 		(symbol "65xx:TC1232"
 			(exclude_from_sim no)
@@ -9539,6 +9542,26 @@
 			(embedded_fonts no)
 		)
 	)
+	(text_box "Rev1 Error: BE not connected!"
+		(exclude_from_sim no)
+		(at 11.43 148.59 0)
+		(size 19.05 13.97)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "10835ef5-cacd-40a3-942a-28655060433a")
+	)
 	(text_box "v3 update: select IO port from highest 3 bits only."
 		(exclude_from_sim no)
 		(at 68.58 276.86 0)
@@ -9746,6 +9769,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "67f94fd3-b2b2-4ccd-9453-3edbc3a67a8f")
+	)
+	(junction
+		(at 46.99 107.95)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "69adaa7b-d63e-47db-86fe-3fd0a92fe8d8")
 	)
 	(junction
 		(at 341.63 49.53)
@@ -9992,10 +10021,6 @@
 		(uuid "2f962d05-e9d8-4072-a3d2-920281d95a6e")
 	)
 	(no_connect
-		(at 36.83 147.32)
-		(uuid "358fe330-1889-4073-9d05-e705712c5ad2")
-	)
-	(no_connect
 		(at 349.25 233.68)
 		(uuid "4176d695-f67c-4966-aa57-de31a99c8fa3")
 	)
@@ -10174,6 +10199,16 @@
 			(type default)
 		)
 		(uuid "08dfed86-ab1f-4321-9bb8-b4b18885f7b0")
+	)
+	(wire
+		(pts
+			(xy 36.83 147.32) (xy 25.4 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0a70788c-324b-455e-926d-99c063837d82")
 	)
 	(wire
 		(pts
@@ -11137,6 +11172,16 @@
 	)
 	(wire
 		(pts
+			(xy 25.4 107.95) (xy 46.99 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6301322f-cffd-450f-9584-a98d675501be")
+	)
+	(wire
+		(pts
 			(xy 339.09 165.1) (xy 344.17 165.1)
 		)
 		(stroke
@@ -11664,6 +11709,16 @@
 			(type default)
 		)
 		(uuid "8a0c3a1a-1038-406e-a619-6246198180a4")
+	)
+	(wire
+		(pts
+			(xy 25.4 147.32) (xy 25.4 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8ab5a1cc-d03a-4bb6-b80a-498547adef48")
 	)
 	(wire
 		(pts
