@@ -15,7 +15,7 @@
   11   | A15      | Input
   12   | GND      | GND
   13   | Ram1En   | Input
-  14   | PldO09   | NC
+  14   | PldO09   | Output
   15   | IoWriteB08 | Output
   16   | IoReadB07 | Output
   17   | IoB      | Output

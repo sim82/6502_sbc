@@ -25,17 +25,22 @@ cmd_help:
 ; 	sta IO_GPIO0
 ; 	inc
 ; 	jmp @loop
+	ldy #0
 @loop2:
-	lda #%00000000
-	sta IO_UART2_CSTO
-	ldx IO_UART2_FIFOA
+	sty IO_UART2_GPR
+	cpy IO_UART2_GPR
+	; bne @error
 	sta IO_GPIO0
-	inc
-	sta IO_GPIO0
+	sty IO_GPIO0
+	iny
 	jmp @loop2
 	; print_message_from_ptr welcome_message
 	; print_message_from_ptr help_message
 	rts
+@error:
+	lda #%01010101
+	sta IO_GPIO0
+	jmp @error
 
 
 ; r - streamed binary load / relocate
