@@ -9,6 +9,8 @@ PF_SPAN_END =   %00000010
 PF_USER =       %00000100
 PF_STATIC =     %01000000
 
+DOS_START_PAGE = $e0
+
 .macro set_pagex_flag flag
 	lda #flag
 	sta PAGETABLE, x
@@ -40,7 +42,7 @@ init_pagetable:
 @lower_reserved_loop:
 	set_pagex_flag PF_ALLOCATED | PF_STATIC
 	dex
-	cpx #$ef
+	cpx #(DOS_START_PAGE - 1)
 	bne @lower_reserved_loop
 	
 	jsr clobber_free_pages

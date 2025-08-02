@@ -1,5 +1,5 @@
 .code
-.import fgetc, fputc, putc, print_message, print_hex8, print_hex16
+.import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge
 .export read_file_paged, open_file_nonpaged, fgetc_buf, print_fletch16
 .include "17_dos.inc"
 
@@ -151,6 +151,7 @@ load_page_to_iobuf_gen:
 	dec RECEIVE_SIZE + 1	; dec remaining size 
 	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
 
+	jsr check_extra
 	sec
 	; cli
 	rts
@@ -186,6 +187,7 @@ load_page_to_iobuf_gen:
 	ldx RECEIVE_SIZE
 	ldy #$00
 	sty RECEIVE_SIZE
+	jsr check_extra
 	sec
 	; cli
 	rts
@@ -195,6 +197,16 @@ load_page_to_iobuf_gen:
 	; cli
 	rts
 
+check_extra:
+	jsr fpurge
+; 	jsr fgetc_nonblocking
+; 	bcc @end
+; 	lda #'X'
+; 	jsr putc
+; 	jsr fpurgec
+
+@end:
+	rts
 
 	; update fletch16 chksum with value in a
 	; will NOT preserve a!

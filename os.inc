@@ -64,8 +64,9 @@ OS_EVENT_RETURN_KEEP_RESIDENT  = $01
 ; a out: random number
 .IMPORT os_rand 
 
-; set vector pointer for direct timer (called from irq handler on timer interrupt)
+; set vector pointer and (and os timer DIV/16) for direct timer (called from irq handler on timer interrupt)
 ; a in: addr low
 ; x in: addr high
+; y in: DIV/16 for os timer events
 .IMPORT os_set_direct_timer 
 

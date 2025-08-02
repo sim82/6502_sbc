@@ -1,23 +1,21 @@
 GAL22V10
 CombTest
 
-Clock     RWB    NC     A08   A09   A10    A11     A12     A13    A14   A15   GND 
-Ram1En    RwBout SysClk WeBAux    IoB   RomB   Ram0B   Ram1B   OeB    WeB    OeBAux   VCC
+Clock     RWB      NC      A08       A09  A10   A11    A12    A13  A14  A15  GND 
+Ram1En    IoReadB  SysClk  IoWriteB  IoB  RomB  Ram0B  Ram1B  OeB  WeB  NC   VCC
 
 
 
 /RomB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 + A15 * /A14 * /Ram1En + A15 * /A13 * /Ram1En + A15 * /A12 * /Ram1En + A15 * /A11 * /Ram1En + A15 * /A10 * /Ram1En + A15 * /A09 * /Ram1En 
 /Ram0B = /A15 
 /Ram1B = A15 * /A14 * Ram1En + A15 * /A13 * Ram1En + A15 * /A12 * Ram1En + A15 * /A11 * Ram1En + A15 * /A10 * Ram1En + A15 * /A09 * Ram1En 
-/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock
-/OeB = RWB * Clock
+/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 
+/OeB = RWB
 /WeB = /RWB * Clock
-/OeBAux = RWB * Clock
-/WeBAux = /RWB * Clock
+
+/IoWriteB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
 SysClk = Clock
-RwBout = RWB
-
-
+/IoReadB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
 
 DESCRIPTION
 Changes:
@@ -25,3 +23,11 @@ Changes:
  - 18.9.2024: remove Clock from IoB
  - 3.10.2024: re-order pins for Mark2 board
  - 22.12.2024: re-add clock to IoB: caused spurious IOs on certain address transitions
+ - 26.5.2025: the IoB signal currently is hacked to make it clock qualified on write cycles. This helps to get e.g. the ti uart working but this should be replaced by proper
+              read/write strobe generation locally to the uart. Same goes for output port latches: io-enable should be ored with the clock for proper write timing rater than
+              baking that into the io-enable signal (which makes it worse for switching the bus transceiver chips)
+              
+* Clock + A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
+/IoWriteB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
+SysClk = Clock
+/IoReadB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB

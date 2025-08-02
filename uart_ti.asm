@@ -44,9 +44,52 @@ uart_init:
 	lda #%00000101
 	sta IO_UART2_CRA
 	sta IO_UART2_CRB
+	; jsr uartaux_init
 	rts
 
 
+; uartaux_init:
+; 	; init ti UART
+; 	; CRA / CRB - reset tx / rx
+; 	lda #%00100000
+; 	sta IO_UARTAUX_CRA
+; 	sta IO_UARTAUX_CRB
+; 	lda #%00110000
+; 	sta IO_UARTAUX_CRA
+; 	sta IO_UARTAUX_CRB
+
+; 	; CRA - reset MR pointer to 0
+; 	lda #%10110000
+; 	sta IO_UARTAUX_CRA
+
+; 	; MR0A: select alternative BRG and fifo depth (channel a sets it globally)
+; 	lda #%00001001
+; 	sta IO_UARTAUX_MRA
+
+; 	; CRB - reset MR pointer to 1
+; 	lda #%00010000
+; 	sta IO_UARTAUX_CRB
+
+; 	; MR1A / MR1B
+; 	lda #%00010011
+; 	sta IO_UARTAUX_MRA
+; 	sta IO_UARTAUX_MRB
+
+; 	; MR2A / MR1B
+;  	lda #%00000111
+; 	sta IO_UARTAUX_MRA
+; 	sta IO_UARTAUX_MRB
+
+; 	; CSRA / CSRB
+; 	lda #%11001100
+; 	sta IO_UARTAUX_CSRA
+; 	sta IO_UARTAUX_CSRB
+
+; 	; start command to A / B
+; 	lda #%00000101
+; 	sta IO_UARTAUX_CRA
+; 	sta IO_UARTAUX_CRB
+; 	rts
 
 putc:
 ; V_OUTP:
@@ -95,8 +138,11 @@ fgetc_nonblocking:
 @loop:
 	; check transmit data register empty
 	lda IO_UART2_SRB
+	; sta IO_GPIO0
 	and #%00000001
 	beq @no_keypress
+	and #%00010000
+	bne @error
 	lda IO_UART2_FIFOB
         sec
 	rts
@@ -104,11 +150,26 @@ fgetc_nonblocking:
 @no_keypress:
         clc
 	rts
+@error:
+	lda #%01000000
+	sta IO_UART2_CRB
+	lda DISP_POSX
+	sta IO_GPIO0
+	inc
+	sta DISP_POSX
+	jmp fgetc_nonblocking
 
 fpurge:
 ; purge any channel2 input buffer
 	jsr fgetc_nonblocking
-	bcs fpurge
+	bcc @end
+	lda #'X'
+	jsr putc
+	; sta IO_GPIO0
+	; jsr putc
+	jmp fpurge
+
+@end:
 	rts
 
 

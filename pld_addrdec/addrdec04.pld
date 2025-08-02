@@ -1,20 +1,21 @@
 GAL22V10
 CombTest
 
-Clock     RWB    NC     A08   A09   A10    A11     A12     A13    A14   A15   GND 
-Ram1En    RwBout SysClk IoRdB IoB   RomB   Ram1B   Ram0B   OeB    WeB    NC   VCC
+Clock     RWB    PldI01     A08       A09   A10    A11     A12     A13    A14   A15      GND 
+Ram1En    PldO09 IoWriteB08 IoReadB07 IoB   RomB   Ram1B   Ram0B   OeB    WeB   SysClk   VCC
 
 
 
 /RomB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 + A15 * /A14 * /Ram1En + A15 * /A13 * /Ram1En + A15 * /A12 * /Ram1En + A15 * /A11 * /Ram1En + A15 * /A10 * /Ram1En + A15 * /A09 * /Ram1En 
 /Ram0B = /A15 
 /Ram1B = A15 * /A14 * Ram1En + A15 * /A13 * Ram1En + A15 * /A12 * Ram1En + A15 * /A11 * Ram1En + A15 * /A10 * Ram1En + A15 * /A09 * Ram1En 
-/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock
-/IoRdB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * Clock * RWB
-/OeB = RWB * Clock
+/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB + A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
+/OeB = RWB
 /WeB = /RWB * Clock
+/IoReadB07 = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
+/IoWriteB08 = Clock
+PldO09 = RWB
 SysClk = Clock
-RwBout = RWB
 
 
 
@@ -26,3 +27,9 @@ Changes:
  - 22.12.2024: re-add clock to IoB: caused spurious IOs on certain address transitions
  - 11.5.2025: re-order pins for Mark3 cpu board: swap Ram0/Ram1 
               add IoRdB (Io Read Direction)
+ - 11.7.2025: apply experimental updates from addrdec03_iotest
+ - 19.7.2025: add clock to IoB on write cycles. seems to work best with ti uart
+/IoReadB07 = RWB
+/IoWriteB08 = /RWB * Clock
+/IoWriteB08 = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
+/IoReadB07 = RWB

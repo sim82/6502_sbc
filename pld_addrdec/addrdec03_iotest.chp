@@ -5,7 +5,7 @@
                           -------\___/-------
                     Clock |  1           24 | VCC
                           |                 |
-                      RWB |  2           23 | OeBAux
+                      RWB |  2           23 | NC
                           |                 |
                        NC |  3           22 | WeB
                           |                 |
@@ -19,11 +19,11 @@
                           |                 |
                       A12 |  8           17 | IoB
                           |                 |
-                      A13 |  9           16 | WeBAux
+                      A13 |  9           16 | IoWriteB
                           |                 |
                       A14 | 10           15 | SysClk
                           |                 |
-                      A15 | 11           14 | RwBout
+                      A15 | 11           14 | IoReadB
                           |                 |
                       GND | 12           13 | Ram1En
                           -------------------

@@ -15,9 +15,32 @@
 cmd_help_str:
 	.byte "help", $00
 cmd_help:
-	print_message_from_ptr welcome_message
-	print_message_from_ptr help_message
+
+	; jsr fgetc
+	; jsr print_hex8
+	; jmp cmd_help
+	; lda #00
+	lda #00
+; @loop:
+; 	sta IO_GPIO0
+; 	inc
+; 	jmp @loop
+	ldy #0
+@loop2:
+	sty IO_UART2_GPR
+	cpy IO_UART2_GPR
+	; bne @error
+	sta IO_GPIO0
+	sty IO_GPIO0
+	iny
+	jmp @loop2
+	; print_message_from_ptr welcome_message
+	; print_message_from_ptr help_message
 	rts
+@error:
+	lda #%01010101
+	sta IO_GPIO0
+	jmp @error
 
 
 ; r - streamed binary load / relocate
@@ -168,21 +191,21 @@ cmd_j:
 cmd_alloc_str:
 	.byte "alloc", $00
 cmd_alloc:
-	lda #5
-	jsr alloc_page_span
-	bcc @end
+; 	lda #5
+; 	jsr alloc_page_span
+; 	bcc @end
 
-	pha
-	jsr print_hex8
-	jsr put_newline
-	pla
-	jsr free_page_span
+; 	pha
+; 	jsr print_hex8
+; 	jsr put_newline
+; 	pla
+; 	jsr free_page_span
 	
-	bcc @end
+; 	bcc @end
 
-	jsr print_hex8
-	jsr put_newline
-@end:
+; 	jsr print_hex8
+; 	jsr put_newline
+; @end:
 	rts
 
 ; ra - run absolute
