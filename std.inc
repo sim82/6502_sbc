@@ -19,6 +19,7 @@ IO_GPIO0        = IO_BASE + $00
 IO_GPIO10        = IO_BASE + $80
 IO_GPIO11        = IO_BASE + $90
 
+
 IO_DISP_CTRL    = IO_BASE + $10
 IO_DISP_DATA    = IO_BASE + $11
 
@@ -63,6 +64,12 @@ IO_UART2_SOPR   = IO_UART2_BASE + $e
 IO_UART2_ROPR   = IO_UART2_BASE + $f
 IO_UART2_CSTA   = IO_UART2_BASE + $e
 IO_UART2_CSTO   = IO_UART2_BASE + $f
+
+; GPIO bank 2 shares IO-enable pin 2 with UART2 (in its unused ADDR04 HIGH area. 
+; Requires JP2 in 'or' position and U13 or-gate populated, otherwise chaos will break lose)
+IO_GPIO2X        = IO_BASE + $50
+IO_GPIO20        = IO_GPIO2X + $0
+IO_GPIO21        = IO_GPIO2X + $1
 
 IO_UARTAUX_BASE   = IO_BASE + $40
 IO_UARTAUX_MRA    = IO_UARTAUX_BASE + $0

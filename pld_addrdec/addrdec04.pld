@@ -14,7 +14,7 @@ Ram1En    PldO09 IoWriteB08 IoReadB07 IoB   RomB   Ram1B   Ram0B   OeB    WeB   
 /WeB = /RWB * Clock
 /IoReadB07 = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
 /IoWriteB08 = Clock
-PldO09 = Clock
+PldO09 = RWB
 SysClk = Clock
 
 

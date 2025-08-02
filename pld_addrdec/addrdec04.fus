@@ -144,7 +144,7 @@ Pin 15 = IoWriteB08   S0 = 0   S1 = 1
 
 Pin 14 = PldO09       S0 = 1   S1 = 1
 122  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-123  x--- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+123  ---- x--- ---- ---- ---- ---- ---- ---- ---- ---- ----
 124  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 125  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 126  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
