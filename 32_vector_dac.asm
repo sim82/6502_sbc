@@ -9,17 +9,19 @@ x1: .res $1
 y1: .res $1
 xi: .res $1
 yi: .res $1
+xe: .res $1
 d: .res $1
 dx2: .res $1
 dy2: .res $1
 pi: .res $1
 ii: .res $1
 q13: .res $1
+xoffs: .res $1
+yoffs: .res $1
 
 .BSS
 pointsx:
 	.res $100
-	
 pointsy:
 	.res $100
 
@@ -57,36 +59,25 @@ event_init:
 	ldx #0
 	stx pi
 	lda #0
-; 	sta pointsx, x
-
-; 	pha
-; 	asl
-; 	sta pointsy, x
-; 	pla
-; 	inc
-; 	inx
-; 	bne @init_loop
 	
 	lda #00
 	sta ii
 	
 	lda #0
 	ldx #0
-@init_loop:
-	sta pointsx, x
-	sta pointsy, x
-	inx
-	bne @init_loop
-
 	
+	lda #10
+	sta xoffs
+	sta yoffs
+
 	lda #0
 	sta x1
 	lda #32
 	sta x0
 	lda #0
-	sta y1
-	lda #32
 	sta y0
+	lda #32
+	sta y1
 	jsr render_square
 	
 ; start direct timer
@@ -132,12 +123,27 @@ event_timer:
 ; @no_reset:
 ; 	sta y1
 ; 	jsr bresenhamq0
-	inc x0
-	inc x1
-	inc y0
-	inc y1
-	; jsr render_square
-	jsr setup_bresenham
+	; inc x0
+	; inc x1
+	; inc y0
+	; inc y1
+	; ; jsr render_square
+	; jsr setup_bresenham
+	; jmp @skipy
+	; lda #90
+	inc xoffs
+	; cmp xoffs
+	; bcs @skipx
+	; ldy #0
+	; sty xoffs
+
+@skipx:
+	inc yoffs
+	; cmp xoffs
+	; bcs @skipx
+	; ldy #0
+	; sty xoffs
+@skipy:
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
 	rts
@@ -216,14 +222,25 @@ bresenhamq0:
 	rts
 	
 setup_bresenham:
-	; lda #0
-	; sta x1
-	; lda #32
-	; sta x0
-	; lda #0
-	; sta y0
-	; lda #32
-	; sta y1
+	; jmp @skip_print
+	ldx #0
+	lda x0
+	jsr os_print_dec
+	lda #' '
+	jsr os_putc
+	lda y0
+	jsr os_print_dec
+	lda #'-'
+	jsr os_putc
+	lda x1
+	jsr os_print_dec
+	lda #' '
+	jsr os_putc
+	lda y1
+	jsr os_print_dec
+	lda #' '
+	jsr os_putc
+@skip_print:
 	; determine quadrant:
 	; x0 <= x1 -> q0 or q1
 	lda x0
@@ -241,14 +258,25 @@ setup_bresenham:
 	jsr os_putc
 	lda #0
 	sta q13
-	ldx x0
+	; calc dx (inv), temporarily store in dx2
+	lda x0
+	sec
+	sbc x1
+	sta dx2
+	
+	; calc & store dy2 (inv)
+	lda y0
+	sec
+	sbc y1
+	asl
+	sta dy2
 	lda x1
-	sta x0
-	stx x1
-	ldx y0
+	sta xi
+	lda x0
+	sta xe
+
 	lda y1
-	sta y0
-	stx y1
+	sta yi
 	jmp @start
 
 @q3:
@@ -256,14 +284,25 @@ setup_bresenham:
 	jsr os_putc
 	lda #1
 	sta q13
-	ldx x0
+	; calc dx (inv), temporarily store in dx2
+	lda x0
+	sec
+	sbc x1
+	sta dx2
+	
+	; calc & store dy2
+	lda y1
+	sec
+	sbc y0
+	asl
+	sta dy2
 	lda x1
-	sta x0
-	stx x1
-	; ldx y0
-	; lda y1
-	; sta y0
-	; stx y1
+	sta xi
+	lda x0
+	sta xe
+
+	lda y1
+	sta yi
 	jmp @start
 @q01:
 	; q0 or q1
@@ -277,10 +316,25 @@ setup_bresenham:
 	jsr os_putc
 	lda #1
 	sta q13
-	ldx y0
-	lda y1
-	sta y0
-	stx y1
+	; calc dx, temporarily store in dx2
+	lda x1
+	sec
+	sbc x0
+	sta dx2
+	
+	; calc & store dy2 (inv)
+	lda y0
+	sec
+	sbc y1
+	asl
+	sta dy2
+	lda x0
+	sta xi
+	lda x1
+	sta xe
+
+	lda y0
+	sta yi
 	jmp @start
 
 @q0:
@@ -289,7 +343,6 @@ setup_bresenham:
 	
 	lda #0
 	sta q13
-@start:
 	; calc dx, temporarily store in dx2
 	lda x1
 	sec
@@ -302,6 +355,15 @@ setup_bresenham:
 	sbc y0
 	asl
 	sta dy2
+	lda x0
+	sta xi
+	lda x1
+	sta xe
+
+	lda y0
+	sta yi
+
+@start:
 	; subtract dx and store in d
 	sec
 	sbc dx2
@@ -309,18 +371,6 @@ setup_bresenham:
 	; calc & store true dx2
 	asl dx2
 
-	lda x0
-	sta xi
-
-	lda q13
-	bne @invy
-	lda y0
-	sta yi
-	rts
-@invy:
-	
-	lda y1
-	sta yi
 	rts
 
 step_bresenham:
@@ -330,8 +380,15 @@ step_bresenham:
 step_bresenhamq02:
 	ldx xi
 	ldy yi
-	stx IO_GPIO20
-	sty IO_GPIO21
+	txa
+	clc
+	adc xoffs
+	sta IO_GPIO20
+
+	tya
+	clc
+	adc yoffs
+	sta IO_GPIO21
 
 	lda d
 	bmi @no_y
@@ -343,13 +400,14 @@ step_bresenhamq02:
 	adc dy2
 	sta d
 	inx
-	cpx x1
+	cpx xe
 	beq @reset
 	stx xi
 	sty yi
 	jmp @end
 
 @reset:
+	jsr advance_line
 	jsr setup_bresenham
 @end:
 	rts
@@ -357,8 +415,15 @@ step_bresenhamq02:
 step_bresenhamq13:
 	ldx xi
 	ldy yi
-	stx IO_GPIO20
-	sty IO_GPIO21
+	txa
+	clc
+	adc xoffs
+	sta IO_GPIO20
+
+	tya
+	clc
+	adc yoffs
+	sta IO_GPIO21
 
 	lda d
 	bmi @no_y
@@ -370,17 +435,37 @@ step_bresenhamq13:
 	adc dy2
 	sta d
 	inx
-	cpx x1
+	cpx xe
 	beq @reset
 	stx xi
 	sty yi
 	jmp @end
 
 @reset:
+	jsr advance_line
 	jsr setup_bresenham
 @end:
 	rts
 	
+advance_line:
+	; inc pi
+	lda pi
+	and #$3
+	tax
+	lda linesx, x
+	sta x0
+	lda linesy, x
+	sta y0
+	inx
+	txa
+	and #$3
+	sta pi
+	tax
+	lda linesx, x
+	sta x1
+	lda linesy, x
+	sta y1
+	rts
 
 render_square:
 	jsr render_xline
@@ -499,4 +584,9 @@ misc_testing:
 init_message:
 	.byte "Press q to exit...", $00
 
+linesx:
+	.byte 16, 32, 16, 0
+	
+linesy:
+	.byte 0, 16, 32, 16
 
