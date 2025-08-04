@@ -14,6 +14,7 @@ dx2: .res $1
 dy2: .res $1
 pi: .res $1
 ii: .res $1
+q13: .res $1
 
 .BSS
 pointsx:
@@ -79,13 +80,13 @@ event_init:
 
 	
 	lda #0
-	sta x0
-	lda #32
 	sta x1
+	lda #32
+	sta x0
 	lda #0
-	sta y0
-	lda #16
 	sta y1
+	lda #32
+	sta y0
 	jsr render_square
 	
 ; start direct timer
@@ -215,6 +216,80 @@ bresenhamq0:
 	rts
 	
 setup_bresenham:
+	; lda #0
+	; sta x1
+	; lda #32
+	; sta x0
+	; lda #0
+	; sta y0
+	; lda #32
+	; sta y1
+	; determine quadrant:
+	; x0 <= x1 -> q0 or q1
+	lda x0
+	cmp x1
+	bcc @q01
+	beq @q01
+@q23:
+	lda y0
+	cmp y1
+	
+	bcc @q3
+	beq @q3
+@q2:
+	lda #'2'
+	jsr os_putc
+	lda #0
+	sta q13
+	ldx x0
+	lda x1
+	sta x0
+	stx x1
+	ldx y0
+	lda y1
+	sta y0
+	stx y1
+	jmp @start
+
+@q3:
+	lda #'3'
+	jsr os_putc
+	lda #1
+	sta q13
+	ldx x0
+	lda x1
+	sta x0
+	stx x1
+	; ldx y0
+	; lda y1
+	; sta y0
+	; stx y1
+	jmp @start
+@q01:
+	; q0 or q1
+	
+	lda y0
+	cmp y1
+	bcc @q0
+	beq @q0
+@q1:
+	lda #'1'
+	jsr os_putc
+	lda #1
+	sta q13
+	ldx y0
+	lda y1
+	sta y0
+	stx y1
+	jmp @start
+
+@q0:
+	lda #'0'
+	jsr os_putc
+	
+	lda #0
+	sta q13
+@start:
 	; calc dx, temporarily store in dx2
 	lda x1
 	sec
@@ -236,11 +311,23 @@ setup_bresenham:
 
 	lda x0
 	sta xi
+
+	lda q13
+	bne @invy
 	lda y0
+	sta yi
+	rts
+@invy:
+	
+	lda y1
 	sta yi
 	rts
 
 step_bresenham:
+	lda q13
+	bne step_bresenhamq13
+	; fall through
+step_bresenhamq02:
 	ldx xi
 	ldy yi
 	stx IO_GPIO20
@@ -267,6 +354,32 @@ step_bresenham:
 @end:
 	rts
 
+step_bresenhamq13:
+	ldx xi
+	ldy yi
+	stx IO_GPIO20
+	sty IO_GPIO21
+
+	lda d
+	bmi @no_y
+	sec
+	sbc dx2
+	dey
+@no_y:
+	clc
+	adc dy2
+	sta d
+	inx
+	cpx x1
+	beq @reset
+	stx xi
+	sty yi
+	jmp @end
+
+@reset:
+	jsr setup_bresenham
+@end:
+	rts
 	
 
 render_square:
