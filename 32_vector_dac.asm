@@ -226,7 +226,7 @@ bresenhamq0:
 	rts
 	
 setup_bresenham:
-	jmp @skip_print
+	; jmp @skip_print
 	ldx #0
 	lda x0
 	jsr os_print_dec
@@ -258,8 +258,8 @@ setup_bresenham:
 	bcc @q3
 	beq @q3
 @q2:
-	; lda #'2'
-	; jsr os_putc
+	lda #'2'
+	jsr os_putc
 	lda #0
 	sta q13
 	; calc dx (inv), temporarily store in dx2
@@ -284,8 +284,8 @@ setup_bresenham:
 	jmp @start
 
 @q3:
-	; lda #'3'
-	; jsr os_putc
+	lda #'d'
+	jsr os_putc
 	lda #1
 	sta q13
 	; calc dx (inv), temporarily store in dx2
@@ -316,8 +316,8 @@ setup_bresenham:
 	bcc @q0
 	beq @q0
 @q1:
-	; lda #'1'
-	; jsr os_putc
+	lda #'b'
+	jsr os_putc
 	lda #1
 	sta q13
 	; calc dx, temporarily store in dx2
@@ -342,8 +342,8 @@ setup_bresenham:
 	jmp @start
 
 @q0:
-	; lda #'0'
-	; jsr os_putc
+	lda #'a'
+	jsr os_putc
 	
 	lda #0
 	sta q13
@@ -452,23 +452,34 @@ step_bresenhamq13:
 	rts
 	
 advance_line:
+	; load current 'fragment counter' (i.e. how many line segments there are to go)
 	lda fc
 
+	; != 0 -> still in the same fragment
 	bne @same_fragment
 
+	; fragments[fi] contains next fragment size
 	ldx fi
+	; lda #'f'
+	; jsr os_putc
 	lda fragments, x
+	; sta ARG0
+	; jsr os_dbg_byte
 	sta fc
-	cmp $ff
+	; $ff means end of fragment array
+	cmp #$ff
 	bne @no_restart
+	; reset everything
 	lda #00
 	sta fc
 	sta fi
+	; restart
+	jmp advance_line
 
 @no_restart:
 	sta fc
-	inc
-	sta fi
+	inx
+	stx fi
 
 @same_fragment:
 	; setup next line in current fragment:
@@ -476,9 +487,14 @@ advance_line:
 	dec fc
 
 	; load start points from xy[fragments[fi]]
-
 	ldx fi
+
+
+	; lda #'l'
+	; jsr os_putc
 	lda fragments, x
+	; sta ARG0
+	; jsr os_dbg_byte
 	tay
 	lda linesx, y
 	sta x0
@@ -488,11 +504,19 @@ advance_line:
 	inx
 	stx fi
 	lda fragments, x
+	; sta ARG0
+	; jsr os_dbg_byte
 	tay
 	lda linesx, y
 	sta x1
 	lda linesy, y
 	sta y1
+
+	lda fc
+	bne @no_next_fragment
+	inc fi
+
+@no_next_fragment:
 	rts
 
 advance_line_old:
@@ -633,11 +657,17 @@ misc_testing:
 init_message:
 	.byte "Press q to exit...", $00
 
+; linesx:
+; 	.byte 16, 32, 16, 0, 32
+	
+; linesy:
+; 	.byte 0, 16, 32, 16, 32
+
 linesx:
-	.byte 16, 32, 16, 0, 32
+	.byte 0, 32, 32, 0, 16
 	
 linesy:
-	.byte 0, 16, 32, 16, 32
+	.byte 0, 0, 32, 32, 16
 
 fragments:
-	.byte 3, 0, 1, 2, 3, 1, 2, 4, $ff
+	.byte 4, 0, 1, 2, 3, 0, 2, 2, 4, 1, $ff
