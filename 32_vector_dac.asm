@@ -15,6 +15,8 @@ dx2: .res $1
 dy2: .res $1
 pi: .res $1
 ii: .res $1
+fi: .res $1
+fc: .res $1
 q13: .res $1
 xoffs: .res $1
 yoffs: .res $1
@@ -58,6 +60,8 @@ event_init:
 
 	ldx #0
 	stx pi
+	stx fi
+	stx fc
 	lda #0
 	
 	lda #00
@@ -222,7 +226,7 @@ bresenhamq0:
 	rts
 	
 setup_bresenham:
-	; jmp @skip_print
+	jmp @skip_print
 	ldx #0
 	lda x0
 	jsr os_print_dec
@@ -254,8 +258,8 @@ setup_bresenham:
 	bcc @q3
 	beq @q3
 @q2:
-	lda #'2'
-	jsr os_putc
+	; lda #'2'
+	; jsr os_putc
 	lda #0
 	sta q13
 	; calc dx (inv), temporarily store in dx2
@@ -280,8 +284,8 @@ setup_bresenham:
 	jmp @start
 
 @q3:
-	lda #'3'
-	jsr os_putc
+	; lda #'3'
+	; jsr os_putc
 	lda #1
 	sta q13
 	; calc dx (inv), temporarily store in dx2
@@ -312,8 +316,8 @@ setup_bresenham:
 	bcc @q0
 	beq @q0
 @q1:
-	lda #'1'
-	jsr os_putc
+	; lda #'1'
+	; jsr os_putc
 	lda #1
 	sta q13
 	; calc dx, temporarily store in dx2
@@ -338,8 +342,8 @@ setup_bresenham:
 	jmp @start
 
 @q0:
-	lda #'0'
-	jsr os_putc
+	; lda #'0'
+	; jsr os_putc
 	
 	lda #0
 	sta q13
@@ -448,6 +452,51 @@ step_bresenhamq13:
 	rts
 	
 advance_line:
+	lda fc
+
+	bne @same_fragment
+
+	ldx fi
+	lda fragments, x
+	sta fc
+	cmp $ff
+	bne @no_restart
+	lda #00
+	sta fc
+	sta fi
+
+@no_restart:
+	sta fc
+	inc
+	sta fi
+
+@same_fragment:
+	; setup next line in current fragment:
+	; decrease fragmetn counter
+	dec fc
+
+	; load start points from xy[fragments[fi]]
+
+	ldx fi
+	lda fragments, x
+	tay
+	lda linesx, y
+	sta x0
+	lda linesy, y
+	sta y0
+	; load end points from xy[fragments[fi+1]]
+	inx
+	stx fi
+	lda fragments, x
+	tay
+	lda linesx, y
+	sta x1
+	lda linesy, y
+	sta y1
+	rts
+
+advance_line_old:
+	; old code
 	; inc pi
 	lda pi
 	and #$3
@@ -585,8 +634,10 @@ init_message:
 	.byte "Press q to exit...", $00
 
 linesx:
-	.byte 16, 32, 16, 0
+	.byte 16, 32, 16, 0, 32
 	
 linesy:
-	.byte 0, 16, 32, 16
+	.byte 0, 16, 32, 16, 32
 
+fragments:
+	.byte 3, 0, 1, 2, 3, 1, 2, 4, $ff
