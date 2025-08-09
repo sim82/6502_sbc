@@ -113,8 +113,24 @@ struct Config {
 fn main() {
     let args = Args::parse();
     let input_file = std::fs::read_to_string(args.input_config).expect("failed to read input file");
-    let input_cfg = toml::from_str(&input_file).expect("failed to deserialize config file");
+    let input_cfg: Config = toml::from_str(&input_file).expect("failed to deserialize config file");
 
+    println!("osgen: {} functions:", input_cfg.os_calls.len());
+    let mut order = input_cfg
+        .os_calls
+        .iter()
+        .map(|(k, v)| (v.ordinal, k))
+        .collect::<Vec<_>>();
+    order.sort_by_key(|(ordinal, _)| *ordinal);
+    for (_, name) in order {
+        let Some(os_call) = input_cfg.os_calls.get(name) else {
+            continue;
+        };
+        println!(
+            "- ({}) {} -> {}: {}",
+            os_call.ordinal, name, os_call.implementation, os_call.description
+        );
+    }
     if let Some(ld65_config) = args.ld65_config {
         let cfg_template = CfgTemplate::from_config(&input_cfg);
         let cfg = cfg_template.render().expect("failed to render ld65 config");

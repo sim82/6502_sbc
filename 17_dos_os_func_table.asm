@@ -1,4 +1,4 @@
-.IMPORT alloc_page_span, getc_blocking, putc, file_open_raw, fgetc_buf, print_dec, put_newline, print_message, get_argn, get_arg, get_event, event_return, free_page_span, print_fletch16, rand_8, set_direct_timer
+.IMPORT alloc_page_span, getc_blocking, putc, file_open_raw, fgetc_buf, print_dec, put_newline, print_message, get_argn, get_arg, get_event, event_return, free_page_span, print_fletch16, rand_8, set_direct_timer, dbg_byte
 .EXPORT os_func_table
 
 os_func_table:
@@ -18,3 +18,4 @@ os_func_table:
     .WORD print_fletch16
     .WORD rand_8
     .WORD set_direct_timer
+    .WORD dbg_byte

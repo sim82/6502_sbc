@@ -1,6 +1,7 @@
 BUILD_DIR=./build
 SRCS_CMD := 24_cmd_cat.asm 25_cmd_bs02.asm 27_snake.asm 28_sudoku.asm 28_sudoku_ui.asm 29_template.asm 29_pcm.asm 30_iotest.asm 31_fiostress.asm 32_vector_dac.asm
-SRCS := uart_ti.asm std.asm 12_sieve_term.asm 12_sieve_dyn.asm 12_sieve_bss.asm 14_memtest.asm 17_dos.asm 17_dos_token.asm 17_dos_pageio.asm 17_dos_baseio.asm 17_dos_pagetable.asm 17_dos_event.asm 17_dos_func_table.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm 22_irq.asm 23_flow_control.asm 26_resident.asm $(SRCS_CMD)
+SRCS_DOS := 17_dos.asm 17_dos_token.asm 17_dos_pageio.asm 17_dos_baseio.asm 17_dos_pagetable.asm 17_dos_event.asm 17_dos_func_table.asm 17_dos_dbg.asm
+SRCS := uart_ti.asm std.asm 12_sieve_term.asm 12_sieve_dyn.asm 12_sieve_bss.asm 14_memtest.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm 22_irq.asm 23_flow_control.asm 26_resident.asm $(SRCS_CMD)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 DEPS_NO_STD := $(BUILD_DIR)/uart_ti.o
@@ -33,7 +34,7 @@ $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
 	ld65 -o $@ -C my_sbc_rambottom.cfg $^ 
 	ln -sf $(shell pwd)/$@ mimonify/disk/memtest
 
-DOS_OBJS = $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(BUILD_DIR)/17_dos_pagetable.o $(BUILD_DIR)/17_dos_builtin.o $(BUILD_DIR)/17_dos_event.o $(BUILD_DIR)/17_dos_os_func_table.o
+DOS_OBJS = $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(BUILD_DIR)/17_dos_pagetable.o $(BUILD_DIR)/17_dos_builtin.o $(BUILD_DIR)/17_dos_event.o $(BUILD_DIR)/17_dos_os_func_table.o ${BUILD_DIR}/17_dos_dbg.o
 
 $(BUILD_DIR)/17_dos: $(DOS_OBJS) $(DEPS_NO_STD)
 	ld65 -o $@ -C my_sbc_dos.cfg $^ 

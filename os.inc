@@ -70,3 +70,7 @@ OS_EVENT_RETURN_KEEP_RESIDENT  = $01
 ; y in: DIV/16 for os timer events
 .IMPORT os_set_direct_timer 
 
+; debug print byte value.
+; ARG0(zp) in: the byte to print as decimal value
+.IMPORT os_dbg_byte 
+
