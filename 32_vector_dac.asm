@@ -13,6 +13,10 @@ xe: .res $1
 d: .res $1
 dx2: .res $1
 dy2: .res $1
+absx: .res $1
+absy: .res $1
+tw: .res $1
+neg: .res $1
 pi: .res $1
 ii: .res $1
 fi: .res $1
@@ -653,6 +657,175 @@ misc_testing:
 	bne @loopy2
 	jmp @outerloop
 
+abs_a:
+	bpl @return
+	eor $ff
+	inc
+@return:
+	rts
+
+invertxy:
+	lda x0
+	ldx x1
+	sta x1
+	stx x0
+	lda y0
+	ldx y1
+	sta y1
+	stx y0
+	rts
+
+swapxy:
+	lda x0
+	ldx y0
+	sta y0
+	stx x0
+	
+	lda x1
+	ldx y1
+	sta y1
+	stx x1
+
+	rts
+
+setup_bresenham2:
+	lda #0
+	sta tw
+@restart:
+	lda x1
+	sec
+	sbc x0
+	sta dx2
+	jsr abs_a
+	sta absx
+	
+	lda y1
+	sec
+	sbc y0
+	sta dy2
+	jsr abs_a
+	sta absy
+
+	; invariants:
+	; - dx2, dy2 set to x/y distance (not yet doubled!)
+	; - absx, absy are absolute x/y distances
+	; - A contains absy (for following comparison)
+	cmp absx
+	bcc @flatslope; x>=y
+	; dy is larger 
+	; check if dy is positive
+	lda dy2
+	bpl @dypos_st
+	; dy is larger than dx, but negative -> invert line and restart from scratch
+	jsr invertxy
+	jmp setup_bresenham2
+@dypos_st:
+	; dy is larger than dx and positive -> swap x/y (rotate into q0 / q7 and enable twiddling)
+	jsr swapxy
+	lda #1
+	sta tw
+	; restart but keep twiddle state. in the next iteration dx must be larget so it will
+	; dirctly go into flatslope case
+	jmp @restart
+
+@flatslope:
+	; dx is larger
+	; check if dx is positive
+	lda dx2
+	bpl @dxpos
+	; dx is negative -> invert line an restart from scratch. next iteration dx is still larger, but
+	; will go to dxpos case.
+	jsr invertxy
+	jmp setup_bresenham2
+@dxpos:
+	; invariants:
+	; - dx is larger than dy (flat slope)
+	; - dx is positive
+	;
+	; check if dy is negative, store in neg
+	ldx #0
+	lda dy2
+	bpl @dypos_fl
+	ldx #1
+@dypos_fl:
+	stx neg
+	
+	; invariants at this point:
+	;  - tw and neg set correctly
+	;  - slope is flat (octant 0 or 7)
+	;  - dx is positive
+	;  - A contains dy for following code
+	; 
+	; go ahead calculating initial D and proper 2*dx / 2*dy
+	asl
+	sta dy2
+	sec
+	sbc dx2
+	sta d
+	asl dx2
+
+	rts
+
+step_bresenham2:
+	lda tw
+	beq @notwiddle
+
+	ldx y0
+	ldy x0
+	txa
+	clc
+	adc yoffs
+	sta IO_GPIO20
+
+	tya
+	clc
+	adc xoffs
+	sta IO_GPIO21
+	jmp @inc
+@notwiddle:
+	ldx x0
+	ldy y0
+	txa
+	clc
+	adc xoffs
+	sta IO_GPIO21
+
+	tya
+	clc
+	adc yoffs
+	sta IO_GPIO20
+
+
+@inc:
+	lda d
+	bmi @no_y
+	lda neg
+	beq @pos
+	dey
+	jmp @cont
+@pos:
+	iny
+@cont:
+	lda d
+	sec
+	sbc dx2
+@no_y:
+	clc
+	adc dy2
+	sta d
+	inx
+	cpx xe
+	beq @reset
+	stx x0
+	sty y0
+	jmp @end
+
+@reset:
+	jsr advance_line
+	jsr setup_bresenham
+@end:
+	rts
+	
 .RODATA
 init_message:
 	.byte "Press q to exit...", $00
