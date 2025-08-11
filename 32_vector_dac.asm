@@ -173,7 +173,7 @@ direct_timer:
 	; inx
 	; stx pi
 
-	jsr step_bresenham
+	jsr step_bresenham2
 	
 ; @ldloop:
 
@@ -692,19 +692,39 @@ setup_bresenham2:
 	lda #0
 	sta tw
 @restart:
+	lda #':'
+	jsr os_putc
+	lda x0
+	sta ARG0
+	jsr os_dbg_byte
+	lda x1
+	sta ARG0
+	jsr os_dbg_byte
+	lda y0
+	sta ARG0
+	jsr os_dbg_byte
+	lda y1
+	sta ARG0
+	jsr os_dbg_byte
 	lda x1
 	sec
 	sbc x0
 	sta dx2
+	lda dx2
 	jsr abs_a
 	sta absx
-	
+	sta ARG0
+	jsr os_dbg_byte
+
 	lda y1
 	sec
 	sbc y0
 	sta dy2
+	lda dy2
 	jsr abs_a
 	sta absy
+	sta ARG0
+	jsr os_dbg_byte
 
 	; invariants:
 	; - dx2, dy2 set to x/y distance (not yet doubled!)
@@ -712,14 +732,22 @@ setup_bresenham2:
 	; - A contains absy (for following comparison)
 	cmp absx
 	bcc @flatslope; x>=y
+	beq @flatslope; x>=y
+
+	lda #'s'
+	jsr os_putc
 	; dy is larger 
 	; check if dy is positive
 	lda dy2
 	bpl @dypos_st
+	lda #'x'
+	jsr os_putc
 	; dy is larger than dx, but negative -> invert line and restart from scratch
 	jsr invertxy
 	jmp setup_bresenham2
 @dypos_st:
+	lda #'y'
+	jsr os_putc
 	; dy is larger than dx and positive -> swap x/y (rotate into q0 / q7 and enable twiddling)
 	jsr swapxy
 	lda #1
@@ -729,12 +757,16 @@ setup_bresenham2:
 	jmp @restart
 
 @flatslope:
+	lda #'f'
+	jsr os_putc
 	; dx is larger
 	; check if dx is positive
 	lda dx2
 	bpl @dxpos
 	; dx is negative -> invert line an restart from scratch. next iteration dx is still larger, but
 	; will go to dxpos case.
+	lda #'Y'
+	jsr os_putc
 	jsr invertxy
 	jmp setup_bresenham2
 @dxpos:
@@ -743,6 +775,8 @@ setup_bresenham2:
 	; - dx is positive
 	;
 	; check if dy is negative, store in neg
+	lda #'X'
+	jsr os_putc
 	ldx #0
 	lda dy2
 	bpl @dypos_fl
@@ -763,6 +797,7 @@ setup_bresenham2:
 	sbc dx2
 	sta d
 	asl dx2
+	jsr os_putnl
 
 	rts
 
@@ -822,7 +857,7 @@ step_bresenham2:
 
 @reset:
 	jsr advance_line
-	jsr setup_bresenham
+	jsr setup_bresenham2
 @end:
 	rts
 	
@@ -844,3 +879,4 @@ linesy:
 
 fragments:
 	.byte 4, 0, 1, 2, 3, 0, 2, 2, 4, 1, $ff
+	; .byte 4, 0, 1, 2, 3, 0, $ff
