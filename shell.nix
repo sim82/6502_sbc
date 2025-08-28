@@ -12,6 +12,7 @@ mkShell rec {
     libxkbcommon wayland # To use the wayland feature
     SDL2 SDL2_mixer rustc cargo rust-analyzer rustfmt clippy
     gnumake
+    minicom
   ];
   LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
 }
