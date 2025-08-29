@@ -3922,6 +3922,113 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Mechanical:MountingHole_Pad"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "H"
+				(at 0 6.35 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "MountingHole_Pad"
+				(at 0 4.445 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Mounting Hole with connection"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "mounting hole"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "MountingHole*Pad*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "MountingHole_Pad_0_1"
+				(circle
+					(center 0 1.27)
+					(radius 1.27)
+					(stroke
+						(width 1.27)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "MountingHole_Pad_1_1"
+				(pin input line
+					(at 0 -2.54 90)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "power:GND"
 			(power)
 			(pin_names
@@ -4162,12 +4269,6 @@
 		(uuid "1c1ffc37-0d93-4c08-95cf-d3bae7cb8154")
 	)
 	(junction
-		(at 177.8 43.18)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "2480d02f-4f88-4884-9e0b-c76d75d694e8")
-	)
-	(junction
 		(at 240.03 29.21)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4365,6 +4466,16 @@
 	)
 	(wire
 		(pts
+			(xy 148.59 76.2) (xy 161.29 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d2a91b5-55e4-4ce5-930f-e6ff50bd452d")
+	)
+	(wire
+		(pts
 			(xy 180.34 129.54) (xy 181.61 129.54)
 		)
 		(stroke
@@ -4545,6 +4656,16 @@
 	)
 	(wire
 		(pts
+			(xy 148.59 82.55) (xy 148.59 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "54ff299e-564c-48bc-9920-1897acd7fec9")
+	)
+	(wire
+		(pts
 			(xy 144.78 142.24) (xy 135.89 142.24)
 		)
 		(stroke
@@ -4565,13 +4686,23 @@
 	)
 	(wire
 		(pts
-			(xy 144.78 43.18) (xy 177.8 43.18)
+			(xy 149.86 104.14) (xy 161.29 104.14)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "70b7f607-5d7b-4c7a-86c7-aaa0e4171aa2")
+		(uuid "672123ee-ea94-4603-855d-8e5cde7915bf")
+	)
+	(wire
+		(pts
+			(xy 139.7 120.65) (xy 146.05 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "70cef731-23fb-42a6-9142-9a2209e16f8b")
 	)
 	(wire
 		(pts
@@ -4615,16 +4746,6 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 76.2) (xy 144.78 76.2)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "95ccf211-a195-468a-b62f-748d167f79a5")
-	)
-	(wire
-		(pts
 			(xy 210.82 129.54) (xy 210.82 119.38)
 		)
 		(stroke
@@ -4632,6 +4753,16 @@
 			(type default)
 		)
 		(uuid "96cf7f1e-5b81-4899-b689-2d074bfeda2c")
+	)
+	(wire
+		(pts
+			(xy 139.7 110.49) (xy 146.05 110.49)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9a9fb59f-2cf5-4527-bdad-72c5f70f1519")
 	)
 	(wire
 		(pts
@@ -4725,16 +4856,6 @@
 	)
 	(wire
 		(pts
-			(xy 144.78 76.2) (xy 144.78 43.18)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cfaa837a-2581-4cbf-96a6-41c9b9fbd1ef")
-	)
-	(wire
-		(pts
 			(xy 248.92 91.44) (xy 248.92 114.3)
 		)
 		(stroke
@@ -4752,6 +4873,16 @@
 			(type default)
 		)
 		(uuid "e415a9c5-cc30-4c94-80ba-c90c5cc17771")
+	)
+	(wire
+		(pts
+			(xy 149.86 115.57) (xy 149.86 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e66ab358-0538-4d13-b6c1-4db3ea5202aa")
 	)
 	(wire
 		(pts
@@ -5023,16 +5154,6 @@
 		)
 		(uuid "3dbfb339-15ef-4e93-9ec4-1ba024393ccd")
 	)
-	(label "RES"
-		(at 161.29 104.14 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "3f47d80c-e93e-4a6f-be4a-d075c333cc93")
-	)
 	(label "DB1"
 		(at 271.78 88.9 0)
 		(effects
@@ -5042,6 +5163,16 @@
 			(justify left bottom)
 		)
 		(uuid "3fca631e-c380-4797-82e7-28c22dfa5a53")
+	)
+	(label "~{RES}"
+		(at 139.7 110.49 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "43ae1671-ca1f-4fc5-9088-1ffe31f6b1c3")
 	)
 	(label "CLOCK"
 		(at 259.08 93.98 180)
@@ -5092,6 +5223,16 @@
 			(justify right bottom)
 		)
 		(uuid "5dbc7221-5eba-4399-9254-4047bb807e70")
+	)
+	(label "RES"
+		(at 139.7 120.65 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "5e1d9eca-6e96-4ee6-a8cd-a4292c461ded")
 	)
 	(label "~{IO_WR}"
 		(at 259.08 104.14 180)
@@ -5855,6 +5996,7 @@
 	(symbol
 		(lib_id "Jumper:SolderJumper_3_Open")
 		(at 135.89 71.12 90)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -5862,7 +6004,7 @@
 		(dnp no)
 		(uuid "2073c4f4-dd24-488b-af09-9fbb7507e3da")
 		(property "Reference" "JP2"
-			(at 133.35 69.8499 90)
+			(at 133.35 72.3901 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5871,7 +6013,7 @@
 			)
 		)
 		(property "Value" "SolderJumper_3_Open"
-			(at 126.492 70.866 90)
+			(at 126.492 71.374 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5880,7 +6022,7 @@
 				(hide yes)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels"
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
 			(at 135.89 71.12 0)
 			(effects
 				(font
@@ -5933,7 +6075,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "319f34c3-deab-4e88-8d87-5effb5fbd990")
 		(property "Reference" "U13"
 			(at 129.54 69.7798 0)
@@ -5944,7 +6085,7 @@
 			)
 		)
 		(property "Value" "74AHC1G32"
-			(at 129.54 72.3198 0)
+			(at 108.458 66.548 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5997,6 +6138,79 @@
 			(project "min_uart_board_01"
 				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
 					(reference "U13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Jumper:SolderJumper_3_Open")
+		(at 146.05 115.57 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "3f04f292-4be3-4909-9b02-f3b6154ed52a")
+		(property "Reference" "JP3"
+			(at 143.51 114.2999 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SolderJumper_3_Open"
+			(at 136.652 115.316 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
+			(at 146.05 115.57 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 146.05 115.57 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Solder Jumper, 3-pole, open"
+			(at 146.05 115.57 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "5a157505-aa06-49c5-957b-ba7699683b90")
+		)
+		(pin "1"
+			(uuid "0b620d6a-3b92-424c-a0e7-5a691d5808ec")
+		)
+		(pin "3"
+			(uuid "ad190d33-2176-4a4f-99bf-627776168b61")
+		)
+		(instances
+			(project "min_uart_board_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "JP3")
 					(unit 1)
 				)
 			)
@@ -6337,6 +6551,135 @@
 		)
 	)
 	(symbol
+		(lib_id "power:VCC")
+		(at 144.78 77.47 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9893ad47-b2dd-4695-8554-6e7f2c57e78a")
+		(property "Reference" "#PWR043"
+			(at 144.78 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "VCC"
+			(at 144.78 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 144.78 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 144.78 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 144.78 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "bda97048-27f0-44df-b564-b21d46653066")
+		)
+		(instances
+			(project "min_uart_board_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "#PWR043")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole_Pad")
+		(at 162.56 153.67 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a41cef8d-ec96-4e66-9dae-c77c5b44f531")
+		(property "Reference" "H1"
+			(at 165.1 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GND"
+			(at 160.02 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad"
+			(at 162.56 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 162.56 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 162.56 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9c46f176-b996-4b80-93f9-feef510d52e4")
+		)
+		(instances
+			(project "min_uart_board_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "H1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector_Generic:Conn_02x03_Odd_Even")
 		(at 223.52 121.92 0)
 		(unit 1)
@@ -6639,7 +6982,7 @@
 				(hide yes)
 			)
 		)
-		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm_NumberLabels"
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
 			(at 146.05 101.6 0)
 			(effects
 				(font
@@ -7346,6 +7689,80 @@
 		)
 	)
 	(symbol
+		(lib_id "Jumper:SolderJumper_3_Open")
+		(at 144.78 82.55 90)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "df94d3e8-1d64-41b5-9f47-993f9a8c45bc")
+		(property "Reference" "JP4"
+			(at 142.24 83.8201 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SolderJumper_3_Open"
+			(at 135.382 82.804 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
+			(at 144.78 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 144.78 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Solder Jumper, 3-pole, open"
+			(at 144.78 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "bad5905b-42c3-440d-a7b2-315344c17f2c")
+		)
+		(pin "1"
+			(uuid "7b2e87f4-47f7-44d4-aeb2-9370ad38d27d")
+		)
+		(pin "3"
+			(uuid "e42c8b70-2baa-4ed2-bf16-2c6f0d96ec45")
+		)
+		(instances
+			(project "min_uart_board_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "JP4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:VCC")
 		(at 252.73 16.51 0)
 		(unit 1)
@@ -7469,6 +7886,136 @@
 			(project "min_uart_board_01"
 				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
 					(reference "#PWR023")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 162.56 156.21 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ea29a899-65c5-4567-95c4-c72b3d61dac8")
+		(property "Reference" "#PWR033"
+			(at 162.56 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 162.56 161.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 162.56 156.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 162.56 156.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 162.56 156.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1827751e-53e6-4406-8aea-e032fadd2ad7")
+		)
+		(instances
+			(project "min_uart_board_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "#PWR033")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 144.78 87.63 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f697217b-0e49-4589-9b45-328636e3df90")
+		(property "Reference" "#PWR044"
+			(at 144.78 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 144.78 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 144.78 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 144.78 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 144.78 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "14def296-cd08-474c-9b82-ae8f448c4591")
+		)
+		(instances
+			(project "min_uart_board_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "#PWR044")
 					(unit 1)
 				)
 			)
