@@ -676,6 +676,14 @@
     [
       "f3e73905-7851-4c7b-a7de-c0801b7173ba",
       "vga output"
+    ],
+    [
+      "d37dfd04-5bfb-481b-a0e1-5eb0341e9ca1",
+      "power"
+    ],
+    [
+      "bf006d6a-9e6e-4a99-9d00-ef1420d78a92",
+      "display_generator"
     ]
   ],
   "text_variables": {}

@@ -2681,6 +2681,17 @@
 		)
 		(uuid "36e82956-4256-445e-8f54-98d3132b7ad5")
 	)
+	(hierarchical_label "H_SYNC"
+		(shape input)
+		(at 143.51 95.25 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4c0558ff-39c2-41dd-a9ec-75e1f36c2b8c")
+	)
 	(hierarchical_label "VA_EN"
 		(shape input)
 		(at 63.5 123.19 180)
@@ -2702,6 +2713,17 @@
 			(justify right)
 		)
 		(uuid "755960fd-6179-46b3-8ea5-b7e441429a06")
+	)
+	(hierarchical_label "V_SYNC"
+		(shape input)
+		(at 143.51 100.33 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7933e8cc-d3a7-4681-82c8-82169aa465c3")
 	)
 	(hierarchical_label "VA_EN"
 		(shape input)
@@ -3594,6 +3616,73 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 139.7 100.33 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "3d3b829d-0e88-4a86-8f9a-dc3315590f4d")
+		(property "Reference" "R13"
+			(at 140.208 103.632 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 139.7 105.918 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal"
+			(at 139.7 102.108 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 139.7 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 139.7 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "6a46bddb-62c8-40cb-8349-af2a4f36458f")
+		)
+		(pin "1"
+			(uuid "5697d210-0dbb-40ef-8ce3-50a58bd56957")
+		)
+		(instances
+			(project "vga_mem_output_01_4l"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f/f3e73905-7851-4c7b-a7de-c0801b7173ba"
+					(reference "R13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 113.03 88.9 0)
 		(unit 1)
@@ -4320,6 +4409,74 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 139.7 95.25 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9605226b-064f-484e-a597-2c9b3bbd2655")
+		(property "Reference" "R12"
+			(at 139.7 88.9 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 139.7 91.44 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal"
+			(at 139.7 97.028 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 139.7 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 139.7 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "12359e3c-3cb1-461b-a5a8-0f26b7cd43f0")
+		)
+		(pin "1"
+			(uuid "a4db04af-a399-46ae-9b9d-af50b95e0f79")
+		)
+		(instances
+			(project "vga_mem_output_01_4l"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f/f3e73905-7851-4c7b-a7de-c0801b7173ba"
+					(reference "R12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "74xx:74LS08")
 		(at 71.12 107.95 0)
 		(unit 3)
@@ -4997,6 +5154,72 @@
 				(path "/cb13e431-64f0-4016-a936-ee98aca3391f/f3e73905-7851-4c7b-a7de-c0801b7173ba"
 					(reference "U1")
 					(unit 4)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 120.65 105.41 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e75800d5-ae23-45f4-8fc3-012c595d8f43")
+		(property "Reference" "#PWR059"
+			(at 120.65 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 120.65 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" ""
+			(at 120.65 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 120.65 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 120.65 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "34e9e6ee-9834-4253-a576-9cc3bcf5b741")
+		)
+		(instances
+			(project "vga_mem_output_01_4l"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f/f3e73905-7851-4c7b-a7de-c0801b7173ba"
+					(reference "#PWR059")
+					(unit 1)
 				)
 			)
 		)
