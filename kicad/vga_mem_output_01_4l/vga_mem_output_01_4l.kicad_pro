@@ -668,6 +668,14 @@
     [
       "cb13e431-64f0-4016-a936-ee98aca3391f",
       "Root"
+    ],
+    [
+      "ec06162c-6acf-4b81-880a-6c66d93e7444",
+      "Address multiplexer"
+    ],
+    [
+      "f3e73905-7851-4c7b-a7de-c0801b7173ba",
+      "vga output"
     ]
   ],
   "text_variables": {}
