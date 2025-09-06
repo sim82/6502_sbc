@@ -1554,7 +1554,7 @@
 	)
 	(wire
 		(pts
-			(xy 260.35 34.29) (xy 270.51 34.29)
+			(xy 231.14 36.83) (xy 241.3 36.83)
 		)
 		(stroke
 			(width 0)
@@ -1664,7 +1664,7 @@
 	)
 	(wire
 		(pts
-			(xy 260.35 40.64) (xy 260.35 34.29)
+			(xy 231.14 43.18) (xy 231.14 36.83)
 		)
 		(stroke
 			(width 0)
@@ -1813,7 +1813,7 @@
 		(uuid "149ccf59-b67b-462d-b5bd-1275ffdc79f0")
 	)
 	(label "CPU_A4"
-		(at 270.51 46.99 180)
+		(at 241.3 49.53 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1823,7 +1823,7 @@
 		(uuid "152f8764-900e-4c2c-82c9-1c502bbd32ad")
 	)
 	(label "CPU_A3"
-		(at 270.51 44.45 180)
+		(at 241.3 46.99 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1833,7 +1833,7 @@
 		(uuid "1bd8edc5-a48e-4359-a02b-1f8e2505fdd7")
 	)
 	(label "CPU_A14"
-		(at 270.51 72.39 180)
+		(at 241.3 74.93 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1843,7 +1843,7 @@
 		(uuid "2321cbc7-26ee-4f16-ba1d-e14344b79b0d")
 	)
 	(label "CPU_A12"
-		(at 270.51 67.31 180)
+		(at 241.3 69.85 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1883,7 +1883,7 @@
 		(uuid "399b5016-5cd3-4811-b804-9aa51d42b8b6")
 	)
 	(label "CPU_A0"
-		(at 270.51 36.83 180)
+		(at 241.3 39.37 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1943,7 +1943,7 @@
 		(uuid "6cff159f-f12a-4c02-9f10-e3806cff03fe")
 	)
 	(label "CPU_A11"
-		(at 270.51 64.77 180)
+		(at 241.3 67.31 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1963,7 +1963,7 @@
 		(uuid "77ba664f-a2ce-4325-b166-305e64b50a79")
 	)
 	(label "CPU_A1"
-		(at 270.51 39.37 180)
+		(at 241.3 41.91 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1973,7 +1973,7 @@
 		(uuid "98e3a2f6-3807-48c1-9e08-d0ab48bc8d0d")
 	)
 	(label "CPU_A5"
-		(at 270.51 49.53 180)
+		(at 241.3 52.07 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1983,7 +1983,7 @@
 		(uuid "a0f14701-0ed7-450b-8aa6-de51130a9fd4")
 	)
 	(label "CPU_A2"
-		(at 270.51 41.91 180)
+		(at 241.3 44.45 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1993,7 +1993,7 @@
 		(uuid "bfd7b201-31f7-4d88-a7c2-ffcf0a5d999e")
 	)
 	(label "CPU_A10"
-		(at 270.51 62.23 180)
+		(at 241.3 64.77 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2013,7 +2013,7 @@
 		(uuid "ce82d9bd-6b71-4b68-8e90-9786387e6b4c")
 	)
 	(label "CPU_A9"
-		(at 270.51 59.69 180)
+		(at 241.3 62.23 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2033,7 +2033,7 @@
 		(uuid "d2cc1ebf-7c19-4e80-965d-6ed9fb544311")
 	)
 	(label "CPU_A13"
-		(at 270.51 69.85 180)
+		(at 241.3 72.39 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2043,7 +2043,7 @@
 		(uuid "d89a168f-812f-45a8-871e-bfd776a7f2ff")
 	)
 	(label "CPU_A16"
-		(at 270.51 77.47 180)
+		(at 241.3 80.01 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2053,7 +2053,7 @@
 		(uuid "d95c7068-bb38-461c-a95f-d973a8963a62")
 	)
 	(label "CPU_A15"
-		(at 270.51 74.93 180)
+		(at 241.3 77.47 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2073,7 +2073,7 @@
 		(uuid "ee6d317d-dfbe-4a0a-982f-0054bc6a237d")
 	)
 	(label "CPU_A8"
-		(at 270.51 57.15 180)
+		(at 241.3 59.69 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2083,7 +2083,7 @@
 		(uuid "f050dcf9-be1b-48a9-a8c9-fb23b6408737")
 	)
 	(label "CPU_A6"
-		(at 270.51 52.07 180)
+		(at 241.3 54.61 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2093,7 +2093,7 @@
 		(uuid "f56007a8-f263-4297-88e4-31fe137c6aad")
 	)
 	(label "CPU_A7"
-		(at 270.51 54.61 180)
+		(at 241.3 57.15 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2441,17 +2441,6 @@
 			(justify left)
 		)
 		(uuid "b485997c-605c-4163-8084-cee6aa15348f")
-	)
-	(hierarchical_label "~{A_FRONT}"
-		(shape input)
-		(at 130.81 146.05 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "b8819af8-1544-4c99-9f95-58ec2c28abc4")
 	)
 	(hierarchical_label "A14"
 		(shape output)
@@ -2863,7 +2852,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 260.35 40.64 0)
+		(at 231.14 43.18 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2872,7 +2861,7 @@
 		(fields_autoplaced yes)
 		(uuid "439c8255-379c-4e8e-8fab-6beae873643c")
 		(property "Reference" "#PWR053"
-			(at 260.35 46.99 0)
+			(at 231.14 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2881,7 +2870,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 260.35 45.72 0)
+			(at 231.14 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2890,7 +2879,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 260.35 40.64 0)
+			(at 231.14 43.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2899,7 +2888,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 260.35 40.64 0)
+			(at 231.14 43.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2908,7 +2897,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 260.35 40.64 0)
+			(at 231.14 43.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3723,7 +3712,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_01x18_Socket")
-		(at 275.59 54.61 0)
+		(at 246.38 57.15 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3732,7 +3721,7 @@
 		(fields_autoplaced yes)
 		(uuid "fefcafcf-cdc1-470a-9463-ae8bb49a09b6")
 		(property "Reference" "J6"
-			(at 276.86 54.6099 0)
+			(at 247.65 57.1499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3741,7 +3730,7 @@
 			)
 		)
 		(property "Value" "Conn_01x18_Socket"
-			(at 276.86 57.1499 0)
+			(at 247.65 59.6899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3750,7 +3739,7 @@
 			)
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x18_P2.54mm_Vertical"
-			(at 275.59 54.61 0)
+			(at 246.38 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3759,7 +3748,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 275.59 54.61 0)
+			(at 246.38 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3768,7 +3757,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x18, script generated"
-			(at 275.59 54.61 0)
+			(at 246.38 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)

@@ -3099,6 +3099,16 @@
 	)
 	(wire
 		(pts
+			(xy 71.12 24.13) (xy 64.77 24.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "75be7c87-5dca-4b5e-aaeb-e5eafd9060f2")
+	)
+	(wire
+		(pts
 			(xy 109.22 140.97) (xy 115.57 140.97)
 		)
 		(stroke
@@ -4485,6 +4495,17 @@
 			(justify left)
 		)
 		(uuid "665b80ff-90f6-462c-a33c-af5a3b78858a")
+	)
+	(hierarchical_label "DG_PIXEL"
+		(shape output)
+		(at 71.12 24.13 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "74fc8c27-dd22-4b66-8f86-6c55b9acab20")
 	)
 	(hierarchical_label "DG_A7"
 		(shape output)
