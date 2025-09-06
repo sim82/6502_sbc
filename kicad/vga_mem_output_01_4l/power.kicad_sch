@@ -1596,10 +1596,22 @@
 		(uuid "621b138b-79ff-4b70-8296-62a44d52652d")
 	)
 	(junction
+		(at 316.23 64.77)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "649307bb-92d2-4eb6-9579-16e3c3a613e3")
+	)
+	(junction
 		(at 226.06 57.15)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "65113df2-f1eb-40ea-a562-300077347466")
+	)
+	(junction
+		(at 322.58 57.15)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "671454dd-8c40-47de-9ebe-de159de3a32e")
 	)
 	(junction
 		(at 218.44 57.15)
@@ -1871,7 +1883,7 @@
 	)
 	(wire
 		(pts
-			(xy 316.23 49.53) (xy 316.23 57.15)
+			(xy 322.58 49.53) (xy 322.58 57.15)
 		)
 		(stroke
 			(width 0)
@@ -1918,6 +1930,16 @@
 			(type default)
 		)
 		(uuid "81c6239d-8050-4df3-a5d9-07eeff9a529f")
+	)
+	(wire
+		(pts
+			(xy 316.23 64.77) (xy 322.58 64.77)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8334422b-0c0c-4500-851f-ec6bb6c79940")
 	)
 	(wire
 		(pts
@@ -1978,6 +2000,16 @@
 			(type default)
 		)
 		(uuid "a0b1a0a1-682a-43df-825e-3b820d2e616e")
+	)
+	(wire
+		(pts
+			(xy 316.23 57.15) (xy 322.58 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b462737a-4090-4a0b-863f-8d038c49a3c2")
 	)
 	(wire
 		(pts
@@ -3341,6 +3373,74 @@
 	)
 	(symbol
 		(lib_id "Device:C")
+		(at 322.58 60.96 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9ae184f7-90c3-4b7b-8a49-109d3b6edb4f")
+		(property "Reference" "C23"
+			(at 320.675 67.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 319.405 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
+			(at 323.5452 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 322.58 60.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 322.58 60.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f8a0fe37-6e32-4367-9720-922262eab99d")
+		)
+		(pin "2"
+			(uuid "924c50ba-f5b6-400a-99e4-78d6d327aef5")
+		)
+		(instances
+			(project "vga_mem_output_01_4l"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f/d37dfd04-5bfb-481b-a0e1-5eb0341e9ca1"
+					(reference "C23")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
 		(at 186.69 60.96 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -3679,7 +3779,7 @@
 	)
 	(symbol
 		(lib_id "power:VCC")
-		(at 316.23 49.53 0)
+		(at 322.58 49.53 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3687,7 +3787,7 @@
 		(dnp no)
 		(uuid "dfa73544-31b6-4c08-8bed-5eca61b880e4")
 		(property "Reference" "#PWR040"
-			(at 316.23 53.34 0)
+			(at 322.58 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3696,7 +3796,7 @@
 			)
 		)
 		(property "Value" "VCC"
-			(at 316.23 44.45 0)
+			(at 322.58 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3704,7 +3804,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 316.23 49.53 0)
+			(at 322.58 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3713,7 +3813,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 316.23 49.53 0)
+			(at 322.58 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3722,7 +3822,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 316.23 49.53 0)
+			(at 322.58 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
