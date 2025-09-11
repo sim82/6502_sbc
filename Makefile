@@ -1,18 +1,18 @@
-BUILD_DIR=./build
-SRCS_CMD := 24_cmd_cat.asm 25_cmd_bs02.asm 27_snake.asm 28_sudoku.asm 28_sudoku_ui.asm 29_template.asm 29_pcm.asm 30_iotest.asm 31_fiostress.asm 32_vector_dac.asm
-SRCS_DOS := 17_dos.asm 17_dos_token.asm 17_dos_pageio.asm 17_dos_baseio.asm 17_dos_pagetable.asm 17_dos_event.asm 17_dos_func_table.asm 17_dos_dbg.asm
-SRCS := uart_ti.asm std.asm 12_sieve_term.asm 12_sieve_dyn.asm 12_sieve_bss.asm 14_memtest.asm 18_bootload_ti.asm 19_memprobe.asm basic.asm basic_bios.asm 20_uart.asm 21_reltest.asm 22_irq.asm 23_flow_control.asm 26_resident.asm $(SRCS_CMD)
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+TARGETS := 24_cmd_cat 25_cmd_bs02 27_snake 28_sudoku 29_template 29_pcm 30_iotest 31_fiostress \
+	    32_vector_dac 12_sieve_term 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 14_memtest \
+	    17_dos 17_dos_rel 18_bootload_ti 19_memprobe basic 20_uart 20_uart_rel 21_reltest_rel \
+	    22_irq 23_flow_control 26_resident 
 
 DEPS_NO_STD := $(BUILD_DIR)/uart_ti.o
 DEPS_ALL := $(BUILD_DIR)/std.o $(DEPS_NO_STD)
 AS_FLAGS := --cpu 65c02
+BUILD_DIR=./build
 $(BUILD_DIR)/%.o: %.asm
 	mkdir -p $(dir $@)
 	ca65 ${AS_FLAGS} -o $@ $<
 
-BINS_CMD := $(BUILD_DIR)/24_cmd_cat $(BUILD_DIR)/25_cmd_bs02 $(BUILD_DIR)/27_snake $(BUILD_DIR)/28_sudoku $(BUILD_DIR)/29_template $(BUILD_DIR)/29_pcm $(BUILD_DIR)/30_iotest $(BUILD_DIR)/31_fiostress $(BUILD_DIR)/32_vector_dac
-all: $(BUILD_DIR)/12_sieve_term $(BUILD_DIR)/12_sieve_term_rel $(BUILD_DIR)/12_sieve_dyn $(BUILD_DIR)/12_sieve_bss $(BUILD_DIR)/14_memtest $(BUILD_DIR)/17_dos $(BUILD_DIR)/17_dos_rel $(BUILD_DIR)/18_bootload_ti $(BUILD_DIR)/19_memprobe $(BUILD_DIR)/basic $(BUILD_DIR)/20_uart $(BUILD_DIR)/20_uart_rel $(BUILD_DIR)/21_reltest_rel $(BUILD_DIR)/22_irq $(BUILD_DIR)/23_flow_control $(BUILD_DIR)/26_resident $(BINS_CMD)
+TARGETS_OUT := $(TARGETS:%=$(BUILD_DIR)/%)
+all: $(TARGETS_OUT)
 
 $(BUILD_DIR)/12_sieve_term: $(BUILD_DIR)/12_sieve_term.o $(DEPS_ALL)	
 	ld65 -o $@ -C my_sbc_ram_d000.cfg $^ 
