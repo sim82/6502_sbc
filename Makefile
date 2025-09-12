@@ -2,6 +2,11 @@
 # Makefile created by AI superpower...
 #
 
+# To add a new relocatable executable:
+# 1. Add it to OS_CFG_TARGETS
+# 2. (optionally) entry to Symlink Names section to automatically create symlink in disk dir
+# 3. Add Dependency Definition listing the object files to link into the executable
+
 # --- Basic Configuration ---
 BUILD_DIR := ./build
 AS_FLAGS  := --cpu 65c02
@@ -9,16 +14,23 @@ LINKER    := ld65
 ASSEMBLER := ca65
 
 # --- Source & Object Definitions ---
-TARGETS := 24_cmd_cat 25_cmd_bs02 27_snake 28_sudoku 29_template 29_pcm 30_iotest 31_fiostress \
-	   32_vector_dac 12_sieve_term 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 14_memtest \
-	   17_dos 17_dos_rel 18_bootload_ti 19_memprobe basic 20_uart 20_uart_rel 21_reltest_rel \
-	   22_irq 23_flow_control 26_resident
+# Group targets by the config file they use for clarity.
+RAM_D000_TARGETS   := 12_sieve_term 23_flow_control
+OS_CFG_TARGETS     := 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 20_uart 20_uart_rel 21_reltest_rel \
+                      22_irq 24_cmd_cat 25_cmd_bs02 26_resident 27_snake 28_sudoku 29_template \
+                      29_pcm 30_iotest 31_fiostress 32_vector_dac 17_dos_rel
+RAMBOTTOM_TARGETS  := 14_memtest 19_memprobe
+DOS_CFG_TARGETS    := 17_dos
+ROMBL_CFG_TARGETS  := 18_bootload_ti
+RAM_BASIC_TARGETS  := basic
 
+TARGETS := $(RAM_D000_TARGETS) $(OS_CFG_TARGETS) $(RAMBOTTOM_TARGETS) $(DOS_CFG_TARGETS) $(ROMBL_CFG_TARGETS) $(RAM_BASIC_TARGETS)
 TARGETS_OUT := $(patsubst %,$(BUILD_DIR)/%,$(TARGETS))
 
 # Common dependencies
 DEPS_NO_STD := $(BUILD_DIR)/uart_ti.o
 DEPS_ALL    := $(BUILD_DIR)/std.o $(DEPS_NO_STD)
+COMMON_INCS := std.inc os.inc
 
 # Object file list for the 'dos' targets
 DOS_OBJS := $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o \
@@ -29,15 +41,6 @@ DOS_OBJS := $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_do
 # --- Target-Specific Variable Definitions (The "Data" Section) ---
 
 # 1. Define Linker Configs
-# Group targets by the config file they use for clarity.
-RAM_D000_TARGETS   := 12_sieve_term 23_flow_control
-OS_CFG_TARGETS     := 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 20_uart 20_uart_rel 21_reltest_rel \
-                      22_irq 24_cmd_cat 25_cmd_bs02 26_resident 27_snake 28_sudoku 29_template \
-                      29_pcm 30_iotest 31_fiostress 32_vector_dac 17_dos_rel
-RAMBOTTOM_TARGETS  := 14_memtest 19_memprobe
-DOS_CFG_TARGETS    := 17_dos
-ROMBL_CFG_TARGETS  := 18_bootload_ti
-RAM_BASIC_TARGETS  := basic
 
 # Assign the linker config variable to each group
 $(patsubst %,$(BUILD_DIR)/%,$(RAM_D000_TARGETS)):   LINKER_CFG := my_sbc_ram_d000.cfg
@@ -80,16 +83,17 @@ $(BUILD_DIR)/32_vector_dac:     SYMLINK := vec
 all: $(TARGETS_OUT)
 
 # Generic rule to assemble a single .asm file into a .o file
-$(BUILD_DIR)/%.o: %.asm
+$(BUILD_DIR)/%.o: %.asm $(COMMON_INCS)
 	@mkdir -p $(dir $@)
 	@echo "AS $<"
 	@$(ASSEMBLER) $(AS_FLAGS) -o $@ $<
 
+#.SECONDEXPANSION:
 # Generic rule for all targets.
 # It uses the target-specific variables defined above.
 # The `if` function conditionally creates the symlink only if the SYMLINK variable is set.
-$(TARGETS_OUT):
-	@echo "LD $@"
+$(TARGETS_OUT): #$$(LINKER_CFG)
+	@echo "LD $@ ($(LINKER_CFG))"
 	@$(LINKER) -o $@ -C $(LINKER_CFG) $^
 	@$(if $(SYMLINK), ln -sf $(CURDIR)/$@ mimonify/disk/$(SYMLINK))
 
@@ -127,3 +131,4 @@ $(BUILD_DIR)/basic: $(BUILD_DIR)/basic.o $(BUILD_DIR)/basic_bios.o $(DEPS_NO_STD
 clean:
 	@echo "Cleaning build directory..."
 	@rm -rf $(BUILD_DIR)
+
