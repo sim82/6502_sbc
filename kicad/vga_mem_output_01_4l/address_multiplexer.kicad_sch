@@ -386,7 +386,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Connector:Conn_01x18_Socket"
+		(symbol "Connector:Conn_01x19_Socket"
 			(pin_names
 				(offset 1.016)
 				(hide yes)
@@ -395,14 +395,14 @@
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "J"
-				(at 0 22.86 0)
+				(at 0 25.4 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" "Conn_01x18_Socket"
+			(property "Value" "Conn_01x19_Socket"
 				(at 0 -25.4 0)
 				(effects
 					(font
@@ -428,7 +428,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Generic connector, single row, 01x18, script generated"
+			(property "Description" "Generic connector, single row, 01x19, script generated"
 				(at 0 0 0)
 				(effects
 					(font
@@ -463,7 +463,19 @@
 					(hide yes)
 				)
 			)
-			(symbol "Conn_01x18_Socket_1_1"
+			(symbol "Conn_01x19_Socket_1_1"
+				(polyline
+					(pts
+						(xy -1.27 22.86) (xy -0.508 22.86)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
 				(polyline
 					(pts
 						(xy -1.27 20.32) (xy -0.508 20.32)
@@ -672,6 +684,18 @@
 					(pts
 						(xy -1.27 -22.86) (xy -0.508 -22.86)
 					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start 0 22.352)
+					(mid -0.5058 22.86)
+					(end 0 23.368)
 					(stroke
 						(width 0.1524)
 						(type default)
@@ -897,7 +921,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 20.32 0)
+					(at -5.08 22.86 0)
 					(length 3.81)
 					(name "Pin_1"
 						(effects
@@ -915,7 +939,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 17.78 0)
+					(at -5.08 20.32 0)
 					(length 3.81)
 					(name "Pin_2"
 						(effects
@@ -933,7 +957,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 15.24 0)
+					(at -5.08 17.78 0)
 					(length 3.81)
 					(name "Pin_3"
 						(effects
@@ -951,7 +975,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 12.7 0)
+					(at -5.08 15.24 0)
 					(length 3.81)
 					(name "Pin_4"
 						(effects
@@ -969,7 +993,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 10.16 0)
+					(at -5.08 12.7 0)
 					(length 3.81)
 					(name "Pin_5"
 						(effects
@@ -987,7 +1011,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 7.62 0)
+					(at -5.08 10.16 0)
 					(length 3.81)
 					(name "Pin_6"
 						(effects
@@ -1005,7 +1029,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 5.08 0)
+					(at -5.08 7.62 0)
 					(length 3.81)
 					(name "Pin_7"
 						(effects
@@ -1023,7 +1047,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 2.54 0)
+					(at -5.08 5.08 0)
 					(length 3.81)
 					(name "Pin_8"
 						(effects
@@ -1041,7 +1065,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 0 0)
+					(at -5.08 2.54 0)
 					(length 3.81)
 					(name "Pin_9"
 						(effects
@@ -1059,7 +1083,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -2.54 0)
+					(at -5.08 0 0)
 					(length 3.81)
 					(name "Pin_10"
 						(effects
@@ -1077,7 +1101,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -5.08 0)
+					(at -5.08 -2.54 0)
 					(length 3.81)
 					(name "Pin_11"
 						(effects
@@ -1095,7 +1119,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -7.62 0)
+					(at -5.08 -5.08 0)
 					(length 3.81)
 					(name "Pin_12"
 						(effects
@@ -1113,7 +1137,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -10.16 0)
+					(at -5.08 -7.62 0)
 					(length 3.81)
 					(name "Pin_13"
 						(effects
@@ -1131,7 +1155,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -12.7 0)
+					(at -5.08 -10.16 0)
 					(length 3.81)
 					(name "Pin_14"
 						(effects
@@ -1149,7 +1173,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -15.24 0)
+					(at -5.08 -12.7 0)
 					(length 3.81)
 					(name "Pin_15"
 						(effects
@@ -1167,7 +1191,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -17.78 0)
+					(at -5.08 -15.24 0)
 					(length 3.81)
 					(name "Pin_16"
 						(effects
@@ -1185,7 +1209,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -20.32 0)
+					(at -5.08 -17.78 0)
 					(length 3.81)
 					(name "Pin_17"
 						(effects
@@ -1203,7 +1227,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -22.86 0)
+					(at -5.08 -20.32 0)
 					(length 3.81)
 					(name "Pin_18"
 						(effects
@@ -1213,6 +1237,24 @@
 						)
 					)
 					(number "18"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -22.86 0)
+					(length 3.81)
+					(name "Pin_19"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "19"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1469,6 +1511,12 @@
 		(uuid "28a8f425-4943-4ecd-bab1-335df2cfd0f2")
 	)
 	(junction
+		(at 231.14 82.55)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "4524f8e5-b572-44fb-8e98-722e11e0ffcd")
+	)
+	(junction
 		(at 76.2 86.36)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1634,6 +1682,16 @@
 	)
 	(wire
 		(pts
+			(xy 231.14 82.55) (xy 231.14 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "64f417aa-f982-4628-92b3-3a0d7fe410c8")
+	)
+	(wire
+		(pts
 			(xy 143.51 77.47) (xy 143.51 85.09)
 		)
 		(stroke
@@ -1664,7 +1722,7 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 43.18) (xy 231.14 36.83)
+			(xy 231.14 87.63) (xy 231.14 82.55)
 		)
 		(stroke
 			(width 0)
@@ -1711,6 +1769,16 @@
 			(type default)
 		)
 		(uuid "b99b7d80-5e50-4e89-a056-ddfde70aeaf4")
+	)
+	(wire
+		(pts
+			(xy 231.14 82.55) (xy 241.3 82.55)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc3731e0-cc42-482a-968a-c4ecf058a34f")
 	)
 	(wire
 		(pts
@@ -2852,7 +2920,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 231.14 43.18 0)
+		(at 231.14 87.63 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2861,7 +2929,7 @@
 		(fields_autoplaced yes)
 		(uuid "439c8255-379c-4e8e-8fab-6beae873643c")
 		(property "Reference" "#PWR053"
-			(at 231.14 49.53 0)
+			(at 231.14 93.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2870,7 +2938,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 231.14 48.26 0)
+			(at 231.14 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2879,7 +2947,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 231.14 43.18 0)
+			(at 231.14 87.63 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2888,7 +2956,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 231.14 43.18 0)
+			(at 231.14 87.63 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2897,7 +2965,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 231.14 43.18 0)
+			(at 231.14 87.63 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3711,8 +3779,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:Conn_01x18_Socket")
-		(at 246.38 57.15 0)
+		(lib_id "Connector:Conn_01x19_Socket")
+		(at 246.38 59.69 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3721,7 +3789,7 @@
 		(fields_autoplaced yes)
 		(uuid "fefcafcf-cdc1-470a-9463-ae8bb49a09b6")
 		(property "Reference" "J6"
-			(at 247.65 57.1499 0)
+			(at 247.65 58.4199 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3730,7 +3798,7 @@
 			)
 		)
 		(property "Value" "Conn_01x18_Socket"
-			(at 247.65 59.6899 0)
+			(at 247.65 60.9599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3738,8 +3806,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x18_P2.54mm_Vertical"
-			(at 246.38 57.15 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x19_P2.54mm_Vertical"
+			(at 246.38 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3748,7 +3816,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 246.38 57.15 0)
+			(at 246.38 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3756,8 +3824,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x18, script generated"
-			(at 246.38 57.15 0)
+		(property "Description" "Generic connector, single row, 01x19, script generated"
+			(at 246.38 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3818,6 +3886,9 @@
 		)
 		(pin "4"
 			(uuid "f3a1bae3-d12a-4ac0-8457-6581d04422bd")
+		)
+		(pin "19"
+			(uuid "28dc2869-47b9-4356-918d-e94123ade62e")
 		)
 		(instances
 			(project "vga_mem_output_01_4l"

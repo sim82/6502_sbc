@@ -1680,6 +1680,18 @@
 		(uuid "a002263d-f1b0-4515-9f91-01dcc3b99444")
 	)
 	(junction
+		(at 270.51 36.83)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a8643cec-bec0-4c4f-a282-384c46df3a52")
+	)
+	(junction
+		(at 278.13 29.21)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ad52e93d-89bf-4e7a-b620-15d9bab96263")
+	)
+	(junction
 		(at 256.54 36.83)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1803,6 +1815,16 @@
 	)
 	(wire
 		(pts
+			(xy 270.51 29.21) (xy 278.13 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "35e3477d-d07c-47d5-b4c9-1a6706f2fc1e")
+	)
+	(wire
+		(pts
 			(xy 189.23 36.83) (xy 195.58 36.83)
 		)
 		(stroke
@@ -1883,7 +1905,7 @@
 	)
 	(wire
 		(pts
-			(xy 270.51 21.59) (xy 270.51 29.21)
+			(xy 278.13 21.59) (xy 278.13 29.21)
 		)
 		(stroke
 			(width 0)
@@ -1920,6 +1942,16 @@
 			(type default)
 		)
 		(uuid "72fbbf57-bef3-4f21-95b6-10cefa5a3b31")
+	)
+	(wire
+		(pts
+			(xy 270.51 36.83) (xy 278.13 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7f0b4f9c-f07c-4241-b38c-be6fd820e917")
 	)
 	(wire
 		(pts
@@ -3173,6 +3205,74 @@
 	)
 	(symbol
 		(lib_id "Device:C")
+		(at 278.13 33.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "8208df83-43ed-4a26-8c12-0ed1b4dea1eb")
+		(property "Reference" "C1"
+			(at 276.225 39.37 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 274.955 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
+			(at 279.0952 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 278.13 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 278.13 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6973e939-a1e5-4670-a55e-cbb15eff8210")
+		)
+		(pin "2"
+			(uuid "ae4c89df-1756-4ccb-8a33-58a06d99b8d0")
+		)
+		(instances
+			(project "vga_mem_output_01_4l"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f/d37dfd04-5bfb-481b-a0e1-5eb0341e9ca1"
+					(reference "C1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
 		(at 256.54 33.02 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -3779,7 +3879,7 @@
 	)
 	(symbol
 		(lib_id "power:VCC")
-		(at 270.51 21.59 0)
+		(at 278.13 21.59 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3787,7 +3887,7 @@
 		(dnp no)
 		(uuid "dfa73544-31b6-4c08-8bed-5eca61b880e4")
 		(property "Reference" "#PWR040"
-			(at 270.51 25.4 0)
+			(at 278.13 25.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3796,7 +3896,7 @@
 			)
 		)
 		(property "Value" "VCC"
-			(at 270.51 16.51 0)
+			(at 278.13 16.51 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3804,7 +3904,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 270.51 21.59 0)
+			(at 278.13 21.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3813,7 +3913,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 270.51 21.59 0)
+			(at 278.13 21.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3822,7 +3922,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 270.51 21.59 0)
+			(at 278.13 21.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3973,16 +4073,16 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_01x02_Socket")
-		(at 69.85 59.69 0)
+		(at 69.85 62.23 0)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "e9ab02f7-24e8-42c2-8d99-8f520dd87453")
 		(property "Reference" "J2"
-			(at 71.12 59.6899 0)
+			(at 71.12 62.2301 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3991,7 +4091,7 @@
 			)
 		)
 		(property "Value" "Conn_01x02_Socket"
-			(at 71.12 62.2299 0)
+			(at 71.12 59.6901 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4000,7 +4100,7 @@
 			)
 		)
 		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x02_P2.54mm_Vertical"
-			(at 69.85 59.69 0)
+			(at 69.85 62.23 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4009,7 +4109,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 69.85 59.69 0)
+			(at 69.85 62.23 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4018,7 +4118,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x02, script generated"
-			(at 69.85 59.69 0)
+			(at 69.85 62.23 0)
 			(effects
 				(font
 					(size 1.27 1.27)
