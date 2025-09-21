@@ -7,10 +7,10 @@
 	
 .RODATA
 BEGADR:
-	.WORD $0700
+	.WORD $0500
 ENDADR:
-	.WORD $fc00 ; 64k ram version
-	; .WORD $7f00 ; 32k/32k rom version
+	; .WORD $fc00 ; 64k ram version
+	.WORD $7f00 ; 32k/32k rom version
 
 ; comment in for ROM build
 ; .SEGMENT "VECTORS"

@@ -1,0 +1,16 @@
+GAL22V10
+CombTest
+
+Clock       SelB   IoRdy     NC       NC      NC     NC      NC      NC     NC    ResetB   GND 
+NC          NC     CycleAct  CpuRdyB  NC      NC     NC      NC      NC     NC    NC   VCC
+
+CycleAct.R = /SelB
+/CpuRdyB = CycleAct * /IoRdy
+
+AR = /ResetB
+
+
+
+
+DESCRIPTION
+ 

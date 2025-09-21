@@ -9,12 +9,12 @@ Ram1En    PldO09 IoWriteB08 IoReadB07 IoB   RomB   Ram1B   Ram0B   OeB    WeB   
 /RomB = A15 * A14 * A13 * A12 * A11 * A10 * A09 * A08 + A15 * /A14 * /Ram1En + A15 * /A13 * /Ram1En + A15 * /A12 * /Ram1En + A15 * /A11 * /Ram1En + A15 * /A10 * /Ram1En + A15 * /A09 * /Ram1En 
 /Ram0B = /A15 
 /Ram1B = A15 * /A14 * Ram1En + A15 * /A13 * Ram1En + A15 * /A12 * Ram1En + A15 * /A11 * Ram1En + A15 * /A10 * Ram1En + A15 * /A09 * Ram1En 
-/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB + A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
+/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08
 /OeB = RWB
 /WeB = /RWB * Clock
 /IoReadB07 = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB
 /IoWriteB08 = Clock
-PldO09 = RWB
+PldO09 = Clock
 SysClk = Clock
 
 
@@ -29,7 +29,11 @@ Changes:
               add IoRdB (Io Read Direction)
  - 11.7.2025: apply experimental updates from addrdec03_iotest
  - 19.7.2025: add clock to IoB on write cycles. seems to work best with ti uart
+ - 24.9.2025: remove clock from IoB on write cycles. Also switch cpu board to use explicitly generated IO Read strobe from IoRead07.
+              Clock qualifying IoB makes the whole design more unflexible and is not worth saving on pld output pin...
+
 /IoReadB07 = RWB
 /IoWriteB08 = /RWB * Clock
 /IoWriteB08 = A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
 /IoReadB07 = RWB
+/IoB =  A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * RWB + A15 * A14 * A13 * A12 * A11 * A10 * A09 * /A08 * /RWB * Clock
