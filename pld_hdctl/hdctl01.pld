@@ -1,16 +1,17 @@
 GAL22V10
 CombTest
 
-Clock       SelB   IoRdy     NC       NC      NC     NC      NC      NC     NC    ResetB   GND 
-NC          NC     CycleAct  CpuRdyB  NC      NC     NC      NC      NC     NC    NC   VCC
+Clock       SelB   IoRdy     RdB      WrB      NC     NC      NC      NC     NC    ResetB   GND 
+NC          NC     CycleAct  CpuRdy   RdlB     WrlB     NC      NC      NC     NC    NC   VCC
 
 CycleAct.R = /SelB
-/CpuRdyB = CycleAct * /IoRdy
+CpuRdy = CycleAct * /IoRdy
+/RdlB = CycleAct * /RdB
+/WrlB = CycleAct * /WrB
 
 AR = /ResetB
 
 
-
-
 DESCRIPTION
+CpuRdy is inverted due to the discrete open collector stage added!
  

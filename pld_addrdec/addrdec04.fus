@@ -16,8 +16,8 @@ Pin 23 = SysClk       S0 = 1   S1 = 1
 
 Pin 22 = WeB          S0 = 0   S1 = 1
  10  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 11  x--- -x-- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 12  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+ 11  x--- -x-- x--- ---- ---- ---- ---- ---- ---- ---- ----
+ 12  ---- -x-- -x-- ---- ---- ---- ---- ---- ---- ---- ----
  13  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  14  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  15  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx

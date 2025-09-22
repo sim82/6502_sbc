@@ -5,8 +5,8 @@
    1   | Clock    | Clock/Input
    2   | SelB     | Input
    3   | IoRdy    | Input
-   4   | NC       | Input
-   5   | NC       | Input
+   4   | RdB      | Input
+   5   | WrB      | Input
    6   | NC       | Input
    7   | NC       | Input
    8   | NC       | Input
@@ -17,9 +17,9 @@
   13   | NC       | Input
   14   | NC       | NC
   15   | CycleAct | Output
-  16   | CpuRdyB  | Output
-  17   | NC       | NC
-  18   | NC       | NC
+  16   | CpuRdy   | Output
+  17   | RdlB     | Output
+  18   | WrlB     | Output
   19   | NC       | NC
   20   | NC       | NC
   21   | NC       | NC
