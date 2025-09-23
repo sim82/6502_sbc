@@ -1,13 +1,15 @@
 GAL22V10
 CombTest
 
-Clock       SelB   IoRdy     RdB      WrB      NC     NC      NC      NC     NC    ResetB   GND 
-NC          NC     CycleAct  CpuRdy   RdlB     WrlB     NC      NC      NC     NC    NC   VCC
+Clock       SelB   IoRdy     RdB      WrB      A3       NC      NC      NC     NC    ResetB   GND 
+NC          NC     CycleAct  CpuRdy   RdlB     WrlB     CS0B    CS1B    NC     NC    NC   VCC
 
 CycleAct.R = /SelB
 CpuRdy = CycleAct * /IoRdy
 /RdlB = CycleAct * /RdB
 /WrlB = CycleAct * /WrB
+/CS0B = CycleAct * /A3
+/CS1B = CycleAct * A3
 
 AR = /ResetB
 

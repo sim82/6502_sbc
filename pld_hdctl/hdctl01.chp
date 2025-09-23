@@ -11,9 +11,9 @@
                           |                 |
                       RdB |  4           21 | NC
                           |                 |
-                      WrB |  5           20 | NC
+                      WrB |  5           20 | CS1B
                           |                 |
-                       NC |  6           19 | NC
+                       A3 |  6           19 | CS0B
                           |                 |
                        NC |  7           18 | WrlB
                           |                 |

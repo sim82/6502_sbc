@@ -7,7 +7,7 @@
    3   | IoRdy    | Input
    4   | RdB      | Input
    5   | WrB      | Input
-   6   | NC       | Input
+   6   | A3       | Input
    7   | NC       | Input
    8   | NC       | Input
    9   | NC       | Input
@@ -20,8 +20,8 @@
   16   | CpuRdy   | Output
   17   | RdlB     | Output
   18   | WrlB     | Output
-  19   | NC       | NC
-  20   | NC       | NC
+  19   | CS0B     | Output
+  20   | CS1B     | Output
   21   | NC       | NC
   22   | NC       | NC
   23   | NC       | NC
