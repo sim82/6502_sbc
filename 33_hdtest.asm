@@ -53,6 +53,10 @@ event_key:
 	txa
 	cmp #'t'
 	beq test1
+	cmp #'r'
+	beq read1
+	cmp #'i'
+	beq init1
 	cmp #'q'
 	beq @exit_non_resident
 @exit_resident:
@@ -82,6 +86,55 @@ test1:
 	lda #0
 	sta $fe20
 	jmp exit_resident
+read1:
+	lda #0
+	lda $fe27
+	ldx #0
+	jsr os_print_dec
+	jsr os_putnl
+	jmp exit_resident
+
+init1:
+	lda #'i'
+	jsr os_putc
+	jsr wait_ready
+	lda #$a0
+	sta $fe26
+	lda #$ec
+	sta $fe27
+	jsr wait_ready
+@wait_drq:
+	lda $fe27
+	and #%00001000
+	bne @wait_drq
+
+	ldy #$ff
+@read_loop1:
+	lda $fe20
+	sta ARG0
+	jsr os_dbg_byte
+	dey
+	bne @read_loop1
+	
+	jmp exit_resident
+	
+
+wait_ready:
+	; lda $fe27
+	; ldx #0
+	; jsr os_print_dec
+	; jsr os_putnl
+	lda $fe27
+	tay
+	and #%10000000
+	bne wait_ready
+	println ready_message
+	tya
+	ldx #0
+	
+	jsr os_print_dec
+	jsr os_putnl
+	rts
 
 .RODATA
 init_message:
@@ -90,4 +143,6 @@ init_message:
 cmd_done_message:
 	.byte "Cmd done...", $00
 
+ready_message:
+	.byte "Ready.", $00
 
