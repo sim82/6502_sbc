@@ -2,6 +2,13 @@
 .INCLUDE "std.inc"
 .INCLUDE "os.inc"
 
+.ZEROPAGE
+last_stat: .res $1
+loop_count: .res $1
+
+.BSS
+input_buf: .res $100
+
 .macro println addr
 	lda #<addr
 	ldx #>addr
@@ -52,11 +59,21 @@ event_init:
 event_key:
 	txa
 	cmp #'t'
-	beq test1
+	beq ttest1
 	cmp #'r'
-	beq read1
+	beq tread1
 	cmp #'i'
-	beq init1
+	beq tidentify
+	cmp #'c'
+	beq tcheck_rdy
+	cmp #'s'
+	beq tprint_status
+	cmp #'e'
+	beq tselect
+	cmp #'b'
+	beq tbenign_write
+	cmp #'d'
+	beq tdump_input
 	cmp #'q'
 	beq @exit_non_resident
 @exit_resident:
@@ -68,6 +85,22 @@ event_key:
 	jsr os_event_return
 	rts 
 
+ttest1:
+	jmp test1
+tread1:
+	jmp read1
+tidentify:
+	jmp identify
+tcheck_rdy:
+	jmp check_rdy
+tprint_status:
+	jmp print_status
+tselect:
+	jmp select
+tbenign_write:
+	jmp benign_write
+tdump_input:
+	jmp dump_input
 	
 event_timer:
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
@@ -81,59 +114,148 @@ exit_resident:
 	jsr os_event_return
 	rts 
 
+print_alphanum:
+	; sta ARG0
+	; jsr os_dbg_byte
+	cmp #'0'
+	bcc @dontprint
+	cmp #$7f
+	bcc @exit
+
+	
+@dontprint:
+	lda #'.'
+
+@exit:
+	jsr os_putc
+	rts
+
 test1:
 	; iprintln "test1"
 	lda #0
 	sta $fe20
 	jmp exit_resident
+; read1:
+; 	lda #$f
+; 	sta loop_count
+; @outer_loop:
+
+; 	ldx #$f
+; @inner_loop:
+; 	lda $fe20
+; 	jsr print_alphanum
+
+; 	dex
+; 	bmi @exit_inner
+; 	lda #' '
+; 	jsr os_putc
+; 	jmp @inner_loop
+
+; @exit_inner:
+; 	jsr os_putnl
+
+; 	dec loop_count
+; 	bpl @outer_loop
+	
+; 	jmp exit_resident
+
 read1:
-	lda #0
-	lda $fe27
-	ldx #0
-	jsr os_print_dec
+	jsr read_block
+	jmp exit_resident
+	; jmp dump_input
+
+
+dump_input:
+	lda #$f
+	sta loop_count
+	ldy #$0
+@outer_loop:
+	ldx #$f
+@inner_loop:
+	lda input_buf, y
+	iny
+	
+	jsr print_alphanum
+
+	dex
+	bmi @exit_inner
+	lda #' '
+	jsr os_putc
+	jmp @inner_loop
+
+@exit_inner:
 	jsr os_putnl
+
+	dec loop_count
+	bpl @outer_loop
 	jmp exit_resident
 
-init1:
-	lda #'i'
-	jsr os_putc
-	jsr wait_ready
-	lda #$a0
+select:
+	lda #$e0
 	sta $fe26
+	jmp exit_resident
+
+identify:
 	lda #$ec
 	sta $fe27
-	jsr wait_ready
-@wait_drq:
-	lda $fe27
-	and #%00001000
-	bne @wait_drq
-
-	ldy #$ff
-@read_loop1:
-	lda $fe20
-	sta ARG0
-	jsr os_dbg_byte
-	dey
-	bne @read_loop1
-	
 	jmp exit_resident
 	
+print_status:
+	lda $fe27
+	sta ARG0
+	jsr os_dbg_byte
+	jsr os_putnl
+	jmp exit_resident
+	
+benign_write:
+	lda #$00
+	sta $fe21
+	jmp exit_resident
 
+check_rdy:
+	lda #0
+	sta last_stat
+@loop:
+	lda $fe27
+	cmp last_stat
+	beq @loop
+	sta last_stat
+	sta ARG0
+	jsr os_dbg_byte
+	jmp @loop
+
+	
 wait_ready:
-	; lda $fe27
-	; ldx #0
-	; jsr os_print_dec
-	; jsr os_putnl
 	lda $fe27
 	tay
+	and #%00000001
+	bne @error
+	tya
 	and #%10000000
 	bne wait_ready
 	println ready_message
-	tya
-	ldx #0
-	
-	jsr os_print_dec
+	sty ARG0
+	jmp @end
+@error:
+	sty ARG0
+	println error_message
+	jsr os_dbg_byte
+	lda #' '
+	jsr os_putc
+	lda $fe21
+	sta ARG0
+@end:
+	jsr os_dbg_byte
 	jsr os_putnl
+	rts
+
+read_block:
+	ldx #$0
+@loop:
+	lda $fe20
+	sta input_buf, x
+	inx
+	bne @loop
 	rts
 
 .RODATA
@@ -146,3 +268,7 @@ cmd_done_message:
 ready_message:
 	.byte "Ready.", $00
 
+error_message:
+	.byte "Error.", $00
+
+; A.S.N.M.2.H.

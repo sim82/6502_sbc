@@ -7,13 +7,13 @@
                           |                 |
                      SelB |  2           23 | NC
                           |                 |
-                    IoRdy |  3           22 | NC
+              CounterDone |  3           22 | NC
                           |                 |
-                      RdB |  4           21 | NC
+                      RdB |  4           21 | CounterLoad
                           |                 |
-                      WrB |  5           20 | CS1B
+                      WrB |  5           20 | NC
                           |                 |
-                       A3 |  6           19 | CS0B
+                       NC |  6           19 | NC
                           |                 |
                        NC |  7           18 | WrlB
                           |                 |
@@ -21,9 +21,9 @@
                           |                 |
                        NC |  9           16 | CpuRdy
                           |                 |
-                       NC | 10           15 | CycleAct
+                       NC | 10           15 | WaitState
                           |                 |
-                   ResetB | 11           14 | NC
+                   ResetB | 11           14 | WasSel
                           |                 |
                       GND | 12           13 | NC
                           -------------------

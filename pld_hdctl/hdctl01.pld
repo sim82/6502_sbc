@@ -1,19 +1,21 @@
 GAL22V10
 CombTest
 
-Clock       SelB   IoRdy     RdB      WrB      A3       NC      NC      NC     NC    ResetB   GND 
-NC          NC     CycleAct  CpuRdy   RdlB     WrlB     CS0B    CS1B    NC     NC    NC   VCC
+Clock       SelB       CounterDone     RdB      WrB      NC       NC      NC      NC              NC    ResetB   GND 
+NC          WasSel     WaitState       CpuRdy   RdlB     WrlB     NC         NC      CounterLoad     NC    NC       VCC
 
-CycleAct.R = /SelB
-CpuRdy = CycleAct * /IoRdy
-/RdlB = CycleAct * /RdB
-/WrlB = CycleAct * /WrB
-/CS0B = CycleAct * /A3
-/CS1B = CycleAct * A3
+WasSel.R = SelB 
+WaitState.R = /SelB * /WaitState * WasSel + WaitState * CounterDone
+CpuRdy.T = /WaitState
+CpuRdy.E = WaitState
+/RdlB = /SelB * /RdB
+/WrlB = /SelB * /WrB
+CounterLoad = Clock + WaitState
 
 AR = /ResetB
 
 
 DESCRIPTION
-CpuRdy is inverted due to the discrete open collector stage added!
- 
+The WasSel hack is used to trigger the wait-state only on the low-going edge of SelB. Without this it would directly re-trigger a wait-state before 
+SelB has a chance to go high again (-> it resets on the next clock-cycle where SelB is high). The 6502 should in no case be fast enough to re-trigger
+SelB again before it recovers.
