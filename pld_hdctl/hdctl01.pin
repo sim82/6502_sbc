@@ -7,7 +7,7 @@
    3   | CounterDone | Input
    4   | RdB      | Input
    5   | WrB      | Input
-   6   | NC       | Input
+   6   | A3       | Input
    7   | NC       | Input
    8   | NC       | Input
    9   | NC       | Input
@@ -20,10 +20,10 @@
   16   | CpuRdy   | Output
   17   | RdlB     | Output
   18   | WrlB     | Output
-  19   | NC       | NC
-  20   | NC       | NC
+  19   | LowB     | Output
+  20   | HighB    | Output
   21   | CounterLoad | Output
-  22   | NC       | NC
+  22   | Dir      | Output
   23   | NC       | NC
   24   | VCC      | VCC
 

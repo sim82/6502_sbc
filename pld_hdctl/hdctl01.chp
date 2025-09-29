@@ -7,13 +7,13 @@
                           |                 |
                      SelB |  2           23 | NC
                           |                 |
-              CounterDone |  3           22 | NC
+              CounterDone |  3           22 | Dir
                           |                 |
                       RdB |  4           21 | CounterLoad
                           |                 |
-                      WrB |  5           20 | NC
+                      WrB |  5           20 | HighB
                           |                 |
-                       NC |  6           19 | NC
+                       A3 |  6           19 | LowB
                           |                 |
                        NC |  7           18 | WrlB
                           |                 |
