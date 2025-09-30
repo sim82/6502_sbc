@@ -8,6 +8,7 @@ loop_count: .res $1
 
 .BSS
 input_buf: .res $100
+input_buf_h: .res $100
 
 .macro println addr
 	lda #<addr
@@ -172,11 +173,13 @@ dump_input:
 @outer_loop:
 	ldx #$f
 @inner_loop:
+	lda input_buf_h, y
+	jsr print_alphanum
 	lda input_buf, y
-	iny
-	
 	jsr print_alphanum
 
+
+	iny
 	dex
 	bmi @exit_inner
 	lda #' '
@@ -254,6 +257,8 @@ read_block:
 @loop:
 	lda $fe20
 	sta input_buf, x
+	lda $fe28
+	sta input_buf_h, x
 	inx
 	bne @loop
 	rts

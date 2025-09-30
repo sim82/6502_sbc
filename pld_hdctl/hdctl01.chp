@@ -5,7 +5,7 @@
                           -------\___/-------
                     Clock |  1           24 | VCC
                           |                 |
-                     SelB |  2           23 | NC
+                     SelB |  2           23 | LatchHiB
                           |                 |
               CounterDone |  3           22 | Dir
                           |                 |

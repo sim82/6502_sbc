@@ -53,3 +53,22 @@ Wait state logic is now functional, and the HD test program has been improved.
     * **IDENTIFY**
     * **READ BLOCK**
     * **DUMP BLOCK**
+
+**2025-09-30: Upper Bits Achieved: We're Halfway to 16-Bit I/O (Read-Only Edition).**
+
+---
+
+### Initial Logic for Upper 8-Bit Read
+
+The initial logic to enable reading the **upper 8 bits** of a 16-bit word has been implemented and tested.
+
+### Hardware & Modifications
+
+* **Lower 8-Bit Selection:** A **74HC245 transceiver** was used to control the selection of the lower 8 data bits on the bus.
+* **Upper 8-Bit Latching:** A **74HC574 latch** was introduced to capture the upper 8 data bits on every read cycle.
+* **Bus Output Mapping:** The latched value of the upper 8 bits can be output onto the bus by performing an I/O read operation where address line **A3 is high** (corresponding to an IO address like **$FE28**).
+* **PLD Update:** Necessary control and select signals for this new logic block were added to the **PLD**.
+
+### Status
+
+This logic currently only works in the **read direction**, with the write direction still pending implementation.

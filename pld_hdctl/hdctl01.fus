@@ -3,9 +3,9 @@
 AR
   0  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- -x--
 
-Pin 23 = NC           S0 = 0   S1 = 0
-  1  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
-  2  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+Pin 23 = LatchHiB     S0 = 0   S1 = 1
+  1  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+  2  ---- -x-- ---- -x-- ---- -x-- ---- ---- ---- ---- ----
   3  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   4  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
   5  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -80,7 +80,7 @@ Pin 19 = LowB         S0 = 0   S1 = 1
 
 Pin 18 = WrlB         S0 = 0   S1 = 1
  66  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 67  ---- -x-- ---- ---- -x-- ---- ---- ---- ---- ---- ----
+ 67  ---- -x-- ---- ---- -x-- -x-- ---- ---- ---- ---- ----
  68  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  69  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  70  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -99,7 +99,7 @@ Pin 18 = WrlB         S0 = 0   S1 = 1
 
 Pin 17 = RdlB         S0 = 0   S1 = 1
  83  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 84  ---- -x-- ---- -x-- ---- ---- ---- ---- ---- ---- ----
+ 84  ---- -x-- ---- -x-- ---- -x-- ---- ---- ---- ---- ----
  85  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  86  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  87  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -131,8 +131,8 @@ Pin 16 = CpuRdy       S0 = 1   S1 = 1
 
 Pin 15 = WaitState    S0 = 1   S1 = 0
 111  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-112  ---- -x-- ---- ---- ---- ---- ---- ---- --x- ---x ----
-113  ---- ---- x--- ---- ---- ---- ---- ---- ---x ---- ----
+112  ---- -x-- ---- ---- ---- -x-- ---- ---- --x- ---x ----
+113  ---- ---- x--- ---- ---- -x-- ---- ---- ---x ---- ----
 114  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 115  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 116  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
