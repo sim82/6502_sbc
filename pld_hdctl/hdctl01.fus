@@ -80,7 +80,7 @@ Pin 19 = LowB         S0 = 0   S1 = 1
 
 Pin 18 = WrlB         S0 = 0   S1 = 1
  66  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 67  ---- -x-- ---- ---- -x-- -x-- ---- ---- ---- ---- ----
+ 67  ---- ---- ---- ---- -x-- -x-- ---- ---- ---x ---- ----
  68  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  69  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  70  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -99,7 +99,7 @@ Pin 18 = WrlB         S0 = 0   S1 = 1
 
 Pin 17 = RdlB         S0 = 0   S1 = 1
  83  ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
- 84  ---- -x-- ---- -x-- ---- -x-- ---- ---- ---- ---- ----
+ 84  ---- ---- ---- -x-- ---- -x-- ---- ---- ---x ---- ----
  85  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  86  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  87  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx

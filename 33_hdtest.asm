@@ -5,6 +5,7 @@
 .ZEROPAGE
 last_stat: .res $1
 loop_count: .res $1
+lba_low: .res $1
 
 .BSS
 input_buf: .res $100
@@ -52,6 +53,8 @@ dispatch_timer:
 
 	
 event_init:
+	lda #$00
+	sta lba_low
 	println init_message
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
@@ -60,7 +63,7 @@ event_init:
 event_key:
 	txa
 	cmp #'t'
-	beq ttest1
+	beq tread_sector
 	cmp #'r'
 	beq tread1
 	cmp #'i'
@@ -86,8 +89,8 @@ event_key:
 	jsr os_event_return
 	rts 
 
-ttest1:
-	jmp test1
+tread_sector:
+	jmp read_sector
 tread1:
 	jmp read1
 tidentify:
@@ -115,57 +118,38 @@ exit_resident:
 	jsr os_event_return
 	rts 
 
-print_alphanum:
-	; sta ARG0
-	; jsr os_dbg_byte
-	cmp #'0'
-	bcc @dontprint
-	cmp #$7f
-	bcc @exit
+; =======================================
+; commands
+; ======================================
 
-	
-@dontprint:
-	lda #'.'
+; ==================
+read_sector:
+	lda #$01
+	sta $fe22
+	lda lba_low
+	inc lba_low
+	sta $fe23
+	lda #$30
+	sta $fe24
+	lda #$00
+	sta $fe25
 
-@exit:
-	jsr os_putc
-	rts
+	lda #$e0
+	sta $fe26
+	lda #$20
+	sta $fe27
+	; jsr read_block
 
-test1:
-	; iprintln "test1"
-	lda #0
-	sta $fe20
 	jmp exit_resident
-; read1:
-; 	lda #$f
-; 	sta loop_count
-; @outer_loop:
 
-; 	ldx #$f
-; @inner_loop:
-; 	lda $fe20
-; 	jsr print_alphanum
-
-; 	dex
-; 	bmi @exit_inner
-; 	lda #' '
-; 	jsr os_putc
-; 	jmp @inner_loop
-
-; @exit_inner:
-; 	jsr os_putnl
-
-; 	dec loop_count
-; 	bpl @outer_loop
-	
-; 	jmp exit_resident
-
+; ==================
 read1:
 	jsr read_block
 	jmp exit_resident
 	; jmp dump_input
 
 
+; ==================
 dump_input:
 	lda #$f
 	sta loop_count
@@ -173,11 +157,11 @@ dump_input:
 @outer_loop:
 	ldx #$f
 @inner_loop:
-	lda input_buf_h, y
-	jsr print_alphanum
 	lda input_buf, y
 	jsr print_alphanum
 
+	lda input_buf_h, y
+	jsr print_alphanum
 
 	iny
 	dex
@@ -193,16 +177,19 @@ dump_input:
 	bpl @outer_loop
 	jmp exit_resident
 
+; ==================
 select:
 	lda #$e0
 	sta $fe26
 	jmp exit_resident
 
+; ==================
 identify:
 	lda #$ec
 	sta $fe27
 	jmp exit_resident
 	
+; ==================
 print_status:
 	lda $fe27
 	sta ARG0
@@ -210,11 +197,15 @@ print_status:
 	jsr os_putnl
 	jmp exit_resident
 	
+; ==================
 benign_write:
 	lda #$00
 	sta $fe21
 	jmp exit_resident
 
+; =======================================
+; utility functions
+; ======================================
 check_rdy:
 	lda #0
 	sta last_stat
@@ -228,6 +219,7 @@ check_rdy:
 	jmp @loop
 
 	
+; ==================
 wait_ready:
 	lda $fe27
 	tay
@@ -252,6 +244,7 @@ wait_ready:
 	jsr os_putnl
 	rts
 
+; ==================
 read_block:
 	ldx #$0
 @loop:
@@ -261,6 +254,23 @@ read_block:
 	sta input_buf_h, x
 	inx
 	bne @loop
+	rts
+
+; ==================
+print_alphanum:
+	; sta ARG0
+	; jsr os_dbg_byte
+	cmp #'0'
+	bcc @dontprint
+	cmp #$7f
+	bcc @exit
+
+	
+@dontprint:
+	lda #'.'
+
+@exit:
+	jsr os_putc
 	rts
 
 .RODATA

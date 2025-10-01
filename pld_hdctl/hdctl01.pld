@@ -8,8 +8,9 @@ WasSel.R = SelB
 WaitState.R = /A3 * /SelB * /WaitState * WasSel + /A3 * WaitState * CounterDone
 CpuRdy.T = /WaitState
 CpuRdy.E = WaitState
-/RdlB = /SelB * /RdB * /A3
-/WrlB = /SelB * /WrB * /A3
+/RdlB = WaitState * /RdB * /A3
+/WrlB = WaitState * /WrB * /A3
+; /Cs0B = WaitState * /A3
 CounterLoad = Clock + WaitState
 
 /LowB = /A3 * /SelB 
