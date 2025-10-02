@@ -1,6 +1,6 @@
 ## Let the AI do the boring stuff, like writing a log book...
 
-**21.09.2025: The Clock Qualification 'Hack' Is Out: Making Room for IDE Controller Timing.
+**21.09.2025: The Clock Qualification 'Hack' Is Out: Making Room for IDE Controller Timing.**
 Changed the **IO Select** method to an alternative that uses an explicit **Read Strobe** signal from the PLD_07.
 
 ---
@@ -18,7 +18,7 @@ This adjustment provides greater flexibility in IO Select timing and is a necess
 
 
 
-**22.09.2025: Decoder Mod Fixes WrB Pulse Bug, Requires a Circuit Change (and a Little Transistor Botch).
+**22.09.2025: Decoder Mod Fixes WrB Pulse Bug, Requires a Circuit Change (and a Little Transistor Botch).**
 
 Continued work on the hard disk controller wait state logic.
 
@@ -31,7 +31,7 @@ An issue was identified where the **WrB signal** continued to pulse while the CP
 * The unused input **PLD Input 1** was repurposed for the **CPU-ready signal**, which required a physical circuit change.
 * A discrete **open collector output stage** was built using a BC548 transistor to provide an inverting output.
 
-**28.09.2025: Wait States Now Working—A Transistor Gets Fired for Being Slow.
+**28.09.2025: Wait States Now Working—A Transistor Gets Fired for Being Slow.**
 
 Wait state logic is now functional, and the HD test program has been improved.
 
