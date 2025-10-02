@@ -1,6 +1,7 @@
 ## Let the AI do the boring stuff, like writing a log book...
 
 **21.09.2025: The Clock Qualification 'Hack' Is Out: Making Room for IDE Controller Timing.**
+
 Changed the **IO Select** method to an alternative that uses an explicit **Read Strobe** signal from the PLD_07.
 
 ---
