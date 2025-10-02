@@ -7,7 +7,7 @@
                           |                 |
                      SelB |  2           23 | LatchHiB
                           |                 |
-              CounterDone |  3           22 | Dir
+              CounterDone |  3           22 | LatchHiWrB
                           |                 |
                       RdB |  4           21 | CounterLoad
                           |                 |

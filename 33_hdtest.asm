@@ -64,6 +64,8 @@ event_key:
 	txa
 	cmp #'t'
 	beq tread_sector
+	cmp #'w'
+	beq twrite_sector
 	cmp #'r'
 	beq tread1
 	cmp #'i'
@@ -78,6 +80,10 @@ event_key:
 	beq tbenign_write
 	cmp #'d'
 	beq tdump_input
+	cmp #'p'
+	beq tpattern
+	cmp #'z'
+	beq treset_read
 	cmp #'q'
 	beq @exit_non_resident
 @exit_resident:
@@ -91,6 +97,8 @@ event_key:
 
 tread_sector:
 	jmp read_sector
+twrite_sector:
+	jmp write_sector
 tread1:
 	jmp read1
 tidentify:
@@ -105,6 +113,10 @@ tbenign_write:
 	jmp benign_write
 tdump_input:
 	jmp dump_input
+tpattern:
+	jmp pattern
+treset_read:
+	jmp reset_read
 	
 event_timer:
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
@@ -129,7 +141,7 @@ read_sector:
 	lda lba_low
 	inc lba_low
 	sta $fe23
-	lda #$30
+	lda #$00
 	sta $fe24
 	lda #$00
 	sta $fe25
@@ -143,11 +155,36 @@ read_sector:
 	jmp exit_resident
 
 ; ==================
+reset_read:
+	lda #$00
+	sta lba_low
+	jmp exit_resident
+
+; ==================
 read1:
 	jsr read_block
 	jmp exit_resident
 	; jmp dump_input
 
+
+; ==================
+write_sector:
+	lda #$01
+	sta $fe22
+	lda #$01	
+	sta $fe23
+	lda #$00
+	sta $fe24
+	lda #$00
+	sta $fe25
+
+	lda #$e0
+	sta $fe26
+	lda #$30
+	sta $fe27
+	jsr wait_drq
+	jsr write_block
+	jmp exit_resident
 
 ; ==================
 dump_input:
@@ -203,6 +240,24 @@ benign_write:
 	sta $fe21
 	jmp exit_resident
 
+; ==================
+pattern:
+	
+	ldx #$00
+@loop:
+	txa
+	and #%00001111
+	ora #%01100000
+	sta input_buf, x
+	txa 
+	and #%00001111
+	ora #%00110000
+	sta input_buf_h, x
+	inx
+	bne @loop
+
+	jmp exit_resident
+
 ; =======================================
 ; utility functions
 ; ======================================
@@ -245,6 +300,16 @@ wait_ready:
 	rts
 
 ; ==================
+wait_drq:
+	lda $fe27
+	and #%10001000
+	cmp #%00001000
+	bne wait_drq
+
+	; println drq_message
+	rts
+
+; ==================
 read_block:
 	ldx #$0
 @loop:
@@ -252,6 +317,19 @@ read_block:
 	sta input_buf, x
 	lda $fe28
 	sta input_buf_h, x
+	inx
+	bne @loop
+	rts
+
+; ==================
+write_block:
+	ldx #$0
+@loop:
+	jsr wait_drq
+	lda input_buf_h, x
+	sta $fe28
+	lda input_buf, x
+	sta $fe20
 	inx
 	bne @loop
 	rts
@@ -285,5 +363,8 @@ ready_message:
 
 error_message:
 	.byte "Error.", $00
+
+drq_message:
+	.byte "DRQ Ready.", $00
 
 ; A.S.N.M.2.H.

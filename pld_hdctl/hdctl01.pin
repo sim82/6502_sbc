@@ -23,7 +23,7 @@
   19   | LowB     | Output
   20   | HighB    | Output
   21   | CounterLoad | Output
-  22   | Dir      | Output
+  22   | LatchHiWrB | Output
   23   | LatchHiB | Output
   24   | VCC      | VCC
 

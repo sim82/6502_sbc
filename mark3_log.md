@@ -1,6 +1,6 @@
 ## Let the AI do the boring stuff, like writing a log book...
 
-### 21.09.2025: The Clock Qualification 'Hack' Is Out: Making Room for IDE Controller Timing.
+**21.09.2025: The Clock Qualification 'Hack' Is Out: Making Room for IDE Controller Timing.
 Changed the **IO Select** method to an alternative that uses an explicit **Read Strobe** signal from the PLD_07.
 
 ---
@@ -18,7 +18,7 @@ This adjustment provides greater flexibility in IO Select timing and is a necess
 
 
 
-### 22.09.2025: Decoder Mod Fixes WrB Pulse Bug, Requires a Circuit Change (and a Little Transistor Botch).
+**22.09.2025: Decoder Mod Fixes WrB Pulse Bug, Requires a Circuit Change (and a Little Transistor Botch).
 
 Continued work on the hard disk controller wait state logic.
 
@@ -31,7 +31,7 @@ An issue was identified where the **WrB signal** continued to pulse while the CP
 * The unused input **PLD Input 1** was repurposed for the **CPU-ready signal**, which required a physical circuit change.
 * A discrete **open collector output stage** was built using a BC548 transistor to provide an inverting output.
 
-### 28.09.2025: Wait States Now Working—A Transistor Gets Fired for Being Slow.
+**28.09.2025: Wait States Now Working—A Transistor Gets Fired for Being Slow.
 
 Wait state logic is now functional, and the HD test program has been improved.
 
@@ -72,3 +72,21 @@ The initial logic to enable reading the **upper 8 bits** of a 16-bit word has be
 ### Status
 
 This logic currently only works in the **read direction**, with the write direction still pending implementation.
+
+
+**2025-10-02: 16-Bit Write is Go—Now Begging the PLD for One More Pin.**
+
+---
+
+### Hardware Integration & PLD Resource Management
+
+The 16-bit write path is now complete following hardware integration and necessary pin optimization:
+
+* A **second 74HC574 latch** was wired in to handle the **upper 8 data bits** for write operations.
+* **PLD outputs are now fully utilized.** To free up a critical control signal:
+    * The **DIR (Direction)** signal was freed by creatively re-using the existing **disk read strobe signal**.
+    * The newly available PLD output pin was then re-purposed to generate the **latch signal** for the second 74HC574.
+
+### Software Update
+
+* The hard disk **test program** was extended to include a **write command**, allowing for initial testing of the full 16-bit read/write data path.
