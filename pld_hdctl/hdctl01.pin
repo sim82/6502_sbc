@@ -15,15 +15,15 @@
   11   | ResetB   | Input
   12   | GND      | GND
   13   | NC       | Input
-  14   | WasSel   | Output
-  15   | WaitState | Output
-  16   | CpuRdy   | Output
-  17   | RdlB     | Output
-  18   | WrlB     | Output
-  19   | LowB     | Output
-  20   | HighB    | Output
+  14   | LowB     | Output
+  15   | LatchHiWrB | Output
+  16   | LatchHiB | Output
+  17   | HighB    | Output
+  18   | WasSel   | Output
+  19   | WaitState | Output
+  20   | CpuRdy   | Output
   21   | CounterLoad | Output
-  22   | LatchHiWrB | Output
-  23   | LatchHiB | Output
+  22   | WrlB     | Output
+  23   | RdlB     | Output
   24   | VCC      | VCC
 

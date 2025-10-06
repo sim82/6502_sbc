@@ -2,7 +2,8 @@ GAL22V10
 CombTest
 
 Clock       SelB       CounterDone     RdB      WrB      A3       NC      NC      NC              NC           ResetB         GND 
-NC          WasSel     WaitState       CpuRdy   RdlB     WrlB     LowB    HighB   CounterLoad     LatchHiWrB   LatchHiB       VCC
+; NC          WasSel     WaitState       CpuRdy   RdlB     WrlB     LowB    HighB   CounterLoad     LatchHiWrB   LatchHiB       VCC
+NC          LowB       LatchHiWrB      LatchHiB HighB    WasSel   WaitState CpuRdy CounterLoad    WrlB         RdlB           VCC
 
 WasSel.R = SelB 
 WaitState.R = /A3 * /SelB * /WaitState * WasSel + /A3 * WaitState * CounterDone

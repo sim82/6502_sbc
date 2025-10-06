@@ -5,25 +5,25 @@
                           -------\___/-------
                     Clock |  1           24 | VCC
                           |                 |
-                     SelB |  2           23 | LatchHiB
+                     SelB |  2           23 | RdlB
                           |                 |
-              CounterDone |  3           22 | LatchHiWrB
+              CounterDone |  3           22 | WrlB
                           |                 |
                       RdB |  4           21 | CounterLoad
                           |                 |
-                      WrB |  5           20 | HighB
+                      WrB |  5           20 | CpuRdy
                           |                 |
-                       A3 |  6           19 | LowB
+                       A3 |  6           19 | WaitState
                           |                 |
-                       NC |  7           18 | WrlB
+                       NC |  7           18 | WasSel
                           |                 |
-                       NC |  8           17 | RdlB
+                       NC |  8           17 | HighB
                           |                 |
-                       NC |  9           16 | CpuRdy
+                       NC |  9           16 | LatchHiB
                           |                 |
-                       NC | 10           15 | WaitState
+                       NC | 10           15 | LatchHiWrB
                           |                 |
-                   ResetB | 11           14 | WasSel
+                   ResetB | 11           14 | LowB
                           |                 |
                       GND | 12           13 | NC
                           -------------------

@@ -8650,6 +8650,16 @@
 	)
 	(wire
 		(pts
+			(xy 191.77 46.99) (xy 191.77 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bd59caa8-ff72-43a1-a853-9e1c5878d8b7")
+	)
+	(wire
+		(pts
 			(xy 248.92 157.48) (xy 259.08 157.48)
 		)
 		(stroke
@@ -8657,6 +8667,16 @@
 			(type default)
 		)
 		(uuid "c2c50c34-ffdc-43e7-8128-5a5a7fbd15e5")
+	)
+	(wire
+		(pts
+			(xy 199.39 46.99) (xy 191.77 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c694a5f9-8307-4826-82e7-e8ea5be7aef4")
 	)
 	(wire
 		(pts
@@ -10418,6 +10438,16 @@
 		)
 		(uuid "d19c12d9-d1fd-4efc-890d-a3e0d65b92b3")
 	)
+	(label "RDY"
+		(at 199.39 46.99 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d819cd4a-265e-4941-a041-cc485a58ddaa")
+	)
 	(label "AB0"
 		(at 144.78 176.53 180)
 		(effects
@@ -10698,6 +10728,71 @@
 	)
 	(symbol
 		(lib_id "power:GND")
+		(at 191.77 135.89 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0707083d-a77b-4aa5-87b4-f5277dc749bc")
+		(property "Reference" "#PWR02"
+			(at 191.77 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 191.77 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 191.77 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 191.77 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 191.77 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1ad16b33-417d-4515-b628-78582f7a4528")
+		)
+		(instances
+			(project "hdctl_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "#PWR02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
 		(at 133.35 259.08 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -10965,6 +11060,71 @@
 			(project "hdctl_01"
 				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
 					(reference "#PWR034")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole_Pad")
+		(at 191.77 133.35 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "217f7233-2033-4007-95d9-a8be9791fe7c")
+		(property "Reference" "H3"
+			(at 194.31 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GND"
+			(at 189.23 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad"
+			(at 191.77 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 191.77 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 191.77 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "66f36c13-0545-45f0-b96d-639fb52fbe3e")
+		)
+		(instances
+			(project "hdctl_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "H3")
 					(unit 1)
 				)
 			)
@@ -11475,6 +11635,71 @@
 			(project "hdctl_01"
 				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
 					(reference "#PWR036")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 203.2 134.62 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "486c6553-9cf3-4795-af38-7dd891bc976d")
+		(property "Reference" "#PWR03"
+			(at 203.2 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 203.2 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 203.2 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 203.2 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 203.2 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "539b7c93-7ab7-4e6b-a177-d649a1a10a0f")
+		)
+		(instances
+			(project "hdctl_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "#PWR03")
 					(unit 1)
 				)
 			)
@@ -12526,6 +12751,71 @@
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole_Pad")
+		(at 203.2 132.08 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "8653394d-f134-4be4-abd2-83de6c052753")
+		(property "Reference" "H4"
+			(at 205.74 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GND"
+			(at 200.66 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad"
+			(at 203.2 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 203.2 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 203.2 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3e9a38ec-322a-4f0b-8b3a-d505d7f58505")
+		)
+		(instances
+			(project "hdctl_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "H4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole_Pad")
 		(at 214.63 151.13 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13300,6 +13590,140 @@
 			(project "min_uart_board_01"
 				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
 					(reference "#PWR026")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 191.77 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bbc1993f-67ea-4e2a-90f4-1a0f8448af60")
+		(property "Reference" "R3"
+			(at 194.31 40.6399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "R"
+			(at 194.31 43.1799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
+			(at 189.992 41.91 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 191.77 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 191.77 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3409c0f9-55e2-4c6f-b30e-7b190368f4b9")
+		)
+		(pin "2"
+			(uuid "cb37e14e-8796-4640-bc7b-d9e74064aa07")
+		)
+		(instances
+			(project ""
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "R3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VCC")
+		(at 191.77 38.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "c0feeb91-faad-4cf8-835e-897f015c504a")
+		(property "Reference" "#PWR01"
+			(at 191.77 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "VCC"
+			(at 191.77 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 191.77 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 191.77 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 191.77 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "61d1a05a-e8e9-4b8d-94f1-c50229cdd3a1")
+		)
+		(instances
+			(project "hdctl_01"
+				(path "/cb13e431-64f0-4016-a936-ee98aca3391f"
+					(reference "#PWR01")
 					(unit 1)
 				)
 			)

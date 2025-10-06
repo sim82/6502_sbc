@@ -6,6 +6,9 @@
 last_stat: .res $1
 loop_count: .res $1
 lba_low: .res $1
+lba_mid: .res $1
+lba_high: .res $1
+
 
 .BSS
 input_buf: .res $100
@@ -84,6 +87,8 @@ event_key:
 	beq tpattern
 	cmp #'z'
 	beq treset_read
+	cmp #'a'
+	beq tread_all
 	cmp #'q'
 	beq @exit_non_resident
 @exit_resident:
@@ -117,6 +122,9 @@ tpattern:
 	jmp pattern
 treset_read:
 	jmp reset_read
+tread_all:
+	jmp read_all
+
 	
 event_timer:
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
@@ -188,30 +196,7 @@ write_sector:
 
 ; ==================
 dump_input:
-	lda #$f
-	sta loop_count
-	ldy #$0
-@outer_loop:
-	ldx #$f
-@inner_loop:
-	lda input_buf, y
-	jsr print_alphanum
-
-	lda input_buf_h, y
-	jsr print_alphanum
-
-	iny
-	dex
-	bmi @exit_inner
-	lda #' '
-	jsr os_putc
-	jmp @inner_loop
-
-@exit_inner:
-	jsr os_putnl
-
-	dec loop_count
-	bpl @outer_loop
+	jsr dump_buf
 	jmp exit_resident
 
 ; ==================
@@ -258,6 +243,48 @@ pattern:
 
 	jmp exit_resident
 
+; ==================
+read_all:
+	lda #00
+	sta lba_low
+	sta lba_mid
+	sta lba_high
+
+@loop:
+	jsr wait_ready
+	lda #$01
+	sta $fe22
+	lda lba_low
+	sta $fe23
+	lda lba_mid
+	sta $fe24
+	lda lba_high
+	sta $fe25
+
+	lda #$e0
+	sta $fe26
+	lda #$20
+	sta $fe27
+
+	jsr wait_ready
+	jsr read_block
+	jsr dump_buf
+
+	clc
+	lda #51
+	; adc lba_low
+	; sta lba_low
+	; lda #0
+	adc lba_mid
+	sta lba_mid
+	lda #0
+	adc lba_high
+	sta lba_high
+	jmp @loop
+	
+
+	
+	
 ; =======================================
 ; utility functions
 ; ======================================
@@ -351,6 +378,33 @@ print_alphanum:
 	jsr os_putc
 	rts
 
+; ==================
+dump_buf:
+	lda #$f
+	sta loop_count
+	ldy #$0
+@outer_loop:
+	ldx #$f
+@inner_loop:
+	lda input_buf, y
+	jsr print_alphanum
+
+	lda input_buf_h, y
+	jsr print_alphanum
+
+	iny
+	dex
+	bmi @exit_inner
+	lda #' '
+	jsr os_putc
+	jmp @inner_loop
+
+@exit_inner:
+	jsr os_putnl
+
+	dec loop_count
+	bpl @outer_loop
+	rts
 .RODATA
 init_message:
 	.byte "Press q to exit...", $00
