@@ -3,8 +3,8 @@
  Pin # | Name     | Pin Type
 -----------------------------
    1   | Clock    | Clock/Input
-   2   | SelB     | Input
-   3   | CounterDone | Input
+   2   | CounterDone | Input
+   3   | SelB     | Input
    4   | RdB      | Input
    5   | WrB      | Input
    6   | A3       | Input

@@ -5,9 +5,9 @@
                           -------\___/-------
                     Clock |  1           24 | VCC
                           |                 |
-                     SelB |  2           23 | RdlB
+              CounterDone |  2           23 | RdlB
                           |                 |
-              CounterDone |  3           22 | WrlB
+                     SelB |  3           22 | WrlB
                           |                 |
                       RdB |  4           21 | CounterLoad
                           |                 |

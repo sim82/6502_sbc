@@ -58,6 +58,8 @@ dispatch_timer:
 event_init:
 	lda #$00
 	sta lba_low
+	sta lba_mid
+	sta lba_high
 	println init_message
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
 	jsr os_event_return
@@ -144,20 +146,46 @@ exit_resident:
 
 ; ==================
 read_sector:
+	lda lba_low
+	sta ARG0
+	jsr os_dbg_byte
+	lda lba_mid
+	sta ARG0
+	jsr os_dbg_byte
+	lda lba_high
+	sta ARG0
+	jsr os_dbg_byte
+	jsr os_putnl
 	lda #$01
 	sta $fe22
+	jsr wait_ready
 	lda lba_low
 	inc lba_low
 	sta $fe23
+	jsr wait_ready
+	lda $fe23
+	sta ARG0
+	jsr os_dbg_byte
 	lda #$00
 	sta $fe24
+	jsr wait_ready
+	lda $fe24
+	sta ARG0
+	jsr os_dbg_byte
 	lda #$00
 	sta $fe25
+	jsr wait_ready
+	lda $fe25
+	sta ARG0
+	jsr os_dbg_byte
 
+	jsr os_putnl
 	lda #$e0
 	sta $fe26
+	jsr wait_ready
 	lda #$20
 	sta $fe27
+	jsr wait_ready
 	; jsr read_block
 
 	jmp exit_resident
@@ -166,6 +194,8 @@ read_sector:
 reset_read:
 	lda #$00
 	sta lba_low
+	sta lba_mid
+	sta lba_high
 	jmp exit_resident
 
 ; ==================
@@ -252,6 +282,7 @@ read_all:
 
 @loop:
 	jsr wait_ready
+	bcc @error
 	lda #$01
 	sta $fe22
 	lda lba_low
@@ -267,13 +298,14 @@ read_all:
 	sta $fe27
 
 	jsr wait_ready
+	bcc @error
 	jsr read_block
 	jsr dump_buf
 
 	clc
-	lda #51
-	; adc lba_low
-	; sta lba_low
+	lda #1
+	adc lba_low
+	sta lba_low
 	; lda #0
 	adc lba_mid
 	sta lba_mid
@@ -282,6 +314,8 @@ read_all:
 	sta lba_high
 	jmp @loop
 	
+@error:
+	jmp exit_resident
 
 	
 	
@@ -324,6 +358,21 @@ wait_ready:
 @end:
 	jsr os_dbg_byte
 	jsr os_putnl
+	sec
+	rts
+
+wait_ready_int:
+	lda $fe27
+	and #%00000001
+	bne @error
+	sec
+@loop:
+	lda $fe27
+	and #%10000000
+	bne @loop
+	rts
+@error:
+	clc
 	rts
 
 ; ==================
