@@ -91,6 +91,22 @@ event_key:
 	beq treset_read
 	cmp #'a'
 	beq tread_all
+	cmp #'x'
+	beq tdump_registers
+	cmp #'1'
+	beq tsetsize
+	cmp #'2'
+	beq tsetlow
+	cmp #'3'
+	beq tsetmid
+	cmp #'4'
+	beq tsethigh
+	cmp #'5'
+	beq treadcmd
+	cmp #'<'
+	beq tdeclow
+	cmp #'>'
+	beq tinclow
 	cmp #'q'
 	beq @exit_non_resident
 @exit_resident:
@@ -127,6 +143,24 @@ treset_read:
 tread_all:
 	jmp read_all
 
+tsetsize:
+	jmp setsize
+tsetlow:
+	jmp setlow
+tsetmid:
+        jmp setmid
+tsethigh:
+        jmp sethigh
+treadcmd:
+	jmp readcmd
+tdeclow:
+	dec lba_low
+	jmp exit_resident
+tinclow:
+	inc lba_low
+	jmp exit_resident
+tdump_registers:
+	jmp dump_registers
 	
 event_timer:
 	lda #OS_EVENT_RETURN_KEEP_RESIDENT
@@ -156,16 +190,20 @@ read_sector:
 	sta ARG0
 	jsr os_dbg_byte
 	jsr os_putnl
+
 	lda #$01
 	sta $fe22
 	jsr wait_ready
+
 	lda lba_low
 	inc lba_low
 	sta $fe23
+
 	jsr wait_ready
 	lda $fe23
 	sta ARG0
 	jsr os_dbg_byte
+
 	lda #$00
 	sta $fe24
 	jsr wait_ready
@@ -191,11 +229,82 @@ read_sector:
 	jmp exit_resident
 
 ; ==================
+setsize:
+	lda #$01
+	sta $fe22
+	jsr wait_ready
+	jmp exit_resident
+setlow:
+	lda lba_low
+	sta ARG0
+	jsr os_dbg_byte
+	sta $fe23
+	jsr wait_ready
+	jmp exit_resident
+
+setmid:
+	lda lba_mid
+	sta $fe24
+	jsr wait_ready
+	jmp exit_resident
+sethigh:
+	lda lba_high
+	sta $fe25
+	jsr wait_ready
+	jmp exit_resident
+readcmd:
+	lda #$e0
+	sta $fe26
+	lda #$20
+	sta $fe27
+	jmp exit_resident
+	
+; ==================
+dump_registers:
+	lda lba_low
+	sta ARG0
+	jsr os_dbg_byte
+	
+	lda lba_mid
+	sta ARG0
+	jsr os_dbg_byte
+
+	lda lba_high
+	sta ARG0
+	jsr os_dbg_byte
+	jsr os_putnl
+
+	lda $fe22
+	sta ARG0
+	jsr os_dbg_byte
+	
+	lda $fe23
+	sta ARG0
+	jsr os_dbg_byte
+	lda $fe24
+	sta ARG0
+	jsr os_dbg_byte
+	lda $fe25
+	sta ARG0
+	jsr os_dbg_byte
+	lda $fe26
+	sta ARG0
+	jsr os_dbg_byte
+	jsr os_putnl
+	jmp exit_resident
+	
+; ==================
 reset_read:
 	lda #$00
 	sta lba_low
 	sta lba_mid
 	sta lba_high
+	lda #$e0
+	sta $fe26
+	jsr wait_ready
+	lda #$08
+	sta $fe27
+	jsr wait_ready
 	jmp exit_resident
 
 ; ==================
