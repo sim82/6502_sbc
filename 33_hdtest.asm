@@ -69,10 +69,12 @@ event_key:
 	txa
 	cmp #'t'
 	beq tread_sector
-	cmp #'w'
+	cmp #'y'
 	beq twrite_sector
 	cmp #'r'
 	beq tread1
+	cmp #'w'
+	beq twrite1
 	cmp #'i'
 	beq tidentify
 	cmp #'c'
@@ -103,6 +105,8 @@ event_key:
 	beq tsethigh
 	cmp #'5'
 	beq treadcmd
+	cmp #'6'
+	beq twritecmd
 	cmp #'<'
 	beq tdeclow
 	cmp #'>'
@@ -124,6 +128,8 @@ twrite_sector:
 	jmp write_sector
 tread1:
 	jmp read1
+twrite1:
+	jmp write1
 tidentify:
 	jmp identify
 tcheck_rdy:
@@ -153,6 +159,9 @@ tsethigh:
         jmp sethigh
 treadcmd:
 	jmp readcmd
+
+twritecmd:
+	jmp writecmd
 tdeclow:
 	dec lba_low
 	jmp exit_resident
@@ -259,6 +268,13 @@ readcmd:
 	sta $fe27
 	jmp exit_resident
 	
+writecmd:
+	lda #$e0
+	sta $fe26
+	lda #$30
+	sta $fe27
+	jmp exit_resident
+	
 ; ==================
 dump_registers:
 	lda lba_low
@@ -313,6 +329,10 @@ read1:
 	jmp exit_resident
 	; jmp dump_input
 
+; ==================
+write1:
+	jsr write_block
+	jmp exit_resident
 
 ; ==================
 write_sector:
@@ -495,6 +515,25 @@ wait_drq:
 	rts
 
 ; ==================
+check_error:
+	lda $fe27
+	and #%00000001
+	beq @noerror
+
+	lda $fe27
+	sta ARG0
+	println error_message
+	jsr os_dbg_byte
+	lda $fe21
+	sta ARG0
+	jsr os_dbg_byte
+	jsr os_putnl
+@loop:
+	jmp @loop
+@noerror:
+	rts
+
+; ==================
 read_block:
 	ldx #$0
 @loop:
@@ -510,13 +549,18 @@ read_block:
 write_block:
 	ldx #$0
 @loop:
+	; stx ARG0
+	; jsr os_dbg_byte
+	jsr check_error
 	jsr wait_drq
+	jsr wait_ready_int
 	lda input_buf_h, x
 	sta $fe28
 	lda input_buf, x
 	sta $fe20
 	inx
 	bne @loop
+	jsr os_putnl
 	rts
 
 ; ==================
