@@ -266,6 +266,8 @@ readcmd:
 	sta $fe26
 	lda #$20
 	sta $fe27
+	jsr wait_ready
+	jsr wait_drq
 	jmp exit_resident
 	
 writecmd:
@@ -273,6 +275,8 @@ writecmd:
 	sta $fe26
 	lda #$30
 	sta $fe27
+	jsr wait_ready
+	jsr wait_drq
 	jmp exit_resident
 	
 ; ==================
@@ -410,24 +414,30 @@ read_all:
 	sta lba_high
 
 @loop:
-	jsr wait_ready
-	bcc @error
-	lda #$01
-	sta $fe22
-	lda lba_low
-	sta $fe23
-	lda lba_mid
-	sta $fe24
-	lda lba_high
-	sta $fe25
+	; jsr wait_ready
+	; bcc @error
+	; lda #$01
+	; sta $fe22
+	; lda lba_low
+	; sta $fe23
+	; lda lba_mid
+	; sta $fe24
+	; lda lba_high
+	; sta $fe25
 
-	lda #$e0
-	sta $fe26
-	lda #$20
-	sta $fe27
+	; lda #$e0
+	; sta $fe26
+	; lda #$20
+	; sta $fe27
 
-	jsr wait_ready
-	bcc @error
+	; jsr wait_ready
+	; bcc @error
+	; jsr read_block
+	jsr setsize
+	jsr setlow
+	jsr setmid
+	jsr sethigh
+	jsr readcmd
 	jsr read_block
 	jsr dump_buf
 
@@ -435,7 +445,7 @@ read_all:
 	lda #1
 	adc lba_low
 	sta lba_low
-	; lda #0
+	lda #0
 	adc lba_mid
 	sta lba_mid
 	lda #0
