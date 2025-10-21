@@ -525,6 +525,18 @@ wait_drq:
 	rts
 
 ; ==================
+check_drq:
+	lda $fe27
+	; shift drq bit into C
+	asl
+	asl
+	asl
+	asl
+	asl
+	; println drq_message
+	rts
+
+; ==================
 check_error:
 	lda $fe27
 	and #%00000001
@@ -547,29 +559,43 @@ check_error:
 read_block:
 	ldx #$0
 @loop:
+	jsr check_error
+	jsr wait_ready_int
+	jsr check_drq
+	bcc @end
 	lda $fe20
 	sta input_buf, x
 	lda $fe28
 	sta input_buf_h, x
 	inx
-	bne @loop
+	jmp @loop
+@end:
+
+	stx ARG0
+	jsr os_dbg_byte
+	jsr os_putnl
 	rts
 
 ; ==================
 write_block:
 	ldx #$0
 @loop:
+	jsr check_error
+	jsr wait_ready_int
 	; stx ARG0
 	; jsr os_dbg_byte
-	jsr check_error
-	jsr wait_drq
-	jsr wait_ready_int
+	; jsr os_putnl
+	jsr check_drq
+	bcc @end
 	lda input_buf_h, x
 	sta $fe28
 	lda input_buf, x
 	sta $fe20
 	inx
-	bne @loop
+	jmp @loop
+@end:
+	stx ARG0
+	jsr os_dbg_byte
 	jsr os_putnl
 	rts
 
