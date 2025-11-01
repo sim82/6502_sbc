@@ -24,6 +24,11 @@ input_buf_h: .res $100
 	jsr os_putnl
 .endmacro
 
+.macro prints addr
+	lda #<addr
+	ldx #>addr
+	jsr os_print_string
+.endmacro
 ; .macro iprintln string
 ; .local @data
 ; .local @code
@@ -95,6 +100,10 @@ event_key:
 	beq tpattern
 	cmp #'a'
 	beq ttoggle_autoinc
+	cmp #'t'
+	beq ttimed_read
+	cmp #'i'
+	beq tidentify
 	cmp #'q'
 	beq @exit_non_resident
 @exit_resident:
@@ -136,6 +145,10 @@ tpattern:
 	jmp cmd_pattern
 ttoggle_autoinc:
 	jmp cmd_toggle_autoinc
+ttimed_read:
+	jmp cmd_timed_read
+tidentify:
+	jmp cmd_identify
 
 
 event_timer:
@@ -191,69 +204,67 @@ cmd_toggle_autoinc:
 	sta auto_inc
 	jmp exit_resident
 
+cmd_timed_read:
+	lda #$00
+	sta lba_low
+	sta lba_mid
+	sta lba_high
+	lda #$01
+	sta auto_inc
 
+@loop:
+	jsr set_size
+	jsr set_low
+	jsr set_mid
+	jsr set_high
+	jsr send_read
+	jsr read_block_fast
+
+
+	; some action on the high address...
+	; clc
+	; lda #107
+	; adc lba_high
+	; and #%00000111
+	; sta lba_high
+	
+	; inc lba low
+	lda #$01
+	clc
+	adc lba_low
+	sta lba_low
+
+	; on carry set after low: dump lba mid (as progress indicator)
+	bcc @skip_dump
+	lda lba_mid
+	sta ARG0
+	jsr os_dbg_byte
+	jsr os_putnl
+	sec
+@skip_dump:
+	lda #0
+	adc lba_mid
+	sta lba_mid
+	bcc @loop
+
+
+	jmp exit_resident
+
+
+	
 ; ==================
-identify:
+cmd_identify:
 	lda #$ec
 	sta $fe27
+	jsr read_block
+	jsr dump_buf
 	jmp exit_resident
-	
 	
 ; ==================
 benign_write:
 	lda #$00
 	sta $fe21
 	jmp exit_resident
-
-; ==================
-; read_all:
-; 	lda #00
-; 	sta lba_low
-; 	sta lba_mid
-; 	sta lba_high
-
-; @loop:
-; 	; jsr wait_ready
-; 	; bcc @error
-; 	; lda #$01
-; 	; sta $fe22
-; 	; lda lba_low
-; 	; sta $fe23
-; 	; lda lba_mid
-; 	; sta $fe24
-; 	; lda lba_high
-; 	; sta $fe25
-
-; 	; lda #$e0
-; 	; sta $fe26
-; 	; lda #$20
-; 	; sta $fe27
-
-; 	; jsr wait_ready
-; 	; bcc @error
-; 	; jsr read_block
-; 	jsr setsize
-; 	jsr setlow
-; 	jsr setmid
-; 	jsr sethigh
-; 	jsr readcmd
-; 	jsr read_block
-; 	jsr dump_buf
-
-; 	clc
-; 	lda #1
-; 	adc lba_low
-; 	sta lba_low
-; 	lda #0
-; 	adc lba_mid
-; 	sta lba_mid
-; 	lda #0
-; 	adc lba_high
-; 	sta lba_high
-; 	jmp @loop
-	
-; @error:
-; 	jmp exit_resident
 
 	
 	
@@ -264,6 +275,7 @@ benign_write:
 print_status:
 	jsr dump_prog_state
 	jsr dump_registers
+	prints drive_status_message
 	lda $fe27
 	sta ARG0
 	jsr os_dbg_byte
@@ -272,39 +284,52 @@ print_status:
 
 ; ==================
 dump_prog_state:
-	lda auto_inc
-	sta ARG0
-	jsr os_dbg_byte
-	jsr os_putnl
+	prints io_address_message
 
+	prints low_message
 	lda lba_low
 	sta ARG0
 	jsr os_dbg_byte
 	
+	prints mid_message
 	lda lba_mid
 	sta ARG0
 	jsr os_dbg_byte
 
+	prints high_message
 	lda lba_high
 	sta ARG0
 	jsr os_dbg_byte
+
+	lda auto_inc
+	beq @skip
+	prints autoinc_message
+@skip:
 	jsr os_putnl
 	rts
 
 dump_registers:
-	lda $fe22
-	sta ARG0
-	jsr os_dbg_byte
+	prints drive_registers_message
 	
+	prints low_message
 	lda $fe23
 	sta ARG0
 	jsr os_dbg_byte
+
+	prints mid_message
 	lda $fe24
 	sta ARG0
 	jsr os_dbg_byte
+
+	prints high_message
 	lda $fe25
 	sta ARG0
 	jsr os_dbg_byte
+
+	lda $fe22
+	sta ARG0
+	jsr os_dbg_byte
+
 	lda $fe26
 	sta ARG0
 	jsr os_dbg_byte
@@ -505,9 +530,9 @@ check_error:
 ; ==================
 read_block:
 	ldx #$0
-@loop:
 	jsr check_error
 	jsr wait_ready_int
+@loop:
 	jsr check_drq
 	bcc @end
 	lda $fe20
@@ -518,9 +543,23 @@ read_block:
 	jmp @loop
 @end:
 
-	stx ARG0
-	jsr os_dbg_byte
-	jsr os_putnl
+	; stx ARG0
+	; jsr os_dbg_byte
+	; jsr os_putnl
+	rts
+
+read_block_fast:
+	ldx #$0
+	jsr check_error
+	jsr wait_ready_int
+	jsr wait_drq
+@loop:
+	lda $fe20
+	sta input_buf, x
+	lda $fe28
+	sta input_buf_h, x
+	inx
+	bne @loop
 	rts
 
 ; ==================
@@ -605,5 +644,23 @@ error_message:
 
 drq_message:
 	.byte "DRQ Ready.", $00
+
+drive_registers_message:
+	.byte "Drive Registers:     ", $00
+drive_status_message:
+	.byte "Drive Status:        ", $00
+
+io_address_message:
+	.byte "Selected IO Address: ", $00
+
+low_message:
+	.byte "l:", $00
+mid_message:
+	.byte "m:", $00
+high_message:
+	.byte "h:", $00
+
+autoinc_message:
+	.byte "++", $00
 
 ; A.S.N.M.2.H.
