@@ -91,3 +91,24 @@ The 16-bit write path is now complete following hardware integration and necessa
 ### Software Update
 
 * The hard disk **test program** was extended to include a **write command**, allowing for initial testing of the full 16-bit read/write data path.
+
+
+
+**2025-11-01: It's the Cable's Fault, Always the Cable's Fault (And Also a doubly Dead Drive).**
+
+---
+
+### Hardware Improvements and Mysterious Fixes
+
+* A **proper ribbon cable** was finally ordered, replacing the improvised cable previously in use (a slightly ironic move, given the mass disposal of similar cables a few years prior).
+* **Write operations suddenly became glitch-free** after installing the new cable. This strongly suggests the faulty, improvised cable was the cause of previous stability issues.
+
+### Software Refinement
+
+* Began the process of **cleanly re-writing the basic I/O functions**. These routines are intended for later integration into a DOS environment.
+
+### Experimental Mishap and Drive Fatalities 💀
+
+* Attempted to connect a period-correct, circa **'99 vintage DTTA-351010 "Deathstar" drive**. This particular drive was an RMA return after its original failure (the famous "click of death").
+* Sadly, the replacement unit had over the years also developed the dreaded **"click of death"** (or in this case, a more emphatic "clonk of death").
+* The drive's fate was sealed during further experimentation when the **5V and 12V power rails were accidentally mixed up**, releasing the **"magic smoke"** and permanently disabling the unit (and postponing further experiments with my treasured vintages drives until I find a molex plug)
