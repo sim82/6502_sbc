@@ -1,9 +1,11 @@
 .code
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge
-.export read_file_paged, open_file_nonpaged, fgetc_nonpaged, print_fletch16, update_fletch16
+.import update_fletch16
+.export open_file_c1block
 .include "17_dos.inc"
 
-open_file_nonpaged:
+; open file on uart channel 1 in block mode (512byte)
+open_file_c1block:
 	save_regs
 	lda #$ff
 	sta IO_BW_EOF
@@ -48,7 +50,7 @@ load_page_to_iobuf:
 	stx IO_BW_PTR
 	rts
 
-fgetc_nonpaged:
+fgetc_buf:
 	save_xy
 	ldy IO_BW_EOF
 	bne @eof
@@ -75,50 +77,6 @@ fgetc_nonpaged:
 	clc
 	restore_xy
 	rts
-
-; IO_ADDR: 16bit destination address
-; IO_FUN: address of per-page io completion function (after a page was loaded into (IO_ADDR)).
-;         (IO_FUN) is called with subroutine semantics (i.e. do rts to return), X register contains size of
-;         current page ($00 means full page). Code in IO_FUN is allowed to modify IO_ADDR, which enables easy loding in to
-;         consecutove pages (use e.g. for binary loading)
-read_file_paged:
-	save_regs
-	jsr fgetc	; read size low byte
-	sta RECEIVE_SIZE
-	; jsr print_hex8
-	jsr fgetc	; and high byte
-	sta RECEIVE_SIZE + 1
-	; jsr print_hex8
-	; check for file error: file size $ffff
-	cmp #$FF
-	bne @no_error
-	lda RECEIVE_SIZE
-	cmp #$FF
-	bne @no_error
-	; fell through both times -> error
-	clc
-	restore_regs
-	rts
-
-@no_error:
-	;
-	; outer loop over all received pages
-	; pages are loaded into IO_BUFFER one by one
-	;
-@load_page_loop:
-	jsr load_page_to_iobuf_gen
-	bcc @end
-	; hack: simulate indirect jsr using indirect jump trampoline (is this a new invention or just what ye olde folks called a vector?)
-	jsr @io_fun_trampoline
-	jmp @load_page_loop	; continue with next page
-
-@end:
-	sec
-	restore_regs
-	rts
-
-@io_fun_trampoline:
-	jmp (IO_FUN)
 
 
 
@@ -208,29 +166,6 @@ check_extra:
 @end:
 	rts
 
-	; update fletch16 chksum with value in a
-	; will NOT preserve a!
-update_fletch16:
-	; pha
-	clc
-	adc FLETCH_1
-	sta FLETCH_1
-	clc
-	adc FLETCH_2
-	sta FLETCH_2
-	; pla
-	rts
 
-print_fletch16:
-	lda FLETCH_1
-	ldx FLETCH_2
-	jsr print_hex16
-	rts
-	
-
-msg_read_full_page:
+msg_read_full_block:
 	.byte "read full page", $0A, $0D, $00
-msg_read_page:
-	.byte "read partial page", $0A, $0D, $00
-msg_read_eof:
-	.byte "end of file", $0A, $0D, $00

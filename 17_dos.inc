@@ -59,7 +59,9 @@ A_TEMP = MON_ADDRH + 1
 X_TEMP = A_TEMP + 1
 DT_COUNT_L = X_TEMP + 1
 DT_COUNT_H = DT_COUNT_L + 1
-.assert DT_COUNT_H < $80, error, "os zp state too large"
+FGETC_L = DT_COUNT_H + 1
+FGETC_H = FGETC_L + 1
+.assert FGETC_H < $80, error, "os zp state too large"
 
 IO_BUFFER = $0400
 
