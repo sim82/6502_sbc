@@ -36,9 +36,9 @@ init_pagetable:
 	inx
 	bne @clear_loop
 	
-	; mark pages $00 - $04 and $f0 - $ff as static / allocated
-	; (technically it is $04 'down to' $f0, via x underflow)
-	ldx #$04
+	; mark pages $00 - $05 and $f0 - $ff as static / allocated
+	; (technically it is $05 'down to' $f0, via x underflow)
+	ldx #$05
 @lower_reserved_loop:
 	set_pagex_flag PF_ALLOCATED | PF_STATIC
 	dex

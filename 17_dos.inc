@@ -38,6 +38,10 @@ IO_BW_END = FLETCH_2 + 1
 IO_BW_PTR = IO_BW_END + 1
 IO_BW_EOF = IO_BW_PTR + 1
 
+; reuse bytewise pointers for block based IO
+IO_BL_L = IO_BW_END
+IO_BL_H = IO_BW_PTR
+
 AL = IO_BW_EOF + 1
 AH = AL + 1
 
@@ -64,6 +68,8 @@ FGETC_H = FGETC_L + 1
 .assert FGETC_H < $80, error, "os zp state too large"
 
 IO_BUFFER = $0400
+IO_BUFFER_L = $0400
+IO_BUFFER_H = $0500
 
 .macro set_ptr src
 	ldx #<src
