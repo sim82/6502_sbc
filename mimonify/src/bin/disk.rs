@@ -90,7 +90,8 @@ fn main() {
 }
 fn open_file<T: SerialPort>(port: &mut T, raw: bool) -> Result<()> {
     port.set_timeout(Duration::from_secs(5)).unwrap();
-    println!("open file");
+    let mode = if raw { "raw" } else { "image" };
+    println!("open file {}", mode);
     let mut filename = String::new();
     loop {
         // let Ok(c) = port.read_u8() else {
@@ -124,13 +125,17 @@ fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<
     let size;
     let data;
     if !raw {
-        println!("serve binary: {:x} - {:x}", file.start, file.end);
         port.write_u16::<LittleEndian>(file.start)?;
         size = file.end - file.start;
         let start = file.start as usize;
         let end = file.end as usize;
 
         data = &file.data[start..end];
+
+        println!(
+            "serve binary: {:x} - {:x}, size :{:x}",
+            file.start, file.end, size
+        );
     } else {
         // protect our poor 6502 from huge files...
         if file.data.len() <= 0xfffe {

@@ -21,7 +21,7 @@ OS_CFG_TARGETS     := 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 20_uart 20_uar
                       29_pcm 30_iotest 31_fiostress 32_vector_dac 17_dos_rel 33_hdtest 33_hdbios
 RAMBOTTOM_TARGETS  := 14_memtest 19_memprobe
 DOS_CFG_TARGETS    := 17_dos
-ROMBL_CFG_TARGETS  := 18_bootload_ti
+ROMBL_CFG_TARGETS  := 18_bootload_ti 18_bootload_hd
 RAM_BASIC_TARGETS  := basic
 
 TARGETS := $(RAM_D000_TARGETS) $(OS_CFG_TARGETS) $(RAMBOTTOM_TARGETS) $(DOS_CFG_TARGETS) $(ROMBL_CFG_TARGETS) $(RAM_BASIC_TARGETS)
@@ -107,6 +107,7 @@ $(BUILD_DIR)/12_sieve_dyn: $(BUILD_DIR)/12_sieve_dyn.o $(DEPS_ALL)
 $(BUILD_DIR)/12_sieve_bss: $(BUILD_DIR)/12_sieve_bss.o
 $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
 $(BUILD_DIR)/18_bootload_ti: $(BUILD_DIR)/18_bootload_ti.o
+$(BUILD_DIR)/18_bootload_hd: $(BUILD_DIR)/18_bootload_hd.o
 $(BUILD_DIR)/19_memprobe: $(BUILD_DIR)/19_memprobe.o $(DEPS_ALL)
 $(BUILD_DIR)/20_uart: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)
 $(BUILD_DIR)/20_uart_rel: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)
