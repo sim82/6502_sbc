@@ -50,44 +50,54 @@ fgetc_block:
 	cmp RECEIVE_SIZE
 	bne @no_eof
 	lda IO_BL_H
-	cmp RECEIVE_SIZR + 1
+	cmp RECEIVE_SIZE + 1
 	beq @eof
 
-	; check if end of buffer
-	; todo
-	lda IO_BL_H
-	and #$01
-	cmp #$01
-	bne @not_empty
-
-	lda IO_BL_L
-	cmp #$ff
-	bne @not_empty
-
-@not_empty:
+@no_eof:
 	; get index into current buf
 	lda IO_BL_H
 	lsr 
 	lda IO_BL_L
 	ror
 	tay
+	; y contains the 'word index' (the upper 8bit of the read ptr, i.e. the index into either the high or low io buffer page)
+	; the carry flag contains the lowest bit, 0 means read from low op buffer, 1 from high
+		
+	bcs @high_byte
+	lda IO_BUFFER_L, y
+	bcc @end_read ; opt: known carry state, rel. jump
+@high_byte:
+	lda IO_BUFFER_H, y
+@end_read:
+
+	pha ; save current byte (could use x reg...)
+
+	; inc read pointer
+	lda #$1
+	clc
+	adc IO_BL_L
+	sta IO_BL_L
+	lda #$1
+	adc IO_BL_H
+	sta IO_BL_H
 	
-	
-	
-	ldy IO_BW_PTR
-	lda IO_BUFFER, y
-	iny
-	cpy IO_BW_END
-	sty IO_BW_PTR
-	bne @skip_fill_buffer 	; if we are not yet a the end of the input buffer, skip re-filling it
-	pha
-	jsr load_block_to_iobuf
-	pla
+	; check if end of buffer:
+	; if all 9 lowest bits are 0 after pointer inc this means we stepped into a new 512byte block
+	; -> needs refill
+	lda IO_BL_H
+	and #$01
+	bne @skip_fill_buffer
+
+	lda IO_BL_L
+	bne @skip_fill_buffer
+
+	jsr read_next_block_to_iobuf
 	bcs @skip_fill_buffer
+	; directly set EOF if read failed
 	ldy #$FF
 	sty IO_BW_EOF
 @skip_fill_buffer:
-
+	pha
 	sec
 	restore_xy
 	rts

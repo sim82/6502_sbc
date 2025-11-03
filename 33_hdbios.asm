@@ -220,7 +220,6 @@ cmd_timed_read:
 	jsr send_read
 	jsr read_block_fast
 
-
 	; some action on the high address...
 	; clc
 	; lda #107
@@ -233,6 +232,7 @@ cmd_timed_read:
 	clc
 	adc lba_low
 	sta lba_low
+	sta IO_GPIO0
 
 	; on carry set after low: dump lba mid (as progress indicator)
 	bcc @skip_dump
@@ -246,10 +246,7 @@ cmd_timed_read:
 	adc lba_mid
 	sta lba_mid
 	bcc @loop
-
-
 	jmp exit_resident
-
 
 	
 ; ==================
