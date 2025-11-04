@@ -1,14 +1,19 @@
 .code
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge
 .import update_fletch16
-.export open_file_c1block
+.import dbg_byte
+.export open_file_c1block, fgetc_block
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
 open_file_c1block:
 	save_regs
+	
 	lda #$ff
 	sta IO_BW_EOF
+	lda #$00
+	sta IO_BL_L
+	sta IO_BL_H
 	
 	jsr fgetc
 	sta RECEIVE_SIZE
@@ -39,9 +44,6 @@ open_file_c1block:
 
 load_block_to_iobuf:
 	jsr read_next_block_to_iobuf
-	stx IO_BW_END
-	ldx #00
-	stx IO_BW_PTR
 	rts
 
 fgetc_block:
@@ -49,12 +51,12 @@ fgetc_block:
 	lda IO_BL_L
 	cmp RECEIVE_SIZE
 	bne @no_eof
+
 	lda IO_BL_H
 	cmp RECEIVE_SIZE + 1
 	beq @eof
 
 @no_eof:
-	; get index into current buf
 	lda IO_BL_H
 	lsr 
 	lda IO_BL_L
@@ -77,7 +79,7 @@ fgetc_block:
 	clc
 	adc IO_BL_L
 	sta IO_BL_L
-	lda #$1
+	lda #$0
 	adc IO_BL_H
 	sta IO_BL_H
 	
@@ -97,11 +99,13 @@ fgetc_block:
 	ldy #$FF
 	sty IO_BW_EOF
 @skip_fill_buffer:
-	pha
+	pla
 	sec
 	restore_xy
 	rts
 @eof:
+	lda #%01010101
+	sta IO_GPIO0
 	lda #'X'
 	clc
 	restore_xy
@@ -123,7 +127,7 @@ read_next_block_to_iobuf:
 	jsr fgetc
 	sta IO_BUFFER_H, y
 	jsr update_fletch16
-	inx
+	iny
 	bne @loop_full_block
 	jsr check_extra
 	sec

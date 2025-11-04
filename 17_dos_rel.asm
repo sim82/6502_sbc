@@ -1,6 +1,6 @@
 .export load_relocatable_binary
 .import print_hex16, print_hex8, put_newline, fgetc_buf, putc
-.import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, file_open_raw
+.import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, file_open_raw, file_open_block
 .import get_argn, get_arg
 .import get_event, event_return
 .import os_func_table
@@ -165,6 +165,8 @@ check_header:
 	; check header
 	; 	non c64 marker
 	check_byte $01
+	lda #%01010101
+	sta IO_GPIO0
 	check_byte $00
 	;	magick
 	check_byte $6f
@@ -625,7 +627,8 @@ stream_bin_p2:
 	rts
 
 load_relocatable_binary:
-	jsr file_open_raw
+	jsr file_open_block
+	; jsr file_open_raw
 	bcc @error
 	jsr stream_bin
 	bcc @error

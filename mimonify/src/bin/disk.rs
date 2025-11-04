@@ -75,9 +75,11 @@ fn main() {
 
         // println!("{:x}", c);
         let res = if c == b'o' {
-            open_file(&mut port, false)
+            open_file(&mut port, false, false)
         } else if c == b'r' {
-            open_file(&mut port, true)
+            open_file(&mut port, true, false)
+        } else if c == b'w' {
+            open_file(&mut port, true, true)
         } else {
             println!("unexpected: {:x} '{}'", c, c as char);
             Ok(())
@@ -88,7 +90,7 @@ fn main() {
         }
     }
 }
-fn open_file<T: SerialPort>(port: &mut T, raw: bool) -> Result<()> {
+fn open_file<T: SerialPort>(port: &mut T, raw: bool, wide: bool) -> Result<()> {
     port.set_timeout(Duration::from_secs(5)).unwrap();
     let mode = if raw { "raw" } else { "image" };
     println!("open file {}", mode);
@@ -107,7 +109,7 @@ fn open_file<T: SerialPort>(port: &mut T, raw: bool) -> Result<()> {
     }
     println!("open file: {}", filename);
     match OpenFile::read_from(filename) {
-        Ok(file) => serve_file(port, file, raw)?,
+        Ok(file) => serve_file(port, file, raw, wide)?,
         Err(e) => {
             println!("error: {:?}. abort.", e);
             port.write_u16::<LittleEndian>(0xffff)?;
@@ -118,7 +120,7 @@ fn open_file<T: SerialPort>(port: &mut T, raw: bool) -> Result<()> {
     }
     Ok(())
 }
-fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<()> {
+fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool, wide: bool) -> Result<()> {
     let mut sum1 = 0u8;
     let mut sum2 = 0u8;
 
@@ -146,13 +148,21 @@ fn serve_file<T: SerialPort>(port: &mut T, file: OpenFile, raw: bool) -> Result<
             data = &file.data[0x0..0xfffe];
         }
 
-        println!("serve raw: {:x}", size);
+        println!("serve {} raw: {:x}", if wide { "wide" } else { "" }, size);
     }
     port.write_u16::<LittleEndian>(size)?;
 
-    for (i, chunk) in data.chunks(256).enumerate() {
+    let chunk_size = if wide { 512 } else { 256 };
+    for (i, chunk) in data.chunks(chunk_size).enumerate() {
         // print!("waiting for sync ...");
         // stdout().flush();
+        let mut wide_chunk = [0u8; 512];
+        let chunk = if wide && chunk.len() < chunk_size {
+            wide_chunk[..chunk.len()].copy_from_slice(chunk);
+            &wide_chunk
+        } else {
+            chunk
+        };
         match port.read_u8() {
             Ok(b'b') => (),
 
