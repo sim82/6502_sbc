@@ -7,6 +7,7 @@ kicad/**/*-backups/*
 
 mimonify/target/*
 mimonify/disk/*
+mimonify/*.bin
 
 bs02/target/*
 osgen/target/*
