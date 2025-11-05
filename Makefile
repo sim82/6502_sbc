@@ -30,15 +30,14 @@ TARGETS_OUT := $(patsubst %,$(BUILD_DIR)/%,$(TARGETS))
 # Common dependencies
 DEPS_NO_STD := $(BUILD_DIR)/uart_ti.o
 DEPS_ALL    := $(BUILD_DIR)/std.o $(DEPS_NO_STD)
-COMMON_INCS := std.inc os.inc
+COMMON_INCS := std.inc os.inc 17_dos.inc
 
 # Object file list for the 'dos' targets
-DOS_OBJS := $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_blockio.o \
+DOS_OBJS := $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o \
             $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(BUILD_DIR)/17_dos_pagetable.o \
             $(BUILD_DIR)/17_dos_builtin.o $(BUILD_DIR)/17_dos_event.o \
             $(BUILD_DIR)/17_dos_os_func_table.o ${BUILD_DIR}/17_dos_dbg.o \
-            $(BUILD_DIR)/17_dos_vfs.o
-
+            $(BUILD_DIR)/17_dos_vfs.o $(BUILD_DIR)/17_dos_vfs_uart.o $(BUILD_DIR)/17_dos_vfs_ide.o 
 # --- Target-Specific Variable Definitions (The "Data" Section) ---
 
 # 1. Define Linker Configs

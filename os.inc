@@ -20,6 +20,8 @@ OS_EVENT_RETURN_KEEP_RESIDENT  = $01
 .IMPORT os_putc 
 
 ; open file in raw buffered mode on fileio channel (uart 1)
+; a in: filename addr low
+; x in: filename addr high
 .IMPORT os_fopen 
 
 ; read single character from open buffered file

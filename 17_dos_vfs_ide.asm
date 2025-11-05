@@ -1,13 +1,19 @@
 .code
-.import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge
+.import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge, dbg_byte, put_newline
 .import update_fletch16
 .import dbg_byte
-.export open_file_c1block, fgetc_block
+.export vfs_ide_open, vfs_ide_getc
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
-open_file_c1block:
+vfs_ide_open:
 	save_regs
+	lda #$03
+	sta IDE_LBA_LOW
+	lda #$00
+	sta IDE_LBA_MID
+	sta IDE_LBA_HIGH
+
 	
 	lda #$ff
 	sta IO_BW_EOF
@@ -15,18 +21,12 @@ open_file_c1block:
 	sta IO_BL_L
 	sta IO_BL_H
 	
-	jsr fgetc
+	lda #$20
 	sta RECEIVE_SIZE
 	; jsr print_hex8
-	jsr fgetc	; and high byte
+	lda #$ff
 	sta RECEIVE_SIZE + 1
-	; jsr print_hex8
-	; check for file error: file size $ffff
-	cmp #$FF
-	bne @no_error
-	lda RECEIVE_SIZE
-	cmp #$FF
-	bne @no_error
+	jmp @no_error
 	; fell through both times -> error
 	clc
 	restore_regs
@@ -46,7 +46,7 @@ load_block_to_iobuf:
 	jsr read_next_block_to_iobuf
 	rts
 
-fgetc_block:
+vfs_ide_getc:
 	save_xy
 	lda IO_BL_L
 	cmp RECEIVE_SIZE
@@ -117,32 +117,153 @@ fgetc_block:
 ; NOTE: this is an intermediate step to make the 'IO' layer ready for the common 512byte block size
 ; used by IDE and others.
 read_next_block_to_iobuf:
-	lda #'b'
-	jsr fputc
-	ldy #$00
-@loop_full_block:
-	jsr fgetc
-	sta IO_BUFFER_L, y
-	jsr update_fletch16
-	jsr fgetc
-	sta IO_BUFFER_H, y
-	jsr update_fletch16
-	iny
-	bne @loop_full_block
-	jsr check_extra
+	jsr set_size
+	jsr set_low
+	jsr set_mid
+	jsr set_high
+	jsr send_read
+	jsr read_block
+
+	inc IDE_LBA_LOW
+	bne @no_carry
+	inc IDE_LBA_MID
+	bne @no_carry
+	inc IDE_LBA_HIGH
+@no_carry:
+	
 	sec
 	rts
 
+; ==================
+set_size:
+	lda #$01
+	sta $fe22
+	; jsr wait_ready
+	rts
+set_low:
+	lda IDE_LBA_LOW
+	; sta ARG0
+	; jsr dbg_byte
+	sta $fe23
+	; jsr wait_ready
+	rts
+	
+set_mid:
+	lda IDE_LBA_MID
+	sta $fe24
+	; jsr wait_ready
+	rts
+	
+set_high:
+	lda IDE_LBA_HIGH
+	sta $fe25
+	; jsr wait_ready
+	rts
+	
+send_read:
+	lda #$e0
+	sta $fe26
+	lda #$20
+	sta $fe27
+	; jsr wait_ready
+	jsr wait_drq
+	rts
+		
+send_write:
+	lda #$e0
+	sta $fe26
+	lda #$30
+	sta $fe27
+	; jsr wait_ready
+	jsr wait_drq
+	rts
+	
+check_rdy:
+	lda #0
+	sta A_TEMP
+@loop:
+	lda $fe27
+	cmp A_TEMP
+	beq @loop
+	sta A_TEMP
+	sta ARG0
+	; jsr dbg_byte
+	jmp @loop
 
-check_extra:
-	jsr fpurge
-; 	jsr fgetc_nonblocking
-; 	bcc @end
-; 	lda #'X'
-; 	jsr putc
-; 	jsr fpurgec
+; ==================
+wait_drq:
+	lda $fe27
+	and #%10001000
+	cmp #%00001000
+	bne wait_drq
 
+	; println drq_message
+	rts
+; ==================
+check_drq:
+	lda $fe27
+	; shift drq bit into C
+	asl
+	asl
+	asl
+	asl
+	asl
+	; println drq_message
+	rts
+
+; ==================
+wait_ready_int:
+	lda $fe27
+	and #%00000001
+	bne @error
+	sec
+@loop:
+	lda $fe27
+	and #%10000000
+	bne @loop
+	rts
+@error:
+	clc
+	rts
+
+; ==================
+check_error:
+	lda $fe27
+	and #%00000001
+	beq @noerror
+
+	lda $fe27
+	sta ARG0
+	; println error_message
+	jsr dbg_byte
+	lda $fe21
+	sta ARG0
+	jsr dbg_byte
+	jsr put_newline
+@loop:
+	jmp @loop
+@noerror:
+	rts
+
+; ==================
+read_block:
+	ldx #$0
+	jsr check_error
+	jsr wait_ready_int
+@loop:
+	jsr check_drq
+	bcc @end
+	lda $fe20
+	sta IO_BUFFER_L, x
+	lda $fe28
+	sta IO_BUFFER_H, x
+	inx
+	jmp @loop
 @end:
+
+	; stx ARG0
+	; jsr os_dbg_byte
+	; jsr os_putnl
 	rts
 
 

@@ -26,7 +26,10 @@ ARGV = ARGC + 1
 ARGV_NUM = 16
 RAND_SEED = ARGV + ARGV_NUM 
 DT_DIV16 = RAND_SEED + 1
-.assert DT_DIV16 < $400, error, "os state too large"
+IDE_LBA_LOW = DT_DIV16 + 1
+IDE_LBA_MID = IDE_LBA_LOW + 1
+IDE_LBA_HIGH = IDE_LBA_MID + 1
+.assert IDE_LBA_HIGH < $400, error, "os state too large"
 
 ZP_PTR = TARGET_ADDR + 2
 
