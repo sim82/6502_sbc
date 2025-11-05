@@ -1,80 +1,12 @@
 .code
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge
-.export read_file_paged, open_file_nonpaged, fgetc_nonpaged, print_fletch16, update_fletch16
+.export read_file_paged, print_fletch16, update_fletch16
 .include "17_dos.inc"
 
-open_file_nonpaged:
-	save_regs
-	lda #$ff
-	sta IO_BW_EOF
-	
-	jsr fgetc
-	sta RECEIVE_SIZE
-	; jsr print_hex8
-	jsr fgetc	; and high byte
-	sta RECEIVE_SIZE + 1
-	; jsr print_hex8
-	; check for file error: file size $ffff
-	cmp #$FF
-	bne @no_error
-	lda RECEIVE_SIZE
-	cmp #$FF
-	bne @no_error
-	; fell through both times -> error
-	clc
-	restore_regs
-	rts
 
-@no_error:
-	lda #0
-	sta FLETCH_1
-	sta FLETCH_2
-	sta IO_BW_EOF	; clear eof
-
-	jsr load_page_to_iobuf
-	restore_regs
-	rts
-
-load_page_to_iobuf:
-	lda #<IO_BUFFER
-	sta IO_ADDR
-	
-	lda #>IO_BUFFER
-	sta IO_ADDR + 1
-	
-	jsr load_page_to_iobuf_gen
-	stx IO_BW_END
-	ldx #00
-	stx IO_BW_PTR
-	rts
-
-fgetc_nonpaged:
-	save_xy
-	ldy IO_BW_EOF
-	bne @eof
-
-	ldy IO_BW_PTR
-	lda IO_BUFFER, y
-	iny
-	cpy IO_BW_END
-	sty IO_BW_PTR
-	bne @skip_fill_buffer 	; if we are not yet a the end of the input buffer, skip re-filling it
-	pha
-	jsr load_page_to_iobuf
-	pla
-	bcs @skip_fill_buffer
-	ldy #$FF
-	sty IO_BW_EOF
-@skip_fill_buffer:
-
-	sec
-	restore_xy
-	rts
-@eof:
-	lda #'X'
-	clc
-	restore_xy
-	rts
+; 
+; this is deprecated in favor of 512byte block IO
+;
 
 ; IO_ADDR: 16bit destination address
 ; IO_FUN: address of per-page io completion function (after a page was loaded into (IO_ADDR)).
