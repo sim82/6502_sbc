@@ -36,7 +36,8 @@ COMMON_INCS := std.inc os.inc
 DOS_OBJS := $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_dos_pageio.o $(BUILD_DIR)/17_dos_blockio.o \
             $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(BUILD_DIR)/17_dos_pagetable.o \
             $(BUILD_DIR)/17_dos_builtin.o $(BUILD_DIR)/17_dos_event.o \
-            $(BUILD_DIR)/17_dos_os_func_table.o ${BUILD_DIR}/17_dos_dbg.o
+            $(BUILD_DIR)/17_dos_os_func_table.o ${BUILD_DIR}/17_dos_dbg.o \
+            $(BUILD_DIR)/17_dos_vfs.o
 
 # --- Target-Specific Variable Definitions (The "Data" Section) ---
 

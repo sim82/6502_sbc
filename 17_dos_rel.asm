@@ -1,6 +1,6 @@
 .export load_relocatable_binary
-.import print_hex16, print_hex8, put_newline, fgetc_buf, putc
-.import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, file_open_raw, file_open_block
+.import print_hex16, print_hex8, put_newline, putc
+.import alloc_page_span, getc_blocking, putc, print_dec, put_newline, print_message, vfs_open, vfs_getc
 .import get_argn, get_arg
 .import get_event, event_return
 .import os_func_table
@@ -9,7 +9,7 @@
 
 
 .macro check_byte b
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 	cmp #b
 
@@ -17,11 +17,11 @@
 .endmacro
 
 .macro read_word addr
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 	sta addr
 
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 	sta addr + 1
 .endmacro
@@ -38,7 +38,7 @@ skip16:
 @loop:
 	beq @dech
 	dex
-	jsr fgetc_buf
+	jsr vfs_getc
 	jsr putc
 	bcc @eof
 	jmp @loop
@@ -66,7 +66,7 @@ skipx:
 	jsr put_newline
 @loop:
 	beq @done
-	jsr fgetc_buf
+	jsr vfs_getc
 
 	bcc @eof
 	; txa
@@ -84,7 +84,7 @@ dumpx:
 	txa
 @loop:
 	beq @done
-	jsr fgetc_buf
+	jsr vfs_getc
 
 	bcc @eof
 	jsr putc
@@ -105,7 +105,7 @@ dumpx:
 
 skip_extra:
 @extra_loop:
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 	; len 0 means end of extra
 	cmp #00
@@ -115,7 +115,7 @@ skip_extra:
 	tax
 	dex ; size includes the length field -> one less byte to skip
 
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 
 	dex ; consume type field
@@ -196,7 +196,7 @@ check_header:
 ; reloc:
 ; read relocation information and apply to loaded binary
 import:
-	jsr fgetc_buf
+	jsr vfs_getc
 	tax
 	bcc @eof
 	; expect less than 256 imports...
@@ -214,7 +214,7 @@ import:
 	beq @exit
 	
 @loop:
-	jsr fgetc_buf
+	jsr vfs_getc
 	tay ; zero test A
 	beq @symbol_end
 	jsr putc
@@ -263,7 +263,7 @@ reloc:
 	
 @loop:
 	; read offset
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 
 	cmp #00
@@ -288,7 +288,7 @@ reloc:
 	; jsr put_newline
 
 	; read type
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 
 	cmp #$80
@@ -361,7 +361,7 @@ reloc_extended_inc:
 reloc_import:
 	; only supprt one import for now
 	; check_byte $00
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 	asl
 	tax
@@ -412,7 +412,7 @@ reloc_high:
 	sta (CL), y
 
 	; skip low byte stored after reloc entry
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 	lda #'^'
 	jsr putc
@@ -483,7 +483,7 @@ copy_code_single_page:
 	txa ; hacky: zero test x before entering the loop...
 copy_code_loop:
 	beq @done
-	jsr fgetc_buf
+	jsr vfs_getc
 	bcc @eof
 
 	ldy #00
@@ -627,7 +627,7 @@ stream_bin_p2:
 	rts
 
 load_relocatable_binary:
-	jsr file_open_block
+	jsr vfs_open
 	; jsr file_open_raw
 	bcc @error
 	jsr stream_bin
@@ -663,7 +663,7 @@ load_relocatable_binary:
 ; 	.WORD getc_blocking
 ; 	.WORD putc
 ; 	.WORD file_open_raw
-; 	.WORD fgetc_buf
+; 	.WORD vfs_getc
 ; 	.WORD print_dec
 ; 	.WORD put_newline
 ; 	.WORD print_message
