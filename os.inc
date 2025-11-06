@@ -76,3 +76,13 @@ OS_EVENT_RETURN_KEEP_RESIDENT  = $01
 ; ARG0(zp) in: the byte to print as decimal value
 .IMPORT os_dbg_byte 
 
+; read next block of open file into iobuf
+; carry clear on eof
+.IMPORT os_fnext_block 
+
+; directly write iobuf to ide disk at LBA
+; a in: LBA low
+; x in: LBA mid
+; y in: LBA high
+.IMPORT os_ide_write_block 
+

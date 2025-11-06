@@ -2,7 +2,7 @@
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge, dbg_byte, put_newline
 .import update_fletch16
 .import dbg_byte
-.export vfs_ide_open, vfs_ide_getc
+.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
@@ -111,6 +111,32 @@ vfs_ide_getc:
 	restore_xy
 	rts
 
+
+vfs_ide_write_block:
+	sta IDE_LBA_LOW
+	stx IDE_LBA_MID
+	sty IDE_LBA_HIGH
+
+	rts
+
+
+read_write_iobuf_to_next_block:
+	jsr set_size
+	jsr set_low
+	jsr set_mid
+	jsr set_high
+	jsr send_write
+	jsr write_block
+
+	inc IDE_LBA_LOW
+	bne @no_carry
+	inc IDE_LBA_MID
+	bne @no_carry
+	inc IDE_LBA_HIGH
+@no_carry:
+	
+	sec
+	rts
 
 ; read 512 byte block. Treat it as 256 x 16bit words and store 
 ; low/high bytes in separate buffers to simplify indexing
@@ -261,6 +287,29 @@ read_block:
 	jmp @loop
 @end:
 
+	; stx ARG0
+	; jsr os_dbg_byte
+	; jsr os_putnl
+	rts
+
+; ==================
+write_block:
+	ldx #$0
+@loop:
+	jsr check_error
+	jsr wait_ready_int
+	; stx ARG0
+	; jsr os_dbg_byte
+	; jsr os_putnl
+	jsr check_drq
+	bcc @end
+	lda IO_BUFFER_H, x
+	sta $fe28
+	lda IO_BUFFER_L, x
+	sta $fe20
+	inx
+	jmp @loop
+@end:
 	; stx ARG0
 	; jsr os_dbg_byte
 	; jsr os_putnl

@@ -1,8 +1,8 @@
 .code
-.import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge
+.import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge, put_newline
 .import update_fletch16
 .import dbg_byte
-.export vfs_uart_open, vfs_uart_getc
+.export vfs_uart_open, vfs_uart_getc, vfs_uart_next_block
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
@@ -42,19 +42,26 @@ vfs_uart_open:
 	restore_regs
 	rts
 
-load_block_to_iobuf:
-	jsr read_next_block_to_iobuf
-	rts
 
 vfs_uart_getc:
 	save_xy
+
+	; check IO_BL < RECEIVE_SIZE (eof)
+	; NOTE: using IO_BL - RECEIVE_SIZE. Carry is set if there is no underflow, i.e. IO_BL >= RECEIVE_SIZE. Inverted carry is so fucking weird...
+	sec
 	lda IO_BL_L
-	cmp RECEIVE_SIZE
-	bne @no_eof
+	sbc RECEIVE_SIZE
 
 	lda IO_BL_H
-	cmp RECEIVE_SIZE + 1
-	beq @eof
+	sbc RECEIVE_SIZE + 1
+	bcs @eof
+	; lda IO_BL_L
+	; cmp RECEIVE_SIZE
+	; bne @no_eof
+
+	; lda IO_BL_H
+	; cmp RECEIVE_SIZE + 1
+	; beq @eof
 
 @no_eof:
 	lda IO_BL_H
@@ -111,11 +118,33 @@ vfs_uart_getc:
 	restore_xy
 	rts
 
+vfs_uart_next_block:
+	save_xy
+	sec
+	lda IO_BL_L
+	sbc RECEIVE_SIZE
+
+	lda IO_BL_H
+	sbc RECEIVE_SIZE + 1
+	bcs @eof
+	jsr read_next_block_to_iobuf
+
+	sec
+	rts
+@eof:
+	
+	lda #%10101010
+	sta IO_GPIO0
+	lda #'X'
+	clc
+	restore_xy
+	rts
 
 ; read 512 byte block. Treat it as 256 x 16bit words and store 
 ; low/high bytes in separate buffers to simplify indexing
 ; NOTE: this is an intermediate step to make the 'IO' layer ready for the common 512byte block size
 ; used by IDE and others.
+load_block_to_iobuf:
 read_next_block_to_iobuf:
 	lda #'b'
 	jsr fputc

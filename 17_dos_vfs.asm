@@ -1,8 +1,8 @@
 
 .import putc, fputc, fpurge, open_file_nonpaged, fgetc_nonpaged, getc
-.import vfs_uart_open, vfs_uart_getc ; uart driver
+.import vfs_uart_open, vfs_uart_getc, vfs_uart_next_block ; uart driver
 .import vfs_ide_open, vfs_ide_getc
-.export vfs_open, vfs_getc
+.export vfs_open, vfs_getc, vfs_next_block
 .include "17_dos.inc"
 .code
 
@@ -42,7 +42,7 @@ vfs_open:
 
 @open_disk:
 	jsr vfs_ide_open
-	
+
 	lda #<vfs_ide_getc
 	sta FGETC_L
 	lda #>vfs_ide_getc
@@ -54,3 +54,8 @@ vfs_open:
 vfs_getc:
 	; jump through fgetc vector
 	jmp (FGETC_L)
+
+vfs_next_block:
+	; hack
+	jmp vfs_uart_next_block
+
