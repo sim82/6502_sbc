@@ -112,15 +112,22 @@ vfs_ide_getc:
 	rts
 
 
-vfs_ide_write_block:
+vfs_ide_set_lba:
 	sta IDE_LBA_LOW
 	stx IDE_LBA_MID
 	sty IDE_LBA_HIGH
+	rts
 
+vfs_ide_write_block:
+	; sta IDE_LBA_LOW
+	; stx IDE_LBA_MID
+	; sty IDE_LBA_HIGH
+
+	jsr write_iobuf_to_next_block
 	rts
 
 
-read_write_iobuf_to_next_block:
+write_iobuf_to_next_block:
 	jsr set_size
 	jsr set_low
 	jsr set_mid
