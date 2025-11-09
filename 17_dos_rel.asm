@@ -32,8 +32,8 @@
 ; skip a block of data in the input file.
 
 skip16:
-	ldy BH
-	ldx BL
+	ldy zp_bh
+	ldx zp_bl
 	
 @loop:
 	beq @dech
@@ -248,17 +248,17 @@ reloc:
 	; relative to the byte before the start of the code segment.
 	; NOTE: expects a page aligned pointer.
 	; lda #$cf
-	lda DH
-	sta CH
-	dec CH
+	lda zp_dh
+	sta zp_ch
+	dec zp_ch
 	; lda #$ff
-	lda DL
-	sta CL
-	dec CL
+	lda zp_dl
+	sta zp_cl
+	dec zp_cl
 
 	; print it
-	ldx CH
-	lda CL
+	ldx zp_ch
+	lda zp_cl
 	jsr print_hex16
 	
 @loop:
@@ -277,13 +277,13 @@ reloc:
 @skip_extended_inc:
 	clc
 	; add to reloc address
-	adc CL
-	sta CL
+	adc zp_cl
+	sta zp_cl
 	lda #00
-	adc CH
-	sta CH
-	lda CL
-	ldx CH
+	adc zp_ch
+	sta zp_ch
+	lda zp_cl
+	ldx zp_ch
 	; jsr print_hex16
 	; jsr put_newline
 
@@ -344,13 +344,13 @@ reloc:
 reloc_extended_inc:
 	lda #254
 	clc
-	adc CL
-	sta CL
+	adc zp_cl
+	sta zp_cl
 	lda #00
-	adc CH
-	sta CH
-	lda CL
-	ldx CH
+	adc zp_ch
+	sta zp_ch
+	lda zp_cl
+	ldx zp_ch
 	lda #'>'
 	jsr putc
 	jsr put_newline
@@ -370,13 +370,13 @@ reloc_import:
 	; lda #<alloc_page_span
 	lda os_func_table, x
 	ldy #$00
-	sta (CL), y
+	sta (zp_cl), y
 	
 	; lda #>alloc_page_span
 	lda os_func_table + 1, x
 	; lda #$bb
 	iny
-	sta (CL), y
+	sta (zp_cl), y
 		
 	lda #'i'
 	jsr putc
@@ -392,11 +392,11 @@ reloc_word:
 	; super primitive: just add base to high adress part...
 
 	ldy #$01
-	lda (CL), y
+	lda (zp_cl), y
 	clc
 	; adc #$d0
-	adc DH
-	sta (CL), y
+	adc zp_dh
+	sta (zp_cl), y
 	lda #'.'
 	jsr putc
 	sec
@@ -405,11 +405,11 @@ reloc_word:
 reloc_high:
 	; lda #$d0
 	ldy #$00
-	lda (CL), y
+	lda (zp_cl), y
 	clc
 	; adc #$d0
-	adc DH
-	sta (CL), y
+	adc zp_dh
+	sta (zp_cl), y
 
 	; skip low byte stored after reloc entry
 	jsr vfs_getc
@@ -429,29 +429,29 @@ reloc_high:
 
 copy_code:
 	; lda #$d0
-	lda DH
-	sta CH
+	lda zp_dh
+	sta zp_ch
 	; lda #$00
-	lda DL
-	sta CL
+	lda zp_dl
+	sta zp_cl
 
 @loop:
-	lda AH
+	lda zp_ah
 	jsr print_hex8
 	jsr put_newline
-	lda AH
+	lda zp_ah
 	beq @single_page
 
 	; jsr print_hex8
 	; jsr put_newline
 
 	jsr copy_code_full_page
-	dec AH
-	; inc CH
+	dec zp_ah
+	; inc zp_ch
 	jmp @loop
 
 @single_page:
-	ldx AL
+	ldx zp_al
 	jsr copy_code_single_page
 
 	rts
@@ -462,9 +462,9 @@ copy_code:
 
 copy_code_full_page:
 	; lda #$d0
-	; sta CH
+	; sta zp_ch
 	; lda #$00
-	; sta CL
+	; sta zp_cl
 
 	ldx #$00
 	lda #$01 ; super hacky: skip zero test on first iter...
@@ -476,9 +476,9 @@ copy_code_full_page:
 
 copy_code_single_page:
 	; lda #$d0
-	; sta CH
+	; sta zp_ch
 	; lda #$00
-	; sta CL
+	; sta zp_cl
 	
 	txa ; hacky: zero test x before entering the loop...
 copy_code_loop:
@@ -487,7 +487,7 @@ copy_code_loop:
 	bcc @eof
 
 	ldy #00
-	sta (CL), y
+	sta (zp_cl), y
 
 	; jsr print_hex8
 	; jsr put_newline
@@ -496,11 +496,11 @@ copy_code_loop:
 	; jsr put_newline
 	clc
 	lda #01
-	adc CL
-	sta CL
+	adc zp_cl
+	sta zp_cl
 	lda #00
-	adc CH
-	sta CH
+	adc zp_ch
+	sta zp_ch
 	dex
 	jmp copy_code_loop
 	
@@ -523,9 +523,9 @@ copy_code_loop:
 
 stream_bin:
 	; lda #$c0
-	; sta DH
+	; sta zp_dh
 	; lda #$00
-	; sta DL
+	; sta zp_dl
 	
 	jsr check_header
 	bcs @header_ok
@@ -538,32 +538,32 @@ stream_bin:
 	check_byte $00
 	
 	; 	tlen
-	read_word AL
+	read_word zp_al
 	
 	; jump data seg
 	ldx #4
 	jsr skipx
 
-	read_word BL
-	lda BL ; expect base of bss to be mod 256
+	read_word zp_bl
+	lda zp_bl ; expect base of bss to be mod 256
 	bne @error
-	read_word CL
+	read_word zp_cl
 	
-	lda CL ; expect size of bss to be mod 256
+	lda zp_cl ; expect size of bss to be mod 256
 	bne @error
 	; jump zbase / stack size
 	ldx #6
 	jsr skipx
 
 	jsr skip_extra
-	lda AL
-	ldx AH
+	lda zp_al
+	ldx zp_ah
 	
  	jsr print_hex16
 	jsr put_newline
 
-	lda CL
-	ldx CH
+	lda zp_cl
+	ldx zp_ch
 	
  	jsr print_hex16
 	jsr put_newline
@@ -581,25 +581,25 @@ stream_bin:
 	rts
 
 stream_bin_p2:
-	lda AH
-	ldx AL ; check if size is already mod 256
+	lda zp_ah
+	ldx zp_al ; check if size is already mod 256
 	beq @no_plus1
 	; ldx #$00
-	; stx AL
+	; stx zp_al
 	clc
 	adc #$01
 @no_plus1:
 	clc
-	adc CH
+	adc zp_ch
 	
 	jsr alloc_page_span
-	sta DH
+	sta zp_dh
 	lda #$00
-	sta DL
+	sta zp_dl
 	
 	; now there should be the program code...
 	jsr copy_code
-	; ldx AL
+	; ldx zp_al
 	; jsr skipx
 	; expect empty missing symbol table
 	; check_byte $00
@@ -633,19 +633,19 @@ load_relocatable_binary:
 	jsr stream_bin
 	bcc @error
 
-	ldx DH
+	ldx zp_dh
 	stx RECEIVE_POS + 1
-	stx MON_ADDRH
-	lda DL
+	stx zp_mon_addrh
+	lda zp_dl
 	sta RECEIVE_POS
-	sta MON_ADDRL
+	sta zp_mon_addrl
 	
 	jsr print_hex16
 	jsr put_newline
 	
 	print_message_from_ptr @fletch16_msg
-	lda FLETCH_1
-	ldx FLETCH_2
+	lda zp_fletch_1
+	ldx zp_fletch_2
 	jsr print_hex16
 	jsr put_newline
 	sec

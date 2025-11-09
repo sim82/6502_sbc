@@ -6,13 +6,13 @@
 
 ; low in a, high in x,
 print_message:
-	sta ZP_PTR
-	stx ZP_PTR + 1
+	sta zp_ptr
+	stx zp_ptr + 1
 	tya
 	pha
 	ldy #$00
 @loop:
-	lda (ZP_PTR), y
+	lda (zp_ptr), y
 	beq @end
 	jsr putc
 	iny

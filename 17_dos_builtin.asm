@@ -80,45 +80,45 @@ cmd_m:
 	lda INPUT_LINE, y
 	jsr decode_nibble_high
 	bcc @no_addr
-	sta A_TEMP
+	sta zp_a_temp
 
 	iny
 	lda INPUT_LINE, y
 	jsr decode_nibble
 	bcc @no_addr
 
-	ora A_TEMP
-	sta MON_ADDRH
+	ora zp_a_temp
+	sta zp_mon_addrh
 
 ; if there was a valid high part of an address given, already set the low mon addr to $00.
 ; this way the lower part is optional, allowing e.g. 'm 02' to monitor the second page. 
 	lda #$00
-	sta MON_ADDRL
+	sta zp_mon_addrl
 
 	iny
 	lda INPUT_LINE, y
 	jsr decode_nibble_high
 	bcc @no_addr
-	sta A_TEMP
+	sta zp_a_temp
 
 	iny
 	lda INPUT_LINE, y
 	jsr decode_nibble
 	bcc @no_addr
 
-	ora A_TEMP
-	sta MON_ADDRL
+	ora zp_a_temp
+	sta zp_mon_addrl
 	
 @no_addr:
-	; ldx MON_ADDRH
-	; lda MON_ADDRL
+	; ldx zp_mon_addrh
+	; lda zp_mon_addrl
 	; jsr print_hex16
 	; jsr put_newline
 	ldy #0
 
 	jmp @newline
 @loop:
-	lda (MON_ADDRL), y
+	lda (zp_mon_addrl), y
 	
 	jsr print_hex8
 
@@ -141,9 +141,9 @@ cmd_m:
 	jsr put_newline
 	tya
 	clc
-	adc MON_ADDRL
+	adc zp_mon_addrl
 
-	ldx MON_ADDRH
+	ldx zp_mon_addrh
 	jsr print_hex16
 	lda #' '
 	jsr putc
@@ -159,16 +159,16 @@ cmd_m:
 ; 	cpy #16
 ; 	beq @end
 	
-; 	lda (ZP_PTR), y
+; 	lda (zp_ptr), y
 ; 	jsr print_hex8
 ; 	lda #' '
 ; 	jsr putc
 ; 	iny
 ; 	jmp @loop
 @end:
-	inc MON_ADDRH
+	inc zp_mon_addrh
 	; jsr put_newline
-	; inc ZP_PTR + 1
+	; inc zp_ptr + 1
 	; dex
 	; bne @outer_loop
 	
@@ -244,9 +244,9 @@ cmd_ra:
 
 	; put receive pos into monitor address, for inspection after reset
 	lda RECEIVE_POS + 1
-	sta MON_ADDRH
+	sta zp_mon_addrh
 	lda RECEIVE_POS
-	sta MON_ADDRL
+	sta zp_mon_addrl
 	jmp (RECEIVE_POS)
 
 @file_error:

@@ -7,13 +7,13 @@
 .code
 
 vfs_open:
-	sta ZP_PTR
-	stx ZP_PTR + 1
+	sta zp_ptr
+	stx zp_ptr + 1
 	; tya
 	; pha
         phy
         ldy #$00
-        lda (ZP_PTR), y
+        lda (zp_ptr), y
         cmp #'#'
         beq @open_disk
 
@@ -22,7 +22,7 @@ vfs_open:
 	jsr fputc
 	ldy #$00
 @send_filename_loop:
-	lda (ZP_PTR), y
+	lda (zp_ptr), y
 	jsr fputc
 	beq @end_of_filename ; meh, it is a bit of a stretch to expect fputc to preserve zero flag...
 	iny
@@ -31,9 +31,9 @@ vfs_open:
 	jsr vfs_uart_open
 	; setup fgetc vector
 	lda #<vfs_uart_getc
-	sta FGETC_L
+	sta zp_fgetc_l
 	lda #>vfs_uart_getc
-	sta FGETC_H
+	sta zp_fgetc_h
 	; pla
 	; tya
         ply
@@ -44,16 +44,16 @@ vfs_open:
 	jsr vfs_ide_open
 
 	lda #<vfs_ide_getc
-	sta FGETC_L
+	sta zp_fgetc_l
 	lda #>vfs_ide_getc
-	sta FGETC_H
+	sta zp_fgetc_h
 
         ply
         rts
 
 vfs_getc:
 	; jump through fgetc vector
-	jmp (FGETC_L)
+	jmp (zp_fgetc_l)
 
 vfs_next_block:
 	; hack

@@ -6,7 +6,7 @@
 .export zp_c, zp_cl, zp_ch
 .export zp_d, zp_dl, zp_dh
 .export zp_e, zp_el, zp_eh
-.export zp_mon_addr, zp_mon_addr_l, zp_mon_addr_h
+.export zp_mon_addr, zp_mon_addrl, zp_mon_addrh
 .export zp_a_temp, zp_x_temp
 .export zp_dt_count_l, zp_dt_count_h
 .export zp_fgetc, zp_fgetc_l, zp_fgetc_h
@@ -49,8 +49,8 @@ zp_e:
 zp_el: .res $1
 zp_eh: .res $1
 zp_mon_addr:
-zp_mon_addr_l: .res $1
-zp_mon_addr_h: .res $1
+zp_mon_addrl: .res $1
+zp_mon_addrh: .res $1
 zp_a_temp: .res $1
 zp_x_temp: .res $1
 zp_dt_count_l: .res $1

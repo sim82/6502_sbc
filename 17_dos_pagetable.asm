@@ -100,13 +100,13 @@ alloc_page_span:
 	cmp #$00
 	beq @out_of_memory
 	
-	sta A_TEMP ; A_TEMP contains requested span size
+	sta zp_a_temp ; zp_a_temp contains requested span size
 
 	ldx #$00 ; counter for start of span (OPT: store smallest free page index)
 
 @outer_loop:
-	ldy A_TEMP ; restore span size
-	stx X_TEMP ; save start of current span (used in success case)
+	ldy zp_a_temp ; restore span size
+	stx zp_x_temp ; save start of current span (used in success case)
 @inner_loop:
 	lda PAGETABLE, x
 	bmi @non_empty ; OPT: check highest bit
@@ -128,9 +128,9 @@ alloc_page_span:
 @empty_span:
 
 ; mark pages as allocated
-	ldy A_TEMP
+	ldy zp_a_temp
 	dey ; stop before last page. 
-	ldx X_TEMP 
+	ldx zp_x_temp 
 
 	lda USER_PROCESS
 	beq @no_user
@@ -140,7 +140,7 @@ alloc_page_span:
 @no_user:
 	lda #PF_ALLOCATED
 @cont:
-	sta A_TEMP
+	sta zp_a_temp
 	
 @mark_loop:
 	; set_pagex_flag PF_ALLOCATED
@@ -151,11 +151,11 @@ alloc_page_span:
 	ora #PF_SPAN_END
 	sta PAGETABLE, x
 	; set_pagex_flag PF_ALLOCATED | PF_SPAN_END ; also set 'span end' bit on last page
-	ldx X_TEMP
+	ldx zp_x_temp
 
 	; a bit crappy, but keeps the loop simple: go back to first page and also set PF_SPAN_START
 	; set_pagex_flag PF_ALLOCATED | PF_SPAN_START
-	lda A_TEMP
+	lda zp_a_temp
 	ora #PF_SPAN_START
 	sta PAGETABLE, x
 	txa 
@@ -170,7 +170,7 @@ alloc_page_span:
 	rts
 
 free_page_span:
-	sta A_TEMP
+	sta zp_a_temp
 	tax
 
 	; check if a points towards a valid page span start
@@ -219,27 +219,27 @@ free_user_pages:
 
 clobber_free_pages:
 	ldx #$00
-	stx AL
+	stx zp_al
 @loop:
 	lda PAGETABLE, x
 	bmi @skip
 
 	sta IO_GPIO0
-	stx AH
+	stx zp_ah
 	ldy #$00
 @inner_loop:
 	; pure gimmick...
 	lda #$de
-	sta (AL), y
+	sta (zp_al), y
 	iny
 	lda #$ad
-	sta (AL), y
+	sta (zp_al), y
 	iny
 	lda #$be
-	sta (AL), y
+	sta (zp_al), y
 	iny
 	lda #$ef
-	sta (AL), y
+	sta (zp_al), y
 	iny
 	bne @inner_loop
 	

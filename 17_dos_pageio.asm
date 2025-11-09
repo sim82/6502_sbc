@@ -8,10 +8,10 @@
 ; this is deprecated in favor of 512byte block IO
 ;
 
-; IO_ADDR: 16bit destination address
-; IO_FUN: address of per-page io completion function (after a page was loaded into (IO_ADDR)).
+; zp_io_addr: 16bit destination address
+; IO_FUN: address of per-page io completion function (after a page was loaded into (zp_io_addr)).
 ;         (IO_FUN) is called with subroutine semantics (i.e. do rts to return), X register contains size of
-;         current page ($00 means full page). Code in IO_FUN is allowed to modify IO_ADDR, which enables easy loding in to
+;         current page ($00 means full page). Code in IO_FUN is allowed to modify zp_io_addr, which enables easy loding in to
 ;         consecutove pages (use e.g. for binary loading)
 read_file_paged:
 	save_regs
@@ -54,14 +54,14 @@ read_file_paged:
 
 
 
-; internal function: load next page for open file into (IO_ADDR)
+; internal function: load next page for open file into (zp_io_addr)
 ; NOTE: registers are clobbered!
 ; return:
 ; - if more data was read (not EOF)
 ;   - carry is set
-;   - (IO_ADDR) contains valid file data
-;   - x contains number of valid bytes in (IO_ADDR), 00 == 256 means a full page was read
-; - if no more data was read carry is cleared, register / (IO_ADDR) content is undefined
+;   - (zp_io_addr) contains valid file data
+;   - x contains number of valid bytes in (zp_io_addr), 00 == 256 means a full page was read
+; - if no more data was read carry is cleared, register / (zp_io_addr) content is undefined
 load_page_to_iobuf_gen:
 	; print_message_from_ptr msg_read_full_page
 	; sei
@@ -75,7 +75,7 @@ load_page_to_iobuf_gen:
 	ldy #$00		; y: count byte inside page
 @loop_full_page:
 	jsr fgetc	; recv next byte
-	sta (IO_ADDR), y	;  and store to IO_BUFFER + y
+	sta (zp_io_addr), y	;  and store to IO_BUFFER + y
 	jsr update_fletch16
 	iny
 	bne @loop_full_page	; end on y wrap around
@@ -107,7 +107,7 @@ load_page_to_iobuf_gen:
 	jsr fgetc	; recv next byte
 	; lda #%11001100
 	; sta IO_GPIO0
-	sta (IO_ADDR), y	;  and store to IO_BUFFER + y
+	sta (zp_io_addr), y	;  and store to IO_BUFFER + y
 	jsr update_fletch16
 	iny
 	; sty IO_GPIO0
@@ -145,17 +145,17 @@ check_extra:
 update_fletch16:
 	; pha
 	clc
-	adc FLETCH_1
-	sta FLETCH_1
+	adc zp_fletch_1
+	sta zp_fletch_1
 	clc
-	adc FLETCH_2
-	sta FLETCH_2
+	adc zp_fletch_2
+	sta zp_fletch_2
 	; pla
 	rts
 
 print_fletch16:
-	lda FLETCH_1
-	ldx FLETCH_2
+	lda zp_fletch_1
+	ldx zp_fletch_2
 	jsr print_hex16
 	rts
 	

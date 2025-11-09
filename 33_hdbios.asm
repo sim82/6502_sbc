@@ -281,7 +281,7 @@ print_status:
 
 ; ==================
 dump_prog_state:
-	prints io_address_message
+	prints zp_io_address_message
 
 	prints low_message
 	lda lba_low
@@ -647,7 +647,7 @@ drive_registers_message:
 drive_status_message:
 	.byte "Drive Status:        ", $00
 
-io_address_message:
+zp_io_address_message:
 	.byte "Selected IO Address: ", $00
 
 low_message:

@@ -90,8 +90,8 @@ skip_warmboot_message:
 	sta USER_PROCESS
 	sta INPUT_CHAR
 	sta IRQ_TIMER
-	sta DT_COUNT_L
-	sta DT_COUNT_H
+	sta zp_dt_count_l
+	sta zp_dt_count_h
 	sta direct_timer_h
 ; @skip_init:
 	jsr clear_resident
@@ -284,35 +284,35 @@ irq:
 	jsr direct_timer_vector
 
 	; check if os timer should also be triggered
-	; lda DT_COUNT_L
+	; lda zp_dt_count_l
 	; sec
 	; sbc #1
-	; sta DT_COUNT_L
-	; lda DT_COUNT_H
+	; sta zp_dt_count_l
+	; lda zp_dt_count_h
 	; sbc #0
-	; sta DT_COUNT_H
-	; ora DT_COUNT_L
+	; sta zp_dt_count_h
+	; ora zp_dt_count_l
 	; uhm, is a 16bit count-down really that simple?
-	dec DT_COUNT_L
+	dec zp_dt_count_l
 	bne @no_timer
-	dec DT_COUNT_H
+	dec zp_dt_count_h
 	bmi @do_timer ; think about this again...
 
 @do_timer:
 	; reset os timer counters from divisor	
 
 	lda #0
-	sta DT_COUNT_H
+	sta zp_dt_count_h
 	lda DT_DIV16
-	sta DT_COUNT_L
-	asl DT_COUNT_L
-	rol DT_COUNT_H
-	asl DT_COUNT_L
-	rol DT_COUNT_H
-	asl DT_COUNT_L
-	rol DT_COUNT_H
-	asl DT_COUNT_L
-	rol DT_COUNT_H
+	sta zp_dt_count_l
+	asl zp_dt_count_l
+	rol zp_dt_count_h
+	asl zp_dt_count_l
+	rol zp_dt_count_h
+	asl zp_dt_count_l
+	rol zp_dt_count_h
+	asl zp_dt_count_l
+	rol zp_dt_count_h
 	
 @trigger_os_timer:
 	lda #1
@@ -422,7 +422,7 @@ compare_token:
 
 	lda INPUT_LINE, y ; looks sus... shouldn't this be offset to current token? Works only for the first token (!?)
 	; jsr putc
-	cmp (ZP_PTR), y
+	cmp (zp_ptr), y
 	bne @mismatch
 	iny
 	jmp @loop
@@ -430,11 +430,11 @@ compare_token:
 @found:
 	; now check if we reached the end of the target string (null termination)
 	; iny
-	; lda (ZP_PTR), y
+	; lda (zp_ptr), y
 	; jsr putc
 
 	lda #$00
-	cmp (ZP_PTR), y
+	cmp (zp_ptr), y
 	bne @mismatch
 	sec
 	rts
@@ -449,19 +449,19 @@ jsr_receive_pos:
 	jmp jsr_receive_pos
 
 load_binary:
-	; meaning of IO_ADDR vs RECEIVE_POS: 
-	;  - IO_ADDR: in ZP, used for indirect addressing and modified during read
+	; meaning of zp_io_addr vs RECEIVE_POS: 
+	;  - zp_io_addr: in ZP, used for indirect addressing and modified during read
 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
 
 	lda #0
-	sta FLETCH_1
-	sta FLETCH_2
+	sta zp_fletch_1
+	sta zp_fletch_2
 	jsr fgetc	; read target address low byte
 	sta RECEIVE_POS
-	sta IO_ADDR
+	sta zp_io_addr
 	jsr fgetc	; and high byte
 	sta RECEIVE_POS + 1	
-	sta IO_ADDR + 1
+	sta zp_io_addr + 1
 	; check for file error: target addr $ffff
 	cmp #$FF
 	bne @no_error
@@ -477,8 +477,8 @@ load_binary:
 	store_address @load_binary_page_completion, IO_FUN
 	jsr read_file_paged
 	bcc @read_error
-	lda FLETCH_1
-	ldx FLETCH_2
+	lda zp_fletch_1
+	ldx zp_fletch_2
 	jsr print_hex16
 	jsr put_newline
 	sec
@@ -486,9 +486,9 @@ load_binary:
 	rts
 
 @load_binary_page_completion:
-	lda IO_ADDR + 1	; QoL: spin windmill
+	lda zp_io_addr + 1	; QoL: spin windmill
 	jsr print_windmill
-	inc IO_ADDR + 1	;  and inc io address by 256 each
+	inc zp_io_addr + 1	;  and inc io address by 256 each
 	rts
 
 exec_input_line:
@@ -549,7 +549,7 @@ exec_input_line:
 	rts
 	
 cat_iobuffer:
-	stx ZP_PTR
+	stx zp_ptr
 	ldy #$00
 @loop:
 	lda IO_BUFFER, y
@@ -560,7 +560,7 @@ cat_iobuffer:
 	jsr putc
 @jump_linefeed:
 	iny
-	cpy ZP_PTR
+	cpy zp_ptr
 	bne @loop
 	rts
 
@@ -637,21 +637,21 @@ set_direct_timer:
 	beq @stop_direct_timer
 	
 	lda #0
-	sta DT_COUNT_H
+	sta zp_dt_count_h
 	sty DT_DIV16
-	sty DT_COUNT_L
+	sty zp_dt_count_l
 	
-	asl DT_COUNT_L
-	rol DT_COUNT_H
-	asl DT_COUNT_L
-	rol DT_COUNT_H
-	asl DT_COUNT_L
-	rol DT_COUNT_H
-	asl DT_COUNT_L
-	rol DT_COUNT_H
+	asl zp_dt_count_l
+	rol zp_dt_count_h
+	asl zp_dt_count_l
+	rol zp_dt_count_h
+	asl zp_dt_count_l
+	rol zp_dt_count_h
+	asl zp_dt_count_l
+	rol zp_dt_count_h
 	uart_start_timer 10000
-	lda DT_COUNT_L
-	ldx DT_COUNT_H
+	lda zp_dt_count_l
+	ldx zp_dt_count_h
 	rts
 @stop_direct_timer:
 

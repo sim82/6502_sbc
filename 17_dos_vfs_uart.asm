@@ -10,10 +10,10 @@ vfs_uart_open:
 	save_regs
 	
 	lda #$ff
-	sta IO_BW_EOF
+	sta zp_io_bw_eof
 	lda #$00
-	sta IO_BL_L
-	sta IO_BL_H
+	sta zp_io_bl_l
+	sta zp_io_bl_h
 	
 	jsr fgetc
 	sta RECEIVE_SIZE
@@ -34,9 +34,9 @@ vfs_uart_open:
 
 @no_error:
 	lda #0
-	sta FLETCH_1
-	sta FLETCH_2
-	sta IO_BW_EOF	; clear eof
+	sta zp_fletch_1
+	sta zp_fletch_2
+	sta zp_io_bw_eof	; clear eof
 
 	jsr load_block_to_iobuf
 	restore_regs
@@ -49,24 +49,24 @@ vfs_uart_getc:
 	; check IO_BL < RECEIVE_SIZE (eof)
 	; NOTE: using IO_BL - RECEIVE_SIZE. Carry is set if there is no underflow, i.e. IO_BL >= RECEIVE_SIZE. Inverted carry is so fucking weird...
 	sec
-	lda IO_BL_L
+	lda zp_io_bl_l
 	sbc RECEIVE_SIZE
 
-	lda IO_BL_H
+	lda zp_io_bl_h
 	sbc RECEIVE_SIZE + 1
 	bcs @eof
-	; lda IO_BL_L
+	; lda zp_io_bl_l
 	; cmp RECEIVE_SIZE
 	; bne @no_eof
 
-	; lda IO_BL_H
+	; lda zp_io_bl_h
 	; cmp RECEIVE_SIZE + 1
 	; beq @eof
 
 @no_eof:
-	lda IO_BL_H
+	lda zp_io_bl_h
 	lsr 
-	lda IO_BL_L
+	lda zp_io_bl_l
 	ror
 	tay
 	; y contains the 'word index' (the upper 8bit of the read ptr, i.e. the index into either the high or low io buffer page)
@@ -84,27 +84,27 @@ vfs_uart_getc:
 	; inc read pointer
 	lda #$1
 	clc
-	adc IO_BL_L
-	sta IO_BL_L
+	adc zp_io_bl_l
+	sta zp_io_bl_l
 	lda #$0
-	adc IO_BL_H
-	sta IO_BL_H
+	adc zp_io_bl_h
+	sta zp_io_bl_h
 	
 	; check if end of buffer:
 	; if all 9 lowest bits are 0 after pointer inc this means we stepped into a new 512byte block
 	; -> needs refill
-	lda IO_BL_H
+	lda zp_io_bl_h
 	and #$01
 	bne @skip_fill_buffer
 
-	lda IO_BL_L
+	lda zp_io_bl_l
 	bne @skip_fill_buffer
 
 	jsr read_next_block_to_iobuf
 	bcs @skip_fill_buffer
 	; directly set EOF if read failed
 	ldy #$FF
-	sty IO_BW_EOF
+	sty zp_io_bw_eof
 @skip_fill_buffer:
 	pla
 	sec
@@ -121,10 +121,10 @@ vfs_uart_getc:
 vfs_uart_next_block:
 	save_xy
 	sec
-	lda IO_BL_L
+	lda zp_io_bl_l
 	sbc RECEIVE_SIZE
 
-	lda IO_BL_H
+	lda zp_io_bl_h
 	sbc RECEIVE_SIZE + 1
 	bcs @eof
 	jsr read_next_block_to_iobuf

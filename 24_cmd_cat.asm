@@ -74,9 +74,9 @@ TMP1 = STR_PTR + 2
 	jsr os_putnl
 	; ldx #00
 	; jsr os_putnl
-	; lda FLETCH_1
+	; lda zp_fletch_1
 	; jsr os_print_dec
-	; lda FLETCH_2
+	; lda zp_fletch_2
 	; jsr os_print_dec
 	
 	rts

@@ -51,7 +51,7 @@ IDE_LBA_HIGH = IDE_LBA_MID + 1
 .importzp zp_c, zp_cl, zp_ch
 .importzp zp_d, zp_dl, zp_dh
 .importzp zp_e, zp_el, zp_eh
-.importzp zp_mon_addr, zp_mon_addr_l, zp_mon_addr_h
+.importzp zp_mon_addr, zp_mon_addrl, zp_mon_addrh
 .importzp zp_a_temp, zp_x_temp
 .importzp zp_dt_count_l, zp_dt_count_h
 .importzp zp_fgetc, zp_fgetc_l, zp_fgetc_h
