@@ -66,7 +66,7 @@ event_init:
     ldx #>@missing_arg_error
     jsr os_print_string
     rts
-    
+
 @file_not_found_error:
     .byte "Error: file not found", $0A, $0D, $00 
 @file_not_found:
@@ -81,6 +81,15 @@ event_key:
 event_timer:
     rts
 
-
+.macro print_inline string
+.local @string
+    lda #<@string
+    lda #>@string
+    jsr os_print_string
+    jmp @end
+@string:
+    .byte string, $0A, $0D, $00
+@end:
+.endmacro
 
 
