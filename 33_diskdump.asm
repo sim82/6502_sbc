@@ -1,5 +1,16 @@
 .INCLUDE "std.inc"
 .INCLUDE "os.inc"
+.macro print_inline string
+.local @string
+.local @end
+    lda #<@string
+    lda #>@string
+    jsr os_print_string
+    jmp @end
+@string:
+    .byte string, $0A, $0D, $00
+@end:
+.endmacro
 
 .ZEROPAGE
 last_stat: .res $1
@@ -35,9 +46,9 @@ event_init:
     lda #$01
     ldx #$00
     ldy #$00
-    jsr os_vfs_ide_set_lba
+    jsr os_ide_set_lba
 
-    ; expecting filename as first argument
+    ; expecting arguments: dd <filename>
     jsr os_get_argn
     cmp #$02
     bne @missing_arg
@@ -59,20 +70,22 @@ event_init:
     bcs @block_loop
     rts
 
-@missing_arg_error:
-    .byte "Error: missing filename argument", $0A, $0D, $00
+; @missing_arg_error:
+;     .byte "Error: missing filename argument", $0A, $0D, $00
 @missing_arg:
-    lda #<@missing_arg_error
-    ldx #>@missing_arg_error
-    jsr os_print_string
+;     lda #<@missing_arg_error
+;     ldx #>@missing_arg_error
+    ; jsr os_print_string
+    print_inline "Error: missing filename argument"
     rts
 
-@file_not_found_error:
-    .byte "Error: file not found", $0A, $0D, $00 
+; @file_not_found_error:
+;     .byte "Error: file not found", $0A, $0D, $00 
 @file_not_found:
-    lda #<@file_not_found_error
-    ldx #>@file_not_found_error
-    jsr os_print_string 
+;     lda #<@file_not_found_error
+;     ldx #>@file_not_found_error
+;     jsr os_print_string 
+    print_inline "Error: file not found"
     rts
 
 event_key:
@@ -81,15 +94,5 @@ event_key:
 event_timer:
     rts
 
-.macro print_inline string
-.local @string
-    lda #<@string
-    lda #>@string
-    jsr os_print_string
-    jmp @end
-@string:
-    .byte string, $0A, $0D, $00
-@end:
-.endmacro
 
 

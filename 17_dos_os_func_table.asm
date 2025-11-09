@@ -1,4 +1,4 @@
-.IMPORT alloc_page_span, getc_blocking, putc, vfs_open, vfs_getc, print_dec, put_newline, print_message, get_argn, get_arg, get_event, event_return, free_page_span, print_fletch16, rand_8, set_direct_timer, dbg_byte, vfs_next_block, vfs_ide_write_block
+.IMPORT alloc_page_span, getc_blocking, putc, vfs_open, vfs_getc, print_dec, put_newline, print_message, get_argn, get_arg, get_event, event_return, free_page_span, print_fletch16, rand_8, set_direct_timer, dbg_byte, vfs_next_block, vfs_ide_write_block, vfs_ide_set_lba
 .EXPORT os_func_table
 
 os_func_table:
@@ -21,3 +21,4 @@ os_func_table:
     .WORD dbg_byte
     .WORD vfs_next_block
     .WORD vfs_ide_write_block
+    .WORD vfs_ide_set_lba

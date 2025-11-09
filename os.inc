@@ -81,8 +81,13 @@ OS_EVENT_RETURN_KEEP_RESIDENT  = $01
 .IMPORT os_fnext_block 
 
 ; directly write iobuf to ide disk at LBA
+; uses internal LBA, set via os_ide_set_lba
+; carry set on error
+.IMPORT os_ide_write_block 
+
+; set LBA for next ide operation
 ; a in: LBA low
 ; x in: LBA mid
 ; y in: LBA high
-.IMPORT os_ide_write_block 
+.IMPORT os_ide_set_lba 
 

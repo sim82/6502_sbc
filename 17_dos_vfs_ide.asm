@@ -2,7 +2,7 @@
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge, dbg_byte, put_newline
 .import update_fletch16
 .import dbg_byte
-.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block
+.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block, vfs_ide_set_lba
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
