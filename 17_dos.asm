@@ -86,10 +86,10 @@ warmboot_entrypoint:
 skip_warmboot_message:
 	; init local vars
 	lda #$00
-	sta INPUT_LINE_PTR
-	sta USER_PROCESS
-	sta INPUT_CHAR
-	sta IRQ_TIMER
+	sta oss_input_line_ptr
+	sta oss_user_process
+	sta oss_input_char
+	sta oss_irq_timer
 	sta zp_dt_count_l
 	sta zp_dt_count_h
 	sta direct_timer_h
@@ -115,24 +115,24 @@ skip_warmboot_message:
 
 @wait_loop:
 	; check if there is a resident process
-	lda RESIDENT_STATE
+	lda oss_resident_state
 	beq @no_resident_run
 
 	; RESIDENT_STATE_INITIAL-> send OS_EVENT_INIT 
 	cmp #RESIDENT_STATE_INITIAL
 	bne @not_init
 	lda #OS_EVENT_INIT
-	sta RESIDENT_EVENT
+	sta oss_resident_event
 	jsr run_resident
 
 	; if resident state == 0 after run_resident -> process exited. go right to sleep
 
-	lda RESIDENT_STATE
+	lda oss_resident_state
 	beq @sleep
 	
 	; otherwise promote it to a resident process
 	lda #RESIDENT_STATE_RUN
-	sta RESIDENT_STATE
+	sta oss_resident_state
 	jmp @sleep
 
 @not_init:
@@ -141,15 +141,15 @@ skip_warmboot_message:
 	
 	; check timer
 	
-	lda IRQ_TIMER
+	lda oss_irq_timer
 	beq @no_timer
 	lda #OS_EVENT_TIMER
-	sta RESIDENT_EVENT
+	sta oss_resident_event
 	jsr run_resident
 	lda #$00
-	sta IRQ_TIMER
+	sta oss_irq_timer
 @no_timer:
-	lda INPUT_CHAR
+	lda oss_input_char
 	; go right back to sleep if there is no input char (wakeup was due to timer)
 	; TODO: check / log if there are 'spurious' wakeups...
 	beq @sleep
@@ -157,7 +157,7 @@ skip_warmboot_message:
 	cmp #$1a
 	bne @no_to_background
 	lda #RESIDENT_STATE_SLEEP
-	sta RESIDENT_STATE 
+	sta oss_resident_state 
 	jsr put_newline
 	jsr print_prompt
 	jmp @sleep
@@ -171,7 +171,7 @@ skip_warmboot_message:
 @no_direct_timer:
 	; cleanup process
 	; meeeep! redundant!
-	lda RECEIVE_POS + 1
+	lda oss_receive_pos + 1
 	jsr free_page_span
 	jsr free_user_pages
 	jsr clear_resident
@@ -181,13 +181,13 @@ skip_warmboot_message:
 
 @no_cancel:
 	; send input char as OS_EVENT_KEY
-	sta RESIDENT_EVENTDATA
+	sta oss_resident_eventdata
 	lda #OS_EVENT_KEY
-	sta RESIDENT_EVENT
+	sta oss_resident_event
 	jsr run_resident
 	; clear input char after one key event was sent
 	lda #$00
-	sta INPUT_CHAR
+	sta oss_input_char
 	jmp @sleep
 
 @no_resident_run:
@@ -195,12 +195,12 @@ skip_warmboot_message:
 	; not sure if an irq is enough to mess up the bulk file read loop...
 	; sei
 	; if no resident program is running, process input with command processor
-	lda INPUT_CHAR
+	lda oss_input_char
 	beq @sleep
 	jsr process_input
 	lda #$00
-	sta INPUT_CHAR
-	lda RESIDENT_STATE
+	sta oss_input_char
+	lda oss_resident_state
 	cmp #RESIDENT_STATE_INITIAL
 	beq @skip_sleep ; @wait_loop is too far away for an indirect jump...
 
@@ -221,18 +221,18 @@ check_unclean_exit:
 
 run_resident:
 	lda #$00
-	sta RESIDENT_RETURN
+	sta oss_resident_return
 	lda #$ff
-	sta USER_PROCESS
+	sta oss_user_process
 	jsr jsr_receive_pos
 	lda #$00
-	sta USER_PROCESS
-	lda RESIDENT_RETURN
+	sta oss_user_process
+	lda oss_resident_return
 	; non-zero return code -> keep resident
 	bne @keep_resident
 	jsr check_unclean_exit
 	jsr clear_resident
-	lda RECEIVE_POS + 1
+	lda oss_receive_pos + 1
 	jsr free_page_span
 	jsr free_user_pages
 	jsr clear_resident
@@ -250,14 +250,14 @@ run_resident:
 	rts
 
 jsr_resident:
-	jmp (RESIDENT_ENTRYPOINT)
+	jmp (oss_resident_entrypoint)
 	jmp jsr_resident
 
 clear_resident:
 	lda #$00
-	sta RESIDENT_STATE
-	; sta RESIDENT_ENTRYPOINT
-	; sta RESIDENT_ENTRYPOINT + 1
+	sta oss_resident_state
+	; sta oss_resident_entrypoint
+	; sta oss_resident_entrypoint + 1
 	rts
 
 irq:
@@ -303,7 +303,7 @@ irq:
 
 	lda #0
 	sta zp_dt_count_h
-	lda DT_DIV16
+	lda oss_dt_div16
 	sta zp_dt_count_l
 	asl zp_dt_count_l
 	rol zp_dt_count_h
@@ -316,7 +316,7 @@ irq:
 	
 @trigger_os_timer:
 	lda #1
-	sta IRQ_TIMER
+	sta oss_irq_timer
 @no_timer:
 	
 	lda IRQ_TMP_A
@@ -329,7 +329,7 @@ irq:
 @use_char:
 	cmp #$18
 	beq @handle_ctrlx
-	sta INPUT_CHAR
+	sta oss_input_char
 	; sta IO_GPIO0
 
 @no_char:
@@ -339,7 +339,7 @@ irq:
 	rti
 
 @handle_ctrlx:
-	lda USER_PROCESS
+	lda oss_user_process
 	beq @cold_boot
 	ldx #$ff
 	txs
@@ -350,7 +350,7 @@ irq:
 	jmp coldboot_entrypoint
 
 print_prompt:
-	lda RESIDENT_STATE
+	lda oss_resident_state
 	beq @no_resident
 	lda #'*'
 	jsr putc
@@ -388,9 +388,9 @@ process_input:
 @no_enter_key:
 	cmp #$08		; handle backspace
 	bne @normal_char
-	ldy INPUT_LINE_PTR	; check if input line is empty -> ignore backspace
+	ldy oss_input_line_ptr	; check if input line is empty -> ignore backspace
 	beq @exit
-	dec INPUT_LINE_PTR	; delete last char (dec ptr)
+	dec oss_input_line_ptr	; delete last char (dec ptr)
 
 	; rub-out character on terminal
 	jsr putc		; send the backspace (move cursor back)
@@ -404,12 +404,12 @@ process_input:
 	rts
 @normal_char:
 	; TODO: ignore non-printable chars
-	ldy INPUT_LINE_PTR	; append normal char to input line
+	ldy oss_input_line_ptr	; append normal char to input line
 	cpy #INPUT_LINE_LEN	;   check if input line is full
 	beq @buf_full
-	sta INPUT_LINE, y	;   store char at current input line ptr
+	sta oss_input_line, y	;   store char at current input line ptr
 	jsr putc		;   local echo
-	inc INPUT_LINE_PTR	;   in-place increase input line ptr
+	inc oss_input_line_ptr	;   in-place increase input line ptr
 	; fall through
 @buf_full:
 	rts
@@ -417,10 +417,10 @@ process_input:
 compare_token:
 	ldy #$00
 @loop:
-	cpy NEXT_TOKEN_END
+	cpy oss_next_token_end
 	beq @found
 
-	lda INPUT_LINE, y ; looks sus... shouldn't this be offset to current token? Works only for the first token (!?)
+	lda oss_input_line, y ; looks sus... shouldn't this be offset to current token? Works only for the first token (!?)
 	; jsr putc
 	cmp (zp_ptr), y
 	bne @mismatch
@@ -445,22 +445,22 @@ compare_token:
 	
 
 jsr_receive_pos:
-	jmp (RECEIVE_POS)
+	jmp (oss_receive_pos)
 	jmp jsr_receive_pos
 
 load_binary:
-	; meaning of zp_io_addr vs RECEIVE_POS: 
+	; meaning of zp_io_addr vs oss_receive_pos: 
 	;  - zp_io_addr: in ZP, used for indirect addressing and modified during read
-	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
+	;  - oss_receive_pos: no need to be in ZP, used as entry point to program after read
 
 	lda #0
 	sta zp_fletch_1
 	sta zp_fletch_2
 	jsr fgetc	; read target address low byte
-	sta RECEIVE_POS
+	sta oss_receive_pos
 	sta zp_io_addr
 	jsr fgetc	; and high byte
-	sta RECEIVE_POS + 1	
+	sta oss_receive_pos + 1	
 	sta zp_io_addr + 1
 	; check for file error: target addr $ffff
 	cmp #$FF
@@ -474,7 +474,7 @@ load_binary:
 
 @no_error:
 	; set up for read_file_paged
-	store_address @load_binary_page_completion, IO_FUN
+	store_address @load_binary_page_completion, oss_io_fun
 	jsr read_file_paged
 	bcc @read_error
 	lda zp_fletch_1
@@ -493,9 +493,9 @@ load_binary:
 
 exec_input_line:
 	; add null termination at end of input line to make parsing more convenient
-	ldx INPUT_LINE_PTR
+	ldx oss_input_line_ptr
 	lda #$00
-	sta INPUT_LINE, x
+	sta oss_input_line, x
 	jsr fgetc_nonblocking
 	bcs exec_input_line
 	jsr fpurge
@@ -517,13 +517,13 @@ exec_input_line:
 ; @end:
 
 	lda #$00
-	sta ARGC
+	sta oss_argc
 		
 @arg_loop:
-	ldy ARGC
-	inc ARGC
-	lda NEXT_TOKEN_PTR
-	sta ARGV, y
+	ldy oss_argc
+	inc oss_argc
+	lda oss_next_token_ptr
+	sta oss_argv, y
 	jsr print_hex8
 	jsr terminate_token
 	jsr retire_token
@@ -531,20 +531,20 @@ exec_input_line:
 	bcs @arg_loop
 
  	jsr put_newline
-	lda ARGV
-	ldx #>INPUT_LINE
+	lda oss_argv
+	ldx #>oss_input_line
 	jsr load_relocatable_binary
 	bcc @cleanup
-	lda RECEIVE_POS
-	sta RESIDENT_ENTRYPOINT
-	lda RECEIVE_POS + 1
-	sta RESIDENT_ENTRYPOINT + 1
+	lda oss_receive_pos
+	sta oss_resident_entrypoint
+	lda oss_receive_pos + 1
+	sta oss_resident_entrypoint + 1
 	lda #RESIDENT_STATE_INITIAL
-	sta RESIDENT_STATE
+	sta oss_resident_state
 	
 @cleanup:
 	ldy #$0
-	sty INPUT_LINE_PTR
+	sty oss_input_line_ptr
 	jsr put_newline
 	rts
 	
@@ -576,16 +576,16 @@ print_windmill:
 
 
 get_argn:
-	lda ARGC
+	lda oss_argc
 	rts
 
 get_arg:
-	cmp ARGC
+	cmp oss_argc
 	bpl @out_of_range
 
 	tax
-	lda ARGV, x
-	ldx #>INPUT_LINE
+	lda oss_argv, x
+	ldx #>oss_input_line
 	sec
 	rts
 
@@ -600,7 +600,7 @@ rand_8:
 	; pha
 	; txa
 	; pha
-	LDA	RAND_SEED		; get seed
+	LDA	oss_rand_seed		; get seed
 	AND	#$b8		; mask non feedback bits
 				; for maximal length run with 8 bits we need
 				; taps at b7, b5, b4 and b3
@@ -619,16 +619,16 @@ rand_8:
 @no_clr:
 	TYA			; copy feedback count
 	LSR	A		; bit 0 into Cb
-	LDA	RAND_SEED	; get seed back
+	LDA	oss_rand_seed	; get seed back
 	ROL	A		; rotate carry into byte
-	STA	RAND_SEED	; save number as next seed
+	STA	oss_rand_seed	; save number as next seed
 	plx
 	ply
 	; pla
 	; tax
 	; pla
 	; tay
-	lda RAND_SEED
+	lda oss_rand_seed
 	RTS			; done
 
 set_direct_timer:
@@ -638,7 +638,7 @@ set_direct_timer:
 	
 	lda #0
 	sta zp_dt_count_h
-	sty DT_DIV16
+	sty oss_dt_div16
 	sty zp_dt_count_l
 	
 	asl zp_dt_count_l

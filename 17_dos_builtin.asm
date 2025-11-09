@@ -51,8 +51,8 @@ cmd_r:
 	jsr retire_token
 	jsr read_token
 	jsr terminate_token
-	lda NEXT_TOKEN_PTR
-	ldx #>INPUT_LINE
+	lda oss_next_token_ptr
+	ldx #>oss_input_line
 	
 	jsr load_relocatable_binary
 	rts
@@ -75,15 +75,15 @@ cmd_m:
 	jsr read_token
 	bcc @no_addr
 
-	ldy NEXT_TOKEN_PTR
+	ldy oss_next_token_ptr
 	
-	lda INPUT_LINE, y
+	lda oss_input_line, y
 	jsr decode_nibble_high
 	bcc @no_addr
 	sta zp_a_temp
 
 	iny
-	lda INPUT_LINE, y
+	lda oss_input_line, y
 	jsr decode_nibble
 	bcc @no_addr
 
@@ -96,13 +96,13 @@ cmd_m:
 	sta zp_mon_addrl
 
 	iny
-	lda INPUT_LINE, y
+	lda oss_input_line, y
 	jsr decode_nibble_high
 	bcc @no_addr
 	sta zp_a_temp
 
 	iny
-	lda INPUT_LINE, y
+	lda oss_input_line, y
 	jsr decode_nibble
 	bcc @no_addr
 
@@ -179,10 +179,10 @@ cmd_j_str:
 	.byte "j", $00
 cmd_j:
 	lda #$ff
-	sta USER_PROCESS
+	sta oss_user_process
 	jsr jsr_receive_pos
 	lda #$00
-	sta USER_PROCESS
+	sta oss_user_process
 	print_message_from_ptr back_to_dos_message
 	rts
 	
@@ -220,11 +220,11 @@ cmd_ra:
 	jsr fpurge
 	lda #'o'
 	jsr fputc
-	ldy NEXT_TOKEN_PTR
+	ldy oss_next_token_ptr
 @send_filename_loop:
-	cpy NEXT_TOKEN_END
+	cpy oss_next_token_end
 	beq @end_of_filename
-	lda INPUT_LINE, y
+	lda oss_input_line, y
 	jsr fputc
 	iny
 	jmp @send_filename_loop
@@ -233,8 +233,8 @@ cmd_ra:
 	jsr fputc
 	jsr load_binary
 	bcc @file_error
-	lda RECEIVE_POS
-	ldx RECEIVE_POS + 1
+	lda oss_receive_pos
+	ldx oss_receive_pos + 1
 	jsr print_hex16
 	jsr put_newline
 	ldy 0
@@ -243,11 +243,11 @@ cmd_ra:
 	bne @delay
 
 	; put receive pos into monitor address, for inspection after reset
-	lda RECEIVE_POS + 1
+	lda oss_receive_pos + 1
 	sta zp_mon_addrh
-	lda RECEIVE_POS
+	lda oss_receive_pos
 	sta zp_mon_addrl
-	jmp (RECEIVE_POS)
+	jmp (oss_receive_pos)
 
 @file_error:
 	print_message_from_ptr file_not_found_message
@@ -258,11 +258,11 @@ cmd_ra:
 cmd_fg_str:
 	.byte "fg", $00
 cmd_fg:
-	lda RESIDENT_STATE
+	lda oss_resident_state
 	cmp #$03
 	bne @no_background
 	lda #$02
-	sta RESIDENT_STATE
+	sta oss_resident_state
 	rts
 	
 @no_background:

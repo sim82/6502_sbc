@@ -9,22 +9,22 @@
 ;
 
 ; zp_io_addr: 16bit destination address
-; IO_FUN: address of per-page io completion function (after a page was loaded into (zp_io_addr)).
-;         (IO_FUN) is called with subroutine semantics (i.e. do rts to return), X register contains size of
-;         current page ($00 means full page). Code in IO_FUN is allowed to modify zp_io_addr, which enables easy loding in to
+; oss_io_fun: address of per-page io completion function (after a page was loaded into (zp_io_addr)).
+;         (oss_io_fun) is called with subroutine semantics (i.e. do rts to return), X register contains size of
+;         current page ($00 means full page). Code in oss_io_fun is allowed to modify zp_io_addr, which enables easy loding in to
 ;         consecutove pages (use e.g. for binary loading)
 read_file_paged:
 	save_regs
 	jsr fgetc	; read size low byte
-	sta RECEIVE_SIZE
+	sta oss_receive_size
 	; jsr print_hex8
 	jsr fgetc	; and high byte
-	sta RECEIVE_SIZE + 1
+	sta oss_receive_size + 1
 	; jsr print_hex8
 	; check for file error: file size $ffff
 	cmp #$FF
 	bne @no_error
-	lda RECEIVE_SIZE
+	lda oss_receive_size
 	cmp #$FF
 	bne @no_error
 	; fell through both times -> error
@@ -50,7 +50,7 @@ read_file_paged:
 	rts
 
 @io_fun_trampoline:
-	jmp (IO_FUN)
+	jmp (oss_io_fun)
 
 
 
@@ -65,7 +65,7 @@ read_file_paged:
 load_page_to_iobuf_gen:
 	; print_message_from_ptr msg_read_full_page
 	; sei
-	ldx RECEIVE_SIZE + 1	; use receive size high byte to determine if a full page shall be read
+	ldx oss_receive_size + 1	; use receive size high byte to determine if a full page shall be read
 	beq @non_full_page
 
 	
@@ -80,7 +80,7 @@ load_page_to_iobuf_gen:
 	iny
 	bne @loop_full_page	; end on y wrap around
 
-	dec RECEIVE_SIZE + 1	; dec remaining size 
+	dec oss_receive_size + 1	; dec remaining size 
 	ldx #$00                ; end index is FF + 1 (i.e. read buffer until index register wrap around)
 
 	jsr check_extra
@@ -95,14 +95,14 @@ load_page_to_iobuf_gen:
 	; print_message_from_ptr msg_read_page
 	ldy #00
 	; don't send 'b' if last page is empty (i.e. size is a multiple of 256)
-	cpy RECEIVE_SIZE
+	cpy oss_receive_size
 	beq @end_empty
 	lda #'b'		; send 'b' command to signal 'send next page'
 	jsr fputc
-	; lda RECEIVE_SIZE
+	; lda oss_receive_size
 	; jsr print_hex8
 @non_full_page_loop:
-	cpy RECEIVE_SIZE	; compare with lower byte of remaining size
+	cpy oss_receive_size	; compare with lower byte of remaining size
 	beq @end
 	jsr fgetc	; recv next byte
 	; lda #%11001100
@@ -116,9 +116,9 @@ load_page_to_iobuf_gen:
 @end:
 	; inx ; this is a bit iffy? why don't we need the x+1? \
 	; meh, it is just a regular 0 based size / index. 256 == 0 in the full page case...
-	ldx RECEIVE_SIZE
+	ldx oss_receive_size
 	ldy #$00
-	sty RECEIVE_SIZE
+	sty oss_receive_size
 	jsr check_extra
 	sec
 	; cli

@@ -4,56 +4,56 @@
 ; tokenizer
 ; in-place tokenize content of input line. Tokens are separated by space character.
 ; The tokenizer will not modify the input line but keep track of the current token
-; in NEXT_TOKEN_PTR and NEXT_TOKEN_END:
-;    NEXT_TOKEN_PTR: start of next token (relative to address of INPUT_LINE)
-;    NEXT_TOKEN_END: end of next token (i.e. first char after token) this can either be a space or then end of input line
+; in oss_next_token_ptr and oss_next_token_end:
+;    oss_next_token_ptr: start of next token (relative to address of oss_input_line)
+;    oss_next_token_end: end of next token (i.e. first char after token) this can either be a space or then end of input line
 ;
 ; normal usage:
 ; 1. call reset_tokenize to start tokenizer at start of input line
 ; 2. call read_token
-;	if a token can be read NEXT_TOKEN_PTR and NEXT_TOKEN_END are set up and carry is set
+;	if a token can be read oss_next_token_ptr and oss_next_token_end are set up and carry is set
 ;	otherwise carry is cleared (i.e. there are no more tokens) -> end loop
-; 3. call retire token. This will advance NEXT_TOKEN_PTR to NEXT_TOKEN_END
+; 3. call retire token. This will advance oss_next_token_ptr to oss_next_token_end
 ; 	repeat at point (2) (i.e. the next read_token call)
 reset_tokenize:
 	lda #$00
-	sta NEXT_TOKEN_PTR
-	sta NEXT_TOKEN_END
+	sta oss_next_token_ptr
+	sta oss_next_token_end
 	rts
 
 read_token:
 	; skip whitespace
-	ldy NEXT_TOKEN_PTR
-	cpy INPUT_LINE_PTR	; check for end of line
+	ldy oss_next_token_ptr
+	cpy oss_input_line_ptr	; check for end of line
 	beq @end_of_line
 
-	lda INPUT_LINE, y	; read character
+	lda oss_input_line, y	; read character
 	jsr is_separator
 	bne @after_space
-	inc NEXT_TOKEN_PTR
+	inc oss_next_token_ptr
 	jmp read_token		; there was a space -> continue loop
 	
 @end_of_line:
 	clc			; report no success: end of line was hit while looking for space
 	rts
 
-	; at this point NEXT_TOKEN_PTR must point at a valid char
+	; at this point oss_next_token_ptr must point at a valid char
 @after_space:
-	ldy NEXT_TOKEN_PTR
+	ldy oss_next_token_ptr
 @in_token_loop:
 	iny			; pre-increment (we are sure that there was a char at Y
 				;		otherwise skip space code would already have returned)
 
-	cpy INPUT_LINE_PTR	; check for line end
+	cpy oss_input_line_ptr	; check for line end
 	beq @end_of_token	; 	handle like normal token end 
-	lda INPUT_LINE, y	; check for space
+	lda oss_input_line, y	; check for space
 	cmp #$20
 	beq @end_of_token	; space also means end of token
 	jmp @in_token_loop
 
 @end_of_token:
-	sty NEXT_TOKEN_END	; Y points to first char after token (either space or end of line)
-	cpy NEXT_TOKEN_PTR
+	sty oss_next_token_end	; Y points to first char after token (either space or end of line)
+	cpy oss_next_token_ptr
 	; clc
 	; beq @token_empty
 	sec			; report success
@@ -62,17 +62,17 @@ read_token:
 
 
 retire_token:
-	lda NEXT_TOKEN_END	
-	sta NEXT_TOKEN_PTR	; advance topen pointer to previous token end ptr
+	lda oss_next_token_end	
+	sta oss_next_token_ptr	; advance topen pointer to previous token end ptr
 	lda #$00
-	sta NEXT_TOKEN_END	; invalidate previous token end ptr
+	sta oss_next_token_end	; invalidate previous token end ptr
 	rts
 
 terminate_token:
 	save_regs
-	ldy NEXT_TOKEN_END
+	ldy oss_next_token_end
 	lda #$00
-	sta INPUT_LINE, y
+	sta oss_input_line, y
 	restore_regs
 	rts
 

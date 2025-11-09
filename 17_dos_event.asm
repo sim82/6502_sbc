@@ -7,11 +7,11 @@
 
 
 get_event:
-	lda RESIDENT_EVENT
-	ldx RESIDENT_EVENTDATA
+	lda oss_resident_event
+	ldx oss_resident_eventdata
 	rts
 
 event_return:
-	sta RESIDENT_RETURN
+	sta oss_resident_return
 	rts
 

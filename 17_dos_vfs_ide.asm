@@ -9,10 +9,10 @@
 vfs_ide_open:
 	save_regs
 	lda #$03
-	sta IDE_LBA_LOW
+	sta oss_ide_lba_low
 	lda #$00
-	sta IDE_LBA_MID
-	sta IDE_LBA_HIGH
+	sta oss_ide_lba_mid
+	sta oss_ide_lba_high
 
 	
 	lda #$ff
@@ -22,10 +22,10 @@ vfs_ide_open:
 	sta zp_io_bl_h
 	
 	lda #$20
-	sta RECEIVE_SIZE
+	sta oss_receive_size
 	; jsr print_hex8
 	lda #$ff
-	sta RECEIVE_SIZE + 1
+	sta oss_receive_size + 1
 	jmp @no_error
 	; fell through both times -> error
 	clc
@@ -49,11 +49,11 @@ load_block_to_iobuf:
 vfs_ide_getc:
 	save_xy
 	lda zp_io_bl_l
-	cmp RECEIVE_SIZE
+	cmp oss_receive_size
 	bne @no_eof
 
 	lda zp_io_bl_h
-	cmp RECEIVE_SIZE + 1
+	cmp oss_receive_size + 1
 	beq @eof
 
 @no_eof:
@@ -113,18 +113,18 @@ vfs_ide_getc:
 
 
 vfs_ide_set_lba:
-	; sta IDE_LBA_LOW
-	; stx IDE_LBA_MID
-	; sty IDE_LBA_HIGH
+	; sta oss_ide_lba_low
+	; stx oss_ide_lba_mid
+	; sty oss_ide_lba_high
 	sta oss_ide_lba_low
 	stx oss_ide_lba_mid
 	sty oss_ide_lba_high	
 	rts
 
 vfs_ide_write_block:
-	; sta IDE_LBA_LOW
-	; stx IDE_LBA_MID
-	; sty IDE_LBA_HIGH
+	; sta oss_ide_lba_low
+	; stx oss_ide_lba_mid
+	; sty oss_ide_lba_high
 
 	jsr write_iobuf_to_next_block
 	rts
@@ -138,11 +138,11 @@ write_iobuf_to_next_block:
 	jsr send_write
 	jsr write_block
 
-	inc IDE_LBA_LOW
+	inc oss_ide_lba_low
 	bne @no_carry
-	inc IDE_LBA_MID
+	inc oss_ide_lba_mid
 	bne @no_carry
-	inc IDE_LBA_HIGH
+	inc oss_ide_lba_high
 @no_carry:
 	
 	sec
@@ -160,11 +160,11 @@ read_next_block_to_iobuf:
 	jsr send_read
 	jsr read_block
 
-	inc IDE_LBA_LOW
+	inc oss_ide_lba_low
 	bne @no_carry
-	inc IDE_LBA_MID
+	inc oss_ide_lba_mid
 	bne @no_carry
-	inc IDE_LBA_HIGH
+	inc oss_ide_lba_high
 @no_carry:
 	
 	sec
@@ -177,7 +177,7 @@ set_size:
 	; jsr wait_ready
 	rts
 set_low:
-	lda IDE_LBA_LOW
+	lda oss_ide_lba_low
 	; sta ARG0
 	; jsr dbg_byte
 	sta $fe23
@@ -185,13 +185,13 @@ set_low:
 	rts
 	
 set_mid:
-	lda IDE_LBA_MID
+	lda oss_ide_lba_mid
 	sta $fe24
 	; jsr wait_ready
 	rts
 	
 set_high:
-	lda IDE_LBA_HIGH
+	lda oss_ide_lba_high
 	sta $fe25
 	; jsr wait_ready
 	rts

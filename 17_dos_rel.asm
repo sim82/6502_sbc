@@ -634,10 +634,10 @@ load_relocatable_binary:
 	bcc @error
 
 	ldx zp_dh
-	stx RECEIVE_POS + 1
+	stx oss_receive_pos + 1
 	stx zp_mon_addrh
 	lda zp_dl
-	sta RECEIVE_POS
+	sta oss_receive_pos
 	sta zp_mon_addrl
 	
 	jsr print_hex16

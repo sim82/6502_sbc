@@ -65,7 +65,7 @@ alloc_page:
 	jmp @loop
 
 @empty_page:
-	lda USER_PROCESS
+	lda oss_user_process
 	beq @no_user
 	lda #(PF_ALLOCATED | PF_SPAN_START | PF_SPAN_END | PF_USER)
 	jmp @write_entry
@@ -132,7 +132,7 @@ alloc_page_span:
 	dey ; stop before last page. 
 	ldx zp_x_temp 
 
-	lda USER_PROCESS
+	lda oss_user_process
 	beq @no_user
 	lda #(PF_ALLOCATED | PF_USER)
 	jmp @cont

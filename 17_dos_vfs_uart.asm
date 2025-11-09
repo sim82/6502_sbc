@@ -16,15 +16,15 @@ vfs_uart_open:
 	sta zp_io_bl_h
 	
 	jsr fgetc
-	sta RECEIVE_SIZE
+	sta oss_receive_size
 	; jsr print_hex8
 	jsr fgetc	; and high byte
-	sta RECEIVE_SIZE + 1
+	sta oss_receive_size + 1
 	; jsr print_hex8
 	; check for file error: file size $ffff
 	cmp #$FF
 	bne @no_error
-	lda RECEIVE_SIZE
+	lda oss_receive_size
 	cmp #$FF
 	bne @no_error
 	; fell through both times -> error
@@ -46,21 +46,21 @@ vfs_uart_open:
 vfs_uart_getc:
 	save_xy
 
-	; check IO_BL < RECEIVE_SIZE (eof)
-	; NOTE: using IO_BL - RECEIVE_SIZE. Carry is set if there is no underflow, i.e. IO_BL >= RECEIVE_SIZE. Inverted carry is so fucking weird...
+	; check IO_BL < oss_receive_size (eof)
+	; NOTE: using IO_BL - oss_receive_size. Carry is set if there is no underflow, i.e. IO_BL >= oss_receive_size. Inverted carry is so fucking weird...
 	sec
 	lda zp_io_bl_l
-	sbc RECEIVE_SIZE
+	sbc oss_receive_size
 
 	lda zp_io_bl_h
-	sbc RECEIVE_SIZE + 1
+	sbc oss_receive_size + 1
 	bcs @eof
 	; lda zp_io_bl_l
-	; cmp RECEIVE_SIZE
+	; cmp oss_receive_size
 	; bne @no_eof
 
 	; lda zp_io_bl_h
-	; cmp RECEIVE_SIZE + 1
+	; cmp oss_receive_size + 1
 	; beq @eof
 
 @no_eof:
@@ -122,10 +122,10 @@ vfs_uart_next_block:
 	save_xy
 	sec
 	lda zp_io_bl_l
-	sbc RECEIVE_SIZE
+	sbc oss_receive_size
 
 	lda zp_io_bl_h
-	sbc RECEIVE_SIZE + 1
+	sbc oss_receive_size + 1
 	bcs @eof
 	jsr read_next_block_to_iobuf
 
