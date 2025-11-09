@@ -1,6 +1,18 @@
 .include "std.inc"
 
+.import oss_pagetable
+.import oss_input_line, oss_input_line_ptr 
+.import oss_next_token_ptr, oss_next_token_end
+.import oss_receive_pos, oss_receive_size, oss_io_fun, oss_user_process
+.import oss_resident_entrypoint, oss_resident_return, oss_resident_state 
+.import oss_resident_event, oss_resident_eventdata, oss_input_char 
+.import oss_irq_timer, oss_argc, oss_argv, oss_argv_num, oss_rand_seed 
+.import oss_dt_div16 
+.import oss_ide_lba_low, oss_ide_lba_mid, oss_ide_lba_high
+
 PAGETABLE = $0200
+.assert PAGETABLE = oss_pagetable, error, "PAGETABLE mismatch"
+
 OS_STATE = $300
 INPUT_LINE = OS_STATE				; address of input line. Keep at page start to simplify ptr calculations
 INPUT_LINE_LEN = $40 - $1			; capacity of input line (minus 1 for null termination)
@@ -29,7 +41,50 @@ DT_DIV16 = RAND_SEED + 1
 IDE_LBA_LOW = DT_DIV16 + 1
 IDE_LBA_MID = IDE_LBA_LOW + 1
 IDE_LBA_HIGH = IDE_LBA_MID + 1
+.assert IDE_LBA_HIGH = oss_ide_lba_high, error, "IDE_LBA_HIGH mismatch"
 .assert IDE_LBA_HIGH < $400, error, "os state too large"
+
+.importzp zp_ptr, zp_io_addr, zp_fletch_1, zp_fletch_2, zp_io_bw_end
+.importzp zp_io_bl_l, zp_io_bw_ptr, zp_io_bl_h, zp_io_bw_eof
+.importzp zp_a, zp_al, zp_ah
+.importzp zp_b, zp_bl, zp_bh
+.importzp zp_c, zp_cl, zp_ch
+.importzp zp_d, zp_dl, zp_dh
+.importzp zp_e, zp_el, zp_eh
+.importzp zp_mon_addr, zp_mon_addr_l, zp_mon_addr_h
+.importzp zp_a_temp, zp_x_temp
+.importzp zp_dt_count_l, zp_dt_count_h
+.importzp zp_fgetc, zp_fgetc_l, zp_fgetc_h
+
+; ZP_PTR = zp_ptr
+; IO_ADDR = zp_io_addr
+; FLETCH_1 = zp_fletch_1
+; FLETCH_2 = zp_fletch_2
+; IO_BW_END = zp_io_bw_end
+; IO_BW_PTR = zp_io_bw_ptr
+; IO_BW_EOF = zp_io_bw_eof
+; IO_BL_L = zp_io_bl_l
+; IO_BL_H = zp_io_bl_h
+; AL = zp_al
+; AH = zp_ah
+; BL = zp_bl
+; BH = zp_bh
+; CL = zp_cl
+; CH = zp_ch
+; DL = zp_dl
+; DH = zp_dh
+; EL = zp_el
+; EH = zp_eh
+; MON_ADDR = zp_mon_addr
+; MON_ADDRL = zp_mon_addr_l
+; MON_ADDRH = zp_mon_addr_h
+; A_TEMP = zp_a_temp
+; X_TEMP = zp_x_temp
+; DT_COUNT_L = zp_dt_count_l
+; DT_COUNT_H = zp_dt_count_h
+; FGETC_L = zp_fgetc_l
+; FGETC_H = zp_fgetc_h
+; FGETC = zp_fgetc
 
 ZP_PTR = TARGET_ADDR + 2
 
@@ -68,6 +123,7 @@ DT_COUNT_L = X_TEMP + 1
 DT_COUNT_H = DT_COUNT_L + 1
 FGETC_L = DT_COUNT_H + 1
 FGETC_H = FGETC_L + 1
+.assert FGETC_H = zp_fgetc_h, error, "zp_fgetc_h mismatch"
 .assert FGETC_H < $80, error, "os zp state too large"
 
 IO_BUFFER = $0400

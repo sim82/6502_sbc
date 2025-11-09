@@ -113,9 +113,12 @@ vfs_ide_getc:
 
 
 vfs_ide_set_lba:
-	sta IDE_LBA_LOW
-	stx IDE_LBA_MID
-	sty IDE_LBA_HIGH
+	; sta IDE_LBA_LOW
+	; stx IDE_LBA_MID
+	; sty IDE_LBA_HIGH
+	sta oss_ide_lba_low
+	stx oss_ide_lba_mid
+	sty oss_ide_lba_high	
 	rts
 
 vfs_ide_write_block:
