@@ -111,7 +111,7 @@ vfs_uart_getc:
 	restore_xy
 	rts
 @eof:
-	lda #%01010101
+	lda #%00001111
 	sta IO_GPIO0
 	lda #'X'
 	clc
@@ -120,6 +120,13 @@ vfs_uart_getc:
 
 vfs_uart_next_block:
 	save_xy
+	clc
+	; increase read pointer by $200. An overflow always means EOF (for files > $fd00).
+	lda #02
+	adc zp_io_bl_h
+	bcs @eof
+	sta zp_io_bl_h
+
 	sec
 	lda zp_io_bl_l
 	sbc oss_receive_size
@@ -128,12 +135,23 @@ vfs_uart_next_block:
 	sbc oss_receive_size + 1
 	bcs @eof
 	jsr read_next_block_to_iobuf
+	lda zp_io_bl_h
+	sta ARG0
+	jsr dbg_byte
+	lda oss_receive_size
+	sta ARG0
+	jsr dbg_byte
+	jsr put_newline
 
+	; lda oss_receive_size + 1
+	; sta ARG0
+	; jsr dbg_byte
+	restore_xy
 	sec
 	rts
 @eof:
 	
-	lda #%10101010
+	lda #%11110000
 	sta IO_GPIO0
 	lda #'X'
 	clc
@@ -159,6 +177,8 @@ read_next_block_to_iobuf:
 	iny
 	bne @loop_full_block
 	jsr check_extra
+	lda #%0000000
+	sta IO_GPIO0
 	sec
 	rts
 

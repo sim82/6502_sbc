@@ -1,10 +1,11 @@
 .INCLUDE "std.inc"
 .INCLUDE "os.inc"
+
 .macro print_inline string
 .local @string
 .local @end
     lda #<@string
-    lda #>@string
+    ldx #>@string
     jsr os_print_string
     jmp @end
 @string:
@@ -70,21 +71,11 @@ event_init:
     bcs @block_loop
     rts
 
-; @missing_arg_error:
-;     .byte "Error: missing filename argument", $0A, $0D, $00
 @missing_arg:
-;     lda #<@missing_arg_error
-;     ldx #>@missing_arg_error
-    ; jsr os_print_string
     print_inline "Error: missing filename argument"
     rts
 
-; @file_not_found_error:
-;     .byte "Error: file not found", $0A, $0D, $00 
 @file_not_found:
-;     lda #<@file_not_found_error
-;     ldx #>@file_not_found_error
-;     jsr os_print_string 
     print_inline "Error: file not found"
     rts
 

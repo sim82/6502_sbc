@@ -8,7 +8,7 @@
 ; open file on uart channel 1 in block mode (512byte)
 vfs_ide_open:
 	save_regs
-	lda #$03
+	lda #$01
 	sta oss_ide_lba_low
 	lda #$00
 	sta oss_ide_lba_mid
@@ -122,11 +122,9 @@ vfs_ide_set_lba:
 	rts
 
 vfs_ide_write_block:
-	; sta oss_ide_lba_low
-	; stx oss_ide_lba_mid
-	; sty oss_ide_lba_high
-
+	save_regs
 	jsr write_iobuf_to_next_block
+	restore_regs
 	rts
 
 

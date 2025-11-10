@@ -165,8 +165,6 @@ check_header:
 	; check header
 	; 	non c64 marker
 	check_byte $01
-	lda #%01010101
-	sta IO_GPIO0
 	check_byte $00
 	;	magick
 	check_byte $6f
