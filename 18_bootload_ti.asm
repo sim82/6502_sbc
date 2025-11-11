@@ -21,6 +21,9 @@ RECEIVE_SIZE = RECEIVE_POS + 2
 BLINKENLIGHT = RECEIVE_SIZE + 2
 
 
+START_VECTOR = $fdfc
+IRQ_VECTOR = $fdfe
+
 .macro set_ptr src
 	ldx #<src
 	stx ZP_PTR
@@ -52,6 +55,7 @@ BLINKENLIGHT = RECEIVE_SIZE + 2
 	ldx $ff
 	txs
 	cld
+	sei ; disable interrupts, because irq vector gets set up before the client code is initialized -> client code must enable interrupts itself if desired
 	; init display
 	; jsr check_busy
 	; lda #%00111000      ; 8bit, two row, default font?
@@ -110,7 +114,7 @@ BLINKENLIGHT = RECEIVE_SIZE + 2
 	sta IO_GPIO0
 	jsr load_binary
 	bcc @file_error
-	jmp (RECEIVE_POS)
+	jmp (START_VECTOR)
 
 @file_error:
 	lda #%10101010
@@ -262,10 +266,10 @@ purge_channel2_input:
 
 irq:
 	pha
-	lda $fdfe
-	ora $fdff
+	lda IRQ_VECTOR
+	ora IRQ_VECTOR + 1
 	beq @skip
-	jmp ($fdfe)
+	jmp (IRQ_VECTOR)
 @skip:
 	pla
 	rti

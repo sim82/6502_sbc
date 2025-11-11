@@ -48,6 +48,14 @@ UART_CLK = 3686400 ; 3.6864 MHz
 	; start timer
 	lda IO_UART2_CSTA
 .endmacro
+
+.SEGMENT "VECTORS"
+START_VECTOR:
+	.word coldboot_entrypoint
+IRQ_VECTOR:
+	.word irq
+	; .word $0000
+
 .CODE
 coldboot_entrypoint:
 ; 	lda #00
@@ -68,11 +76,11 @@ coldboot_entrypoint:
 
 	; lda IO_UART2_CSTO
 	
-	lda #<irq
-	sta $fdfe
+	; lda #<irq
+	; sta $fdfe
 	
-	lda #>irq
-	sta $fdfe+1
+	; lda #>irq
+	; sta $fdfe+1
 
 	; jmp @skip_init
 	jsr init_pagetable
@@ -667,6 +675,7 @@ direct_timer_l:
 	.byte $00
 direct_timer_h: 
 	.byte $00 
+
 
 windmill:
 	.byte "-\|/"
