@@ -15,7 +15,7 @@ ASSEMBLER := ca65
 
 # --- Source & Object Definitions ---
 # Group targets by the config file they use for clarity.
-RAM_D000_TARGETS   := 12_sieve_term 23_flow_control
+RAM_D000_TARGETS   := 12_sieve_term 23_flow_control 18_bootload_low
 OS_CFG_TARGETS     := 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 20_uart 20_uart_rel 21_reltest_rel \
                       22_irq 24_cmd_cat 25_cmd_bs02 26_resident 27_snake 28_sudoku 29_template \
                       29_pcm 30_iotest 31_fiostress 32_vector_dac 33_hdtest 33_hdbios \
@@ -60,6 +60,7 @@ $(BUILD_DIR)/14_memtest:        SYMLINK := memtest
 $(BUILD_DIR)/17_dos:            SYMLINK := dos
 # $(BUILD_DIR)/17_dos_rel:        SYMLINK := dosr
 $(BUILD_DIR)/18_bootload_ti:    SYMLINK := bl
+$(BUILD_DIR)/18_bootload_low:    SYMLINK := bll
 $(BUILD_DIR)/19_memprobe:       SYMLINK := memprobe
 $(BUILD_DIR)/basic:             SYMLINK := basic
 $(BUILD_DIR)/20_uart:           SYMLINK := ti
@@ -109,6 +110,7 @@ $(BUILD_DIR)/12_sieve_dyn: $(BUILD_DIR)/12_sieve_dyn.o $(DEPS_ALL)
 $(BUILD_DIR)/12_sieve_bss: $(BUILD_DIR)/12_sieve_bss.o
 $(BUILD_DIR)/14_memtest: $(BUILD_DIR)/14_memtest.o $(BUILD_DIR)/std.o
 $(BUILD_DIR)/18_bootload_ti: $(BUILD_DIR)/18_bootload_ti.o
+$(BUILD_DIR)/18_bootload_low: $(BUILD_DIR)/18_bootload_hd.o
 $(BUILD_DIR)/18_bootload_hd: $(BUILD_DIR)/18_bootload_hd.o
 $(BUILD_DIR)/19_memprobe: $(BUILD_DIR)/19_memprobe.o $(DEPS_ALL)
 $(BUILD_DIR)/20_uart: $(BUILD_DIR)/20_uart.o $(DEPS_NO_STD)
