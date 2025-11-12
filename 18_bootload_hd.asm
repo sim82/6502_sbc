@@ -3,8 +3,8 @@
 .INCLUDE "std.inc"
 .SEGMENT "VECTORS"
 ; change for ram build!
-	.WORD $FF00
-	.WORD irq
+	; .WORD $FF00
+	; .WORD irq
 	; .WORD $3000
 
 
@@ -19,7 +19,10 @@ RECEIVE_POS = IO_ADDR + 2
 RECEIVE_SIZE = RECEIVE_POS + 2
 
 BLINKENLIGHT = RECEIVE_SIZE + 2
+LBA_LOW = BLINKENLIGHT + 1
 
+START_VECTOR = $fdfc
+IRQ_VECTOR = $fdfe
 
 .macro set_ptr src
 	ldx #<src
@@ -52,44 +55,7 @@ BLINKENLIGHT = RECEIVE_SIZE + 2
 	ldx $ff
 	txs
 	cld
-
-	lda #%11111111
-	sta IO_GPIO0
-	; ; init ti UART
-	; set fifo size and BRG on channel a, since it is shared
-	; ; CRA - reset MR pointer
-	lda #%10110000
-	sta IO_UART2_CRA
-
-	; MR0A
-	lda #%00001001
-	sta IO_UART2_MRA
-
-	; MR1B
-	lda #%00010011
-	sta IO_UART2_MRB
-
-	; MR2B
-	lda #%00000111
-	sta IO_UART2_MRB
-
-	; CSRB
-	lda #%11001100
-	sta IO_UART2_CSRB
-
-	lda #%00000101
-	sta IO_UART2_CRB
-
-
-	lda #%11111110
-	sta IO_GPIO0
-	jsr purge_channel2_input
-	ldy #$00
-@loop:
-	lda filename, y
-	iny
-	jsr putc2
-	bne @loop
+	sei
 
 	lda #%11111100
 	sta IO_GPIO0
@@ -110,16 +76,31 @@ load_binary:
 	;  - IO_ADDR: in ZP, used for indirect addressing and modified during read
 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
 
-	jsr getc2	; read target address low byte
+	; hardcoded: load from lba $71 00 00 to $e000
+	lda #$71
+	sta LBA_LOW
+
+	; init ide registers
+
+	sta IO_IDE_LBA_LOW
+	lda #$00
+	sta IO_IDE_LBA_MID
+	sta IO_IDE_LBA_HIGH
+	lda #$01
+	sta IO_IDE_SIZE
+	lda #$e0
+	sta IO_IDE_DRIVE_HEAD
+
+
+	lda #$00 ; hard coded $e000
 	sta RECEIVE_POS
 	sta IO_ADDR
-	jsr getc2	; and high byte
+	lda #$e0 ; hard coded $e000
 	sta RECEIVE_POS + 1	
 	sta IO_ADDR + 1
 	lda #%11111000
 	sta IO_GPIO0
-	lda #%00000001
-	sta BLINKENLIGHT
+
 	; check for file error: target addr high $ff (this is always rom)
 	; low byte check not necessary
 	cmp #$FF
@@ -129,11 +110,12 @@ load_binary:
 	rts
 
 @no_error:
-	jsr getc2	; read size low byte
+	lda #$00
 	sta RECEIVE_SIZE
 	; jsr print_hex8
-	jsr getc2	; and high byte
+	lda #$1e
 	sta RECEIVE_SIZE + 1
+	beq @done
 
 	; no space for size check...
 	;
@@ -141,36 +123,57 @@ load_binary:
 	; pages are loaded into IO_BUFFER one by one
 	;
 @load_page_loop:
-	; request next page
-	lda #'b'		; send 'b' command to signal 'send next page'
-	jsr putc2
-	ldy #$00		; y: count byte inside page
-	lda RECEIVE_SIZE + 1
-	bne @done
 
-	ldx BLINKENLIGHT
-	stx IO_GPIO0
-	inx
-	stx BLINKENLIGHT
+	; issue read command to ide
+	lda LBA_LOW
+	sta IO_GPIO0
+	sta IO_IDE_LBA_LOW
+	lda #$20
+	sta IO_IDE_CMD
+	jsr wait_drq
 
-	;
-	; full page case: exactly 256 bytes
-	;
+	ldy #$00
 @loop_full_page:
-	jsr getc2	; recv next byte
-	sta (IO_ADDR), y	;  and store to (IO_ADDR) + y
+	lda IO_IDE_DATA_LOW
+	sta (IO_ADDR), y
+	iny
+	lda IO_IDE_DATA_HIGH
+	sta (IO_ADDR), y
 	iny
 	bne @loop_full_page	; end on y wrap around
-
-	dec RECEIVE_SIZE + 1	; dec remaining size 
 	inc IO_ADDR + 1
+	dec RECEIVE_SIZE + 1	
+	beq @done
+	ldy #$00
+@loop_full_page2:
+	lda IO_IDE_DATA_LOW
+	sta (IO_ADDR), y
+	iny
+	lda IO_IDE_DATA_HIGH
+	sta (IO_ADDR), y
+	iny
+	bne @loop_full_page2	; end on y wrap around
+	inc IO_ADDR + 1
+	dec RECEIVE_SIZE + 1	
+	beq @done
 
-	jmp @load_page_loop 
-	
+	inc LBA_LOW
+	cmp #$80
+	bne @load_page_loop
 @done:
+	
 	sec
 	rts
 
+; ==================
+wait_drq:
+	lda $fe27
+	and #%10001000
+	cmp #%00001000
+	bne wait_drq
+
+	; println drq_message
+	rts
 
 
 putc2:
@@ -206,10 +209,10 @@ purge_channel2_input:
 
 irq:
 	pha
-	lda $fdfe
-	ora $fdff
+	lda IRQ_VECTOR
+	ora IRQ_VECTOR + 1
 	beq @skip
-	jmp ($fdfe)
+	jmp (IRQ_VECTOR)
 @skip:
 	pla
 	rti
