@@ -171,43 +171,43 @@ read_next_block_to_iobuf:
 ; ==================
 set_size:
 	lda #$01
-	sta $fe22
+	sta IO_IDE_SIZE
 	; jsr wait_ready
 	rts
 set_low:
 	lda oss_ide_lba_low
 	; sta ARG0
 	; jsr dbg_byte
-	sta $fe23
+	sta IO_IDE_LBA_LOW
 	; jsr wait_ready
 	rts
 	
 set_mid:
 	lda oss_ide_lba_mid
-	sta $fe24
+	sta IO_IDE_LBA_MID
 	; jsr wait_ready
 	rts
 	
 set_high:
 	lda oss_ide_lba_high
-	sta $fe25
+	sta IO_IDE_LBA_HIGH
 	; jsr wait_ready
 	rts
 	
 send_read:
 	lda #$e0
-	sta $fe26
-	lda #$20
-	sta $fe27
+	sta IO_IDE_DRIVE_HEAD
+	lda #IDE_CMD_READ
+	sta IO_IDE_CMD
 	; jsr wait_ready
 	jsr wait_drq
 	rts
 		
 send_write:
 	lda #$e0
-	sta $fe26
-	lda #$30
-	sta $fe27
+	sta IO_IDE_DRIVE_HEAD
+	lda #IDE_CMD_WRITE
+	sta IO_IDE_CMD
 	; jsr wait_ready
 	jsr wait_drq
 	rts
@@ -216,7 +216,7 @@ check_rdy:
 	lda #0
 	sta zp_a_temp
 @loop:
-	lda $fe27
+	lda IO_IDE_STATUS
 	cmp zp_a_temp
 	beq @loop
 	sta zp_a_temp
@@ -226,7 +226,7 @@ check_rdy:
 
 ; ==================
 wait_drq:
-	lda $fe27
+	lda IO_IDE_STATUS
 	and #%10001000
 	cmp #%00001000
 	bne wait_drq
@@ -235,7 +235,7 @@ wait_drq:
 	rts
 ; ==================
 check_drq:
-	lda $fe27
+	lda IO_IDE_STATUS
 	; shift drq bit into C
 	asl
 	asl
@@ -247,12 +247,12 @@ check_drq:
 
 ; ==================
 wait_ready_int:
-	lda $fe27
+	lda IO_IDE_STATUS
 	and #%00000001
 	bne @error
 	sec
 @loop:
-	lda $fe27
+	lda IO_IDE_STATUS
 	and #%10000000
 	bne @loop
 	rts
@@ -262,15 +262,15 @@ wait_ready_int:
 
 ; ==================
 check_error:
-	lda $fe27
+	lda IO_IDE_STATUS
 	and #%00000001
 	beq @noerror
 
-	lda $fe27
+	lda IO_IDE_STATUS
 	sta ARG0
 	; println error_message
 	jsr dbg_byte
-	lda $fe21
+	lda IO_IDE_ERROR
 	sta ARG0
 	jsr dbg_byte
 	jsr put_newline
@@ -287,9 +287,10 @@ read_block:
 @loop:
 	jsr check_drq
 	bcc @end
-	lda $fe20
+	lda IO_IDE_DATA_LOW
 	sta IO_BUFFER_L, x
-	lda $fe28
+	; get high byte from latch
+	lda IO_IDE_DATA_HIGH
 	sta IO_BUFFER_H, x
 	inx
 	jmp @loop
@@ -311,10 +312,11 @@ write_block:
 	; jsr os_putnl
 	jsr check_drq
 	bcc @end
+	; write high byte to latch first
 	lda IO_BUFFER_H, x
-	sta $fe28
+	sta IO_IDE_DATA_HIGH
 	lda IO_BUFFER_L, x
-	sta $fe20
+	sta IO_IDE_DATA_LOW
 	inx
 	jmp @loop
 @end:
