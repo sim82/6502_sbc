@@ -15,13 +15,13 @@ ASSEMBLER := ca65
 
 # --- Source & Object Definitions ---
 # Group targets by the config file they use for clarity.
-RAM_D000_TARGETS   := 12_sieve_term 23_flow_control 18_bootload_low
+RAM_D000_TARGETS   := 23_flow_control 18_bootload_low
 OS_CFG_TARGETS     := 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 20_uart 20_uart_rel 21_reltest_rel \
                       22_irq 24_cmd_cat 25_cmd_bs02 26_resident 27_snake 28_sudoku 29_template \
                       29_pcm 30_iotest 31_fiostress 32_vector_dac 33_hdtest 33_hdbios \
 					  33_diskdump
 RAMBOTTOM_TARGETS  := 14_memtest 19_memprobe
-DOS_CFG_TARGETS    := 17_dos
+DOS_CFG_TARGETS    := 17_dos 12_sieve_term
 ROMBL_CFG_TARGETS  := 18_bootload_ti 18_bootload_hd
 RAM_BASIC_TARGETS  := basic
 

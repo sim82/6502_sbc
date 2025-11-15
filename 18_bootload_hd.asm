@@ -1,13 +1,11 @@
 
 .AUTOIMPORT +
 .INCLUDE "std.inc"
+
+;change for ram build!
 .SEGMENT "VECTORS"
-; change for ram build!
-	; .WORD $FF00
-	; .WORD irq
-	; .WORD $3000
-
-
+	.WORD $FF00
+	.WORD irq
 
 
 ZP_PTR = $80
@@ -52,13 +50,18 @@ IRQ_VECTOR = $fdfe
 
 .CODE
 	; reset undefined processor state
-	ldx $ff
+	ldx #$ff
 	txs
 	cld
 	sei
 
-	lda #%11111100
-	sta IO_GPIO0
+	ldy #$00
+	lda #$00
+@delete_loop:
+	sta $e100, y
+	iny
+	bne @delete_loop
+
 	jsr load_binary
 	bcc @file_error
 	jmp (RECEIVE_POS)
@@ -72,6 +75,11 @@ IRQ_VECTOR = $fdfe
 
 
 load_binary:
+	lda #%00001111
+	sta IO_GPIO0
+	jsr wait_ready
+	lda #%11110000
+	sta IO_GPIO0
 	; meaning of IO_ADDR vs RECEIVE_POS: 
 	;  - IO_ADDR: in ZP, used for indirect addressing and modified during read
 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
@@ -101,21 +109,11 @@ load_binary:
 	lda #%11111000
 	sta IO_GPIO0
 
-	; check for file error: target addr high $ff (this is always rom)
-	; low byte check not necessary
-	cmp #$FF
-	bne @no_error
-	; fell through -> error
-	clc
-	rts
-
-@no_error:
 	lda #$00
 	sta RECEIVE_SIZE
 	; jsr print_hex8
 	lda #$1e
 	sta RECEIVE_SIZE + 1
-	beq @done
 
 	; no space for size check...
 	;
@@ -123,7 +121,6 @@ load_binary:
 	; pages are loaded into IO_BUFFER one by one
 	;
 @load_page_loop:
-
 	; issue read command to ide
 	lda LBA_LOW
 	sta IO_GPIO0
@@ -132,6 +129,13 @@ load_binary:
 	sta IO_IDE_CMD
 	jsr wait_drq
 
+	; this loop is running two times per (512 byte) io block:
+	; 1) read the first 256 bytes to IO_ADDR
+	; 2) then inc IO_ADDR high, and if lowest bit is set (i.e. it is the upper half of the current 
+	;    512 byte io block) run the loop again for the next 256 bytes
+	; 3) after the second run (when after IO_ADDR inc the low bit is 0), increase LBA_LOW address and start next io block
+	;
+	; Precondition: RECEIVE_POS must be 512 byte aligned!
 	ldy #$00
 @loop_full_page:
 	lda IO_IDE_DATA_LOW
@@ -143,25 +147,20 @@ load_binary:
 	bne @loop_full_page	; end on y wrap around
 	inc IO_ADDR + 1
 	dec RECEIVE_SIZE + 1	
-	beq @done
-	ldy #$00
-@loop_full_page2:
-	lda IO_IDE_DATA_LOW
-	sta (IO_ADDR), y
-	iny
-	lda IO_IDE_DATA_HIGH
-	sta (IO_ADDR), y
-	iny
-	bne @loop_full_page2	; end on y wrap around
-	inc IO_ADDR + 1
-	dec RECEIVE_SIZE + 1	
+	lda RECEIVE_SIZE + 1
 	beq @done
 
+	; check if we are currently in the middle of 512 byte block
+	lda IO_ADDR + 1
+	and #$1
+	bne @loop_full_page
+	
 	inc LBA_LOW
+	lda LBA_LOW
 	cmp #$80
 	bne @load_page_loop
+
 @done:
-	
 	sec
 	rts
 
@@ -175,49 +174,25 @@ wait_drq:
 	; println drq_message
 	rts
 
-
-putc2:
-	pha
+wait_ready:
 @loop:
-	lda IO_UART2_SRB
-	and #%00000100
-	beq @loop
-	pla
-	sta IO_UART2_FIFOB
+	lda $fe27
+	and #%10000000
+	bne @loop
 	rts
-
-getc2:
-	; lda IO_UART_ISR2
-	; and #%00000001
-	lda IO_UART2_SRB
-	and #%00000001
-	beq getc2
-	lda IO_UART2_FIFOB
-shared_rts:
-	rts
-	
-
-purge_channel2_input:
-; purge any channel2 input buffer
-	lda IO_UART2_SRB
-	and #%00000001
-	
-	beq shared_rts
-	lda IO_UART2_FIFOB
-	jmp purge_channel2_input
-
 
 irq:
 	pha
 	lda IRQ_VECTOR
 	ora IRQ_VECTOR + 1
 	beq @skip
+	; NOTE: special IRQ calling convention: irq handler must restore A before rti!
+	;       Since we need to save A anyway and it is likely that A is used in the irq handler,
+	;       we save one pha/pla pair.
 	jmp (IRQ_VECTOR)
 @skip:
 	pla
 	rti
 	
 
-filename:
- 	.byte "o.b", $00
 

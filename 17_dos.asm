@@ -58,11 +58,6 @@ IRQ_VECTOR:
 
 .CODE
 coldboot_entrypoint:
-; 	lda #00
-; @loop:
-; 	sta IO_GPIO0
-; 	inc
-; 	jmp @loop
 	ldx #$ff
 	txs 
 
@@ -85,6 +80,12 @@ coldboot_entrypoint:
 	; jmp @skip_init
 	jsr init_pagetable
 	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  	lda #%11001100
+; @loop:
+; 	sta IO_GPIO0
+; 	jmp @loop
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	jmp skip_warmboot_message
 
 warmboot_entrypoint:
