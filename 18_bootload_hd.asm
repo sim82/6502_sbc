@@ -1,5 +1,5 @@
 
-.AUTOIMPORT +
+; .AUTOIMPORT +
 .INCLUDE "std.inc"
 
 ;change for ram build!
@@ -22,32 +22,6 @@ LBA_LOW = BLINKENLIGHT + 1
 START_VECTOR = $fdfc
 IRQ_VECTOR = $fdfe
 
-.macro set_ptr src
-	ldx #<src
-	stx ZP_PTR
-	ldx #>src
-	stx ZP_PTR + 1
-.endmacro
-
-.macro dispatch_command cmd_ptr, dest
-.local @next
-	set_ptr cmd_ptr
-	jsr compare_token
-	bcc @next
-	jsr dest
-	jmp @cleanup
-@next:
-.endmacro
-
-
-; store 16bit value (addr) into two bytes of memory at dest
-.macro store_address addr, dest
-	lda #<addr
-	sta dest
-	lda #>addr
-	sta dest + 1
-.endmacro
-
 .CODE
 	; reset undefined processor state
 	ldx #$ff
@@ -62,22 +36,17 @@ IRQ_VECTOR = $fdfe
 	iny
 	bne @delete_loop
 
-	jsr load_binary
-	bcc @file_error
-	jmp (RECEIVE_POS)
 
-@file_error:
-	lda #%10101010
-	sta IO_GPIO0
-@end_loop:
-	nop
-	jmp @end_loop
 
 
 load_binary:
 	lda #%00001111
 	sta IO_GPIO0
-	jsr wait_ready
+	; inlined to reduce code size
+@wait_ready_loop:
+	lda $fe27
+	and #%10000000
+	bne @wait_ready_loop
 	lda #%11110000
 	sta IO_GPIO0
 	; meaning of IO_ADDR vs RECEIVE_POS: 
@@ -89,8 +58,6 @@ load_binary:
 	sta LBA_LOW
 
 	; init ide registers
-
-	sta IO_IDE_LBA_LOW
 	lda #$00
 	sta IO_IDE_LBA_MID
 	sta IO_IDE_LBA_HIGH
@@ -111,23 +78,21 @@ load_binary:
 
 	lda #$00
 	sta RECEIVE_SIZE
-	; jsr print_hex8
 	lda #$1e
 	sta RECEIVE_SIZE + 1
 
-	; no space for size check...
-	;
-	; outer loop over all received pages
-	; pages are loaded into IO_BUFFER one by one
-	;
 @load_page_loop:
 	; issue read command to ide
 	lda LBA_LOW
-	sta IO_GPIO0
 	sta IO_IDE_LBA_LOW
 	lda #$20
 	sta IO_IDE_CMD
-	jsr wait_drq
+	; inlined wait drq
+@wait_drq_loop:
+	lda $fe27
+	and #%10001000
+	cmp #%00001000
+	bne @wait_drq_loop
 
 	; this loop is running two times per (512 byte) io block:
 	; 1) read the first 256 bytes to IO_ADDR
@@ -161,25 +126,25 @@ load_binary:
 	bne @load_page_loop
 
 @done:
-	sec
-	rts
+	jmp (RECEIVE_POS)
 
 ; ==================
-wait_drq:
-	lda $fe27
-	and #%10001000
-	cmp #%00001000
-	bne wait_drq
+; wait_drq:
+; 	lda $fe27
+; 	and #%10001000
+; 	cmp #%00001000
+; 	bne wait_drq
 
-	; println drq_message
-	rts
+; 	; println drq_message
+; 	rts
 
-wait_ready:
-@loop:
-	lda $fe27
-	and #%10000000
-	bne @loop
-	rts
+
+; wait_ready:
+; @loop:
+; 	lda $fe27
+; 	and #%10000000
+; 	bne @loop
+; 	rts
 
 irq:
 	pha
