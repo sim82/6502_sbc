@@ -13,11 +13,11 @@ ZP_PTR = $80
 
 IO_ADDR = ZP_PTR + 2
 
-RECEIVE_POS = IO_ADDR + 2
-RECEIVE_SIZE = RECEIVE_POS + 2
+; RECEIVE_POS = IO_ADDR + 2
+; RECEIVE_SIZE = RECEIVE_POS + 2
 
-BLINKENLIGHT = RECEIVE_SIZE + 2
-LBA_LOW = BLINKENLIGHT + 1
+; BLINKENLIGHT = RECEIVE_SIZE + 2
+; LBA_LOW = BLINKENLIGHT + 1
 
 START_VECTOR = $fdfc
 IRQ_VECTOR = $fdfe
@@ -45,8 +45,10 @@ load_binary:
 	; inlined to reduce code size
 @wait_ready_loop:
 	lda $fe27
-	and #%10000000
-	bne @wait_ready_loop
+	; check BSY bit (bit 7)
+	rol
+	bcs @wait_ready_loop
+
 	lda #%11110000
 	sta IO_GPIO0
 	; meaning of IO_ADDR vs RECEIVE_POS: 
@@ -54,45 +56,41 @@ load_binary:
 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
 
 	; hardcoded: load from lba $71 00 00 to $e000
-	lda #$71
-	sta LBA_LOW
+	; lda #$71
+	; sta LBA_LOW
+	; X reg is exclusively used for LBA_LOW for the whole load process. NEVER USE X FOR ANY OTHER PURPOSE!
+	ldx #$71
 
 	; init ide registers
 	lda #$00
 	sta IO_IDE_LBA_MID
 	sta IO_IDE_LBA_HIGH
+	sta IO_ADDR
 	lda #$01
 	sta IO_IDE_SIZE
 	lda #$e0
 	sta IO_IDE_DRIVE_HEAD
 
 
-	lda #$00 ; hard coded $e000
-	sta RECEIVE_POS
-	sta IO_ADDR
 	lda #$e0 ; hard coded $e000
-	sta RECEIVE_POS + 1	
+	; sta RECEIVE_POS + 1	
 	sta IO_ADDR + 1
 	lda #%11111000
 	sta IO_GPIO0
 
-	lda #$00
-	sta RECEIVE_SIZE
-	lda #$1e
-	sta RECEIVE_SIZE + 1
+	; lda #$1e
+	; sta RECEIVE_SIZE + 1
 
 @load_page_loop:
 	; issue read command to ide
-	lda LBA_LOW
-	sta IO_IDE_LBA_LOW
+	stx IO_IDE_LBA_LOW
 	lda #$20
 	sta IO_IDE_CMD
 	; inlined wait drq
 @wait_drq_loop:
 	lda $fe27
-	and #%10001000
-	cmp #%00001000
-	bne @wait_drq_loop
+	and #%00001000
+	beq @wait_drq_loop
 
 	; this loop is running two times per (512 byte) io block:
 	; 1) read the first 256 bytes to IO_ADDR
@@ -111,22 +109,21 @@ load_binary:
 	iny
 	bne @loop_full_page	; end on y wrap around
 	inc IO_ADDR + 1
-	dec RECEIVE_SIZE + 1	
-	lda RECEIVE_SIZE + 1
-	beq @done
-
-	; check if we are currently in the middle of 512 byte block
 	lda IO_ADDR + 1
-	and #$1
-	bne @loop_full_page
-	
-	inc LBA_LOW
-	lda LBA_LOW
-	cmp #$80
-	bne @load_page_loop
+	; check if we reached the end of the e000 - fdff range
+	cmp #$fe
+	beq @done
+	; check if we are in the middle of 512 byte block
+	ror
+	bcs @loop_full_page
+
+	; advance LBA_LOW	
+	inx
+	bne @load_page_loop ; always true, X never 0
 
 @done:
-	jmp (RECEIVE_POS)
+	; jmp (RECEIVE_POS)
+	jmp $e000
 
 ; ==================
 ; wait_drq:
