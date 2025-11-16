@@ -12,6 +12,9 @@ ZP_PTR = $80
 
 
 IO_ADDR = ZP_PTR + 2
+DELAY0 = IO_ADDR + 2
+DELAY1 = DELAY0 + 1
+DELAY2 = DELAY1 + 1
 
 ; RECEIVE_POS = IO_ADDR + 2
 ; RECEIVE_SIZE = RECEIVE_POS + 2
@@ -28,20 +31,78 @@ IRQ_VECTOR = $fdfe
 	txs
 	cld
 	sei
+;;;;;;;;;;;;;;;;;
+; init io addr to $e000
+	lda #00
+	sta IO_ADDR
+	lda #$e0 ; hard coded $e000
+	sta IO_ADDR + 1
 
-	ldy #$00
+;;;;;;;;;;;;;;;;;;
+; init ti UART
+
+	lda #%10110000
+	sta IO_UART2_CRA
+
+	; MR0A
+	lda #%00001001
+	sta IO_UART2_MRA
+
+	; MR1B
+	lda #%00010011
+	sta IO_UART2_MRB
+
+	; MR2B
+	lda #%00000111
+	sta IO_UART2_MRB
+
+	; CSRB
+	lda #%11001100
+	sta IO_UART2_CSRB
+
+	lda #%00000101
+	sta IO_UART2_CRB
+;;;;;;;;;;;;;;;;;;;
+; request .b 
+	lda #'o'
+	jsr putc2
+	lda #'.'
+	jsr putc2
+	lda #'b'
+	jsr putc2
 	lda #$00
-@delete_loop:
-	sta $e100, y
+	jsr putc2
+
+	; ignore receive pos & size 
+	jsr getc2
+	jsr getc2
+	; sanity check: expect reveive pos $e0xx to distinguish from line noise if uart is unconnected...
+	cmp #$e0
+	bne load_hd
+	jsr getc2
+	jsr getc2
+
+
+load_uart:
+	lda #'b'
+	jsr putc2
+	ldy #$00
+
+@load_full_page:
+	jsr getc2
+	sta (IO_ADDR), y
 	iny
-	bne @delete_loop
+	bne @load_full_page	; end on y wrap around
+	inc IO_ADDR + 1
+	lda IO_ADDR + 1
+	; check if we reached the end of the e000 - fdff range
+	cmp #$fe
+	beq done_load
+	jmp load_uart
+
+load_hd:
 
 
-
-
-load_binary:
-	lda #%00001111
-	sta IO_GPIO0
 	; inlined to reduce code size
 @wait_ready_loop:
 	lda $fe27
@@ -49,8 +110,8 @@ load_binary:
 	rol
 	bcs @wait_ready_loop
 
-	lda #%11110000
-	sta IO_GPIO0
+	; lda #%11110000
+	; sta IO_GPIO0
 	; meaning of IO_ADDR vs RECEIVE_POS: 
 	;  - IO_ADDR: in ZP, used for indirect addressing and modified during read
 	;  - RECEIVE_POS: no need to be in ZP, used as entry point to program after read
@@ -65,21 +126,10 @@ load_binary:
 	lda #$00
 	sta IO_IDE_LBA_MID
 	sta IO_IDE_LBA_HIGH
-	sta IO_ADDR
 	lda #$01
 	sta IO_IDE_SIZE
 	lda #$e0
 	sta IO_IDE_DRIVE_HEAD
-
-
-	lda #$e0 ; hard coded $e000
-	; sta RECEIVE_POS + 1	
-	sta IO_ADDR + 1
-	lda #%11111000
-	sta IO_GPIO0
-
-	; lda #$1e
-	; sta RECEIVE_SIZE + 1
 
 @load_page_loop:
 	; issue read command to ide
@@ -122,6 +172,7 @@ load_binary:
 	bne @load_page_loop ; always true, X never 0
 
 @done:
+done_load:
 	; jmp (RECEIVE_POS)
 	jmp $e000
 
@@ -142,6 +193,40 @@ load_binary:
 ; 	and #%10000000
 ; 	bne @loop
 ; 	rts
+
+
+getc2:
+	; primitive timeout implementation:
+	ldx #%11111000
+	; init lower delay bytes with same value as highest byte to save one load instruction... (does not really matter and we are desparate for code size)
+	stx DELAY0
+	stx DELAY1
+@loop:
+	inc DELAY0
+	bne @nocarry
+	inc DELAY1
+	bne @nocarry
+	inx
+	stx IO_GPIO0
+	beq load_hd
+@nocarry:
+	lda IO_UART2_SRB
+	; and #%00000001
+	ror
+	bcc @loop
+	lda IO_UART2_FIFOB
+shared_rts:
+	rts
+	
+putc2:
+	pha
+@loop:
+	lda IO_UART2_SRB
+	and #%00000100
+	beq @loop
+	pla
+	sta IO_UART2_FIFOB
+	rts
 
 irq:
 	pha
