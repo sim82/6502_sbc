@@ -15,17 +15,18 @@ ASSEMBLER := ca65
 
 # --- Source & Object Definitions ---
 # Group targets by the config file they use for clarity.
-RAM_D000_TARGETS   := 23_flow_control 18_bootload_low
+RAM_D000_TARGETS   := 23_flow_control #18_bootload_low 
+RAM_1000_TARGETS   := 34_bl_stage2
 OS_CFG_TARGETS     := 12_sieve_term_rel 12_sieve_dyn 12_sieve_bss 20_uart 20_uart_rel 21_reltest_rel \
                       22_irq 24_cmd_cat 25_cmd_bs02 26_resident 27_snake 28_sudoku 29_template \
                       29_pcm 30_iotest 31_fiostress 32_vector_dac 33_hdtest 33_hdbios \
 					  33_diskdump
-RAMBOTTOM_TARGETS  := 14_memtest 19_memprobe
+RAMBOTTOM_TARGETS  := 14_memtest 19_memprobe 
 DOS_CFG_TARGETS    := 17_dos 12_sieve_term
 ROMBL_CFG_TARGETS  := 18_bootload_ti 18_bootload_hd
 RAM_BASIC_TARGETS  := basic
 
-TARGETS := $(RAM_D000_TARGETS) $(OS_CFG_TARGETS) $(RAMBOTTOM_TARGETS) $(DOS_CFG_TARGETS) $(ROMBL_CFG_TARGETS) $(RAM_BASIC_TARGETS)
+TARGETS := $(RAM_1000_TARGETS) $(RAM_D000_TARGETS) $(OS_CFG_TARGETS) $(RAMBOTTOM_TARGETS) $(DOS_CFG_TARGETS) $(ROMBL_CFG_TARGETS) $(RAM_BASIC_TARGETS)
 TARGETS_OUT := $(patsubst %,$(BUILD_DIR)/%,$(TARGETS))
 
 # Common dependencies
@@ -45,6 +46,7 @@ DOS_OBJS := $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_do
 
 # Assign the linker config variable to each group
 $(patsubst %,$(BUILD_DIR)/%,$(RAM_D000_TARGETS)):   LINKER_CFG := my_sbc_ram_d000.cfg
+$(patsubst %,$(BUILD_DIR)/%,$(RAM_1000_TARGETS)):   LINKER_CFG := my_sbc_ram_1000.cfg
 $(patsubst %,$(BUILD_DIR)/%,$(OS_CFG_TARGETS)):     LINKER_CFG := my_sbc_os.cfg
 $(patsubst %,$(BUILD_DIR)/%,$(RAMBOTTOM_TARGETS)):  LINKER_CFG := my_sbc_rambottom.cfg
 $(patsubst %,$(BUILD_DIR)/%,$(DOS_CFG_TARGETS)):    LINKER_CFG := my_sbc_dos.cfg
@@ -79,6 +81,7 @@ $(BUILD_DIR)/32_vector_dac:     SYMLINK := vec
 $(BUILD_DIR)/33_hdtest:         SYMLINK := hd
 $(BUILD_DIR)/33_hdbios:         SYMLINK := hb
 $(BUILD_DIR)/33_diskdump:       SYMLINK := dd
+$(BUILD_DIR)/34_bl_stage2:       SYMLINK := bl2
 
 
 # --- Build Rules (The "Logic" Section) ---
@@ -130,6 +133,8 @@ $(BUILD_DIR)/32_vector_dac: $(BUILD_DIR)/32_vector_dac.o
 $(BUILD_DIR)/33_hdtest: $(BUILD_DIR)/33_hdtest.o
 $(BUILD_DIR)/33_hdbios: $(BUILD_DIR)/33_hdbios.o
 $(BUILD_DIR)/33_diskdump: $(BUILD_DIR)/33_diskdump.o
+$(BUILD_DIR)/34_bl_stage2: $(BUILD_DIR)/34_bl_stage2.o $(DEPS_NO_STD)
+
 
 # Special targets with multiple object files
 $(BUILD_DIR)/17_dos: $(DOS_OBJS) $(DEPS_NO_STD)

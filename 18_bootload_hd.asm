@@ -35,7 +35,7 @@ IRQ_VECTOR = $fdfe
 ; init io addr to $e000
 	lda #00
 	sta IO_ADDR
-	lda #$e0 ; hard coded $e000
+	lda #$10 ; hard coded $1000
 	sta IO_ADDR + 1
 
 ;;;;;;;;;;;;;;;;;;
@@ -68,7 +68,7 @@ IRQ_VECTOR = $fdfe
 	jsr putc2
 	lda #'.'
 	jsr putc2
-	lda #'b'
+	lda #'2'
 	jsr putc2
 	lda #$00
 	jsr putc2
@@ -77,7 +77,7 @@ IRQ_VECTOR = $fdfe
 	jsr getc2
 	jsr getc2
 	; sanity check: expect reveive pos $e0xx to distinguish from line noise if uart is unconnected...
-	cmp #$e0
+	cmp #$10
 	bne load_hd
 	jsr getc2
 	jsr getc2
@@ -96,7 +96,7 @@ load_uart:
 	inc IO_ADDR + 1
 	lda IO_ADDR + 1
 	; check if we reached the end of the e000 - fdff range
-	cmp #$fe
+	cmp #$13
 	beq done_load
 	jmp load_uart
 
@@ -120,7 +120,7 @@ load_hd:
 	; lda #$71
 	; sta LBA_LOW
 	; X reg is exclusively used for LBA_LOW for the whole load process. NEVER USE X FOR ANY OTHER PURPOSE!
-	ldx #$71
+	ldx #$09
 
 	; init ide registers
 	lda #$00
@@ -161,7 +161,7 @@ load_hd:
 	inc IO_ADDR + 1
 	lda IO_ADDR + 1
 	; check if we reached the end of the e000 - fdff range
-	cmp #$fe
+	cmp #$13
 	beq @done
 	; check if we are in the middle of 512 byte block
 	ror
@@ -174,7 +174,7 @@ load_hd:
 @done:
 done_load:
 	; jmp (RECEIVE_POS)
-	jmp $e000
+	jmp $1000
 
 ; ==================
 ; wait_drq:
