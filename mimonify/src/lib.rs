@@ -13,6 +13,5 @@ pub fn guess_program_space(f: &[u8]) -> (usize, usize) {
     let start = (start / 256) * 256;
     let end = ((end + 255) / 256) * 256;
     
-    println!("guessed program space: {:x} - {:x}", start, end);
     (start, end)
 }

@@ -3,6 +3,7 @@
 .import uart_init, putc, put_newline, fpurge, fputc, fgetc, print_hex16
 .ZEROPAGE
 .res $80
+status: .res $1 ; bootstrap status from stage1 bootloader
 zp_ptr: .res $2
 io_addr:
 io_addrl: .res $1
@@ -30,6 +31,27 @@ receive_sizeh: .res $1
     jsr uart_init
     jsr put_newline
     print_string msg_greeting
+
+    lda status
+    beq @skip_status_message
+    print_string msg_bootstrapped
+    lda status
+    cmp #$1
+    beq @status_uart
+    cmp #$2
+    beq @status_ide
+
+@status_uart:
+    lda #<msg_uart
+    ldx #>msg_uart
+    jmp @print_status
+@status_ide:
+    lda #<msg_ide
+    ldx #>msg_ide
+@print_status:
+    jsr print_message
+@skip_status_message:
+
 
     jsr fpurge
     print_string msg_loading_uart
@@ -139,6 +161,12 @@ filename:
 
 msg_greeting:
  	.byte "Hello, World!", $0a, $0d, $00
+msg_bootstrapped:
+ 	.byte "Bootstrapped via ", $00
+msg_uart:
+    .byte "UART", $0a, $0d, $00
+msg_ide:
+    .byte "IDE", $0a, $0d, $00
 msg_loading_uart:
  	.byte "Loading via UART...", $0a, $0d, $00
 msg_position:

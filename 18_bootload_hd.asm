@@ -10,8 +10,8 @@
 
 ZP_PTR = $80
 
-
-IO_ADDR = ZP_PTR + 2
+STATUS = ZP_PTR
+IO_ADDR = STATUS + 1
 DELAY0 = IO_ADDR + 2
 DELAY1 = DELAY0 + 1
 DELAY2 = DELAY1 + 1
@@ -35,6 +35,7 @@ IRQ_VECTOR = $fdfe
 ; init io addr to $e000
 	lda #00
 	sta IO_ADDR
+	sta STATUS
 	lda #$10 ; hard coded $1000
 	sta IO_ADDR + 1
 
@@ -64,26 +65,20 @@ IRQ_VECTOR = $fdfe
 	sta IO_UART2_CRB
 ;;;;;;;;;;;;;;;;;;;
 ; request .b 
-	lda #'o'
-	jsr putc2
-	lda #'.'
-	jsr putc2
 	lda #'2'
-	jsr putc2
-	lda #$00
 	jsr putc2
 
 	; ignore receive pos & size 
 	jsr getc2
-	jsr getc2
-	; sanity check: expect reveive pos $e0xx to distinguish from line noise if uart is unconnected...
-	cmp #$10
+	cmp #$54
 	bne load_hd
 	jsr getc2
-	jsr getc2
-
+	cmp #$46
+	bne load_hd
 
 load_uart:
+	lda #$1
+	sta STATUS
 	lda #'b'
 	jsr putc2
 	ldy #$00
@@ -95,13 +90,14 @@ load_uart:
 	bne @load_full_page	; end on y wrap around
 	inc IO_ADDR + 1
 	lda IO_ADDR + 1
-	; check if we reached the end of the e000 - fdff range
-	cmp #$13
+	; check if we reached the end of the 1000 - 2000 range
+	cmp #$20
 	beq done_load
 	jmp load_uart
 
 load_hd:
-
+	lda #$2
+	sta STATUS
 
 	; inlined to reduce code size
 @wait_ready_loop:
@@ -160,8 +156,8 @@ load_hd:
 	bne @loop_full_page	; end on y wrap around
 	inc IO_ADDR + 1
 	lda IO_ADDR + 1
-	; check if we reached the end of the e000 - fdff range
-	cmp #$13
+	; check if we reached the end of the 1000 - 2000 range
+	cmp #$20
 	beq @done
 	; check if we are in the middle of 512 byte block
 	ror
