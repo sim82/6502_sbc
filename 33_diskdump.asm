@@ -21,6 +21,7 @@ loop_count: .res $1
 ; lba_high: .res $1
 next_pattern: .res $1
 auto_inc: .res $1
+cur_pos: .res $1
 
 .BSS
 input_buf: .res $100
@@ -44,7 +45,10 @@ input_buf_h: .res $100
 
 event_init:
     ; set up to write to ide disk starting at lba 1
-    lda #$01
+    lda #$00
+    sta cur_pos
+    lda #$1
+    ; lda #$71
     ldx #$00
     ldy #$00
     jsr os_ide_set_lba
@@ -63,11 +67,27 @@ event_init:
 
     ; loop over blocks until eof, writing each to ide
 @block_loop:
+    ; compare if cur_pos is >= $10 and cur_pos < $20 and only call os_id_write_block if true
+    lda cur_pos
+    sta ARG0
+    cmp #$10
+    ; cmp #$e0
+    bcc @no_write
+    lda cur_pos
+    cmp #$20
+    ; cmp #$fe
+    bcs @no_write
+
+    print_inline "writing block"
+    jsr os_dbg_byte
     ; after os_fopen the first block is already in the io buffer.
     ; write it to ide. lba is auto incremented by os_ide_write_block.
     jsr os_ide_write_block
+@no_write:
     ; advance to next block
     jsr os_fnext_block
+    inc cur_pos
+    inc cur_pos
     bcs @block_loop
     rts
 

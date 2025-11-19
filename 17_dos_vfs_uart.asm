@@ -135,13 +135,13 @@ vfs_uart_next_block:
 	sbc oss_receive_size + 1
 	bcs @eof
 	jsr read_next_block_to_iobuf
-	lda zp_io_bl_h
-	sta ARG0
-	jsr dbg_byte
-	lda oss_receive_size
-	sta ARG0
-	jsr dbg_byte
-	jsr put_newline
+	; lda zp_io_bl_h
+	; sta ARG0
+	; jsr dbg_byte
+	; lda oss_receive_size
+	; sta ARG0
+	; jsr dbg_byte
+	; jsr put_newline
 
 	; lda oss_receive_size + 1
 	; sta ARG0

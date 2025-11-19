@@ -116,7 +116,7 @@ load_hd:
 	; lda #$71
 	; sta LBA_LOW
 	; X reg is exclusively used for LBA_LOW for the whole load process. NEVER USE X FOR ANY OTHER PURPOSE!
-	ldx #$09
+	ldx #$01
 
 	; init ide registers
 	lda #$00
