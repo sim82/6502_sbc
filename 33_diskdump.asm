@@ -22,6 +22,12 @@ loop_count: .res $1
 next_pattern: .res $1
 auto_inc: .res $1
 cur_pos: .res $1
+ptr0: 
+ptr0l:.res $1
+ptr0h:.res $1
+temp: .res $1
+startblock: .res $1
+endblock: .res $1
 
 .BSS
 input_buf: .res $100
@@ -44,37 +50,65 @@ input_buf_h: .res $100
     rts
 
 event_init:
-    ; set up to write to ide disk starting at lba 1
-    lda #$00
-    sta cur_pos
-    lda #$1
-    ; lda #$71
-    ldx #$00
-    ldy #$00
-    jsr os_ide_set_lba
 
-    ; expecting arguments: dd <filename>
+    ; expecting arguments: dd <filename> <src start block> <src end block> <dest lba low>
     jsr os_get_argn
-    cmp #$02
-    bne @missing_arg
+    sta ARG0
+    jsr os_dbg_byte
+    cmp #$05
+    beq @no_missing_arg
+
+    print_inline "Error: missing filename argument"
+    rts
+
+@no_missing_arg:
     ; get first argument (filename)
     lda #$01
     jsr os_get_arg
 
     ; open file for reading
     jsr os_fopen
-    bcc @file_not_found
+    bcs @file_found
+
+    print_inline "Error: file not found"
+    rts
+@file_found:
+
+    ; get 2nd argument (src start block)
+    lda #$02
+    jsr os_get_arg
+    jsr get_arg_hex
+
+    ; use hex value read from arg as LBA low
+    ; lda #$71
+    ldx #$00
+    ldy #$00
+    jsr os_ide_set_lba
+    lda #$00
+    sta cur_pos
+
+    ; get 3rd and 4th argument (src end block):w
+    lda #$03
+    jsr os_get_arg
+    jsr get_arg_hex
+    sta startblock
+    lda #$04
+    jsr os_get_arg
+    jsr get_arg_hex
+    sta endblock
+
+
 
     ; loop over blocks until eof, writing each to ide
 @block_loop:
     ; compare if cur_pos is >= $10 and cur_pos < $20 and only call os_id_write_block if true
     lda cur_pos
     sta ARG0
-    cmp #$10
+    cmp startblock
     ; cmp #$e0
     bcc @no_write
     lda cur_pos
-    cmp #$20
+    cmp endblock
     ; cmp #$fe
     bcs @no_write
 
@@ -91,13 +125,7 @@ event_init:
     bcs @block_loop
     rts
 
-@missing_arg:
-    print_inline "Error: missing filename argument"
-    rts
 
-@file_not_found:
-    print_inline "Error: file not found"
-    rts
 
 event_key:
     rts
@@ -105,5 +133,66 @@ event_key:
 event_timer:
     rts
 
+get_arg_hex:
+    sta ptr0l
+    stx ptr0h
+    ldy #$00
+    lda (ptr0), y
+    jsr decode_nibble_high
+    sta temp
 
+    ldy #$01
+    lda (ptr0), y
+    jsr decode_nibble
+    ora temp
+    sta temp
+    sta ARG0
+    jsr os_dbg_byte
+    rts
+
+decode_nibble_high:
+	jsr decode_nibble
+	bcs @exit
+	asl
+	asl
+	asl
+	asl
+@exit:
+	rts
+decode_nibble:
+	; sta IO_DISP_DATA
+	cmp #'0'
+	bmi @bad_char
+
+	cmp #':'
+	bpl @high
+	sec
+	sbc #'0'
+	; pha
+	; lda #$00
+	; sta NUM1+1
+	; pla
+	; sta NUM1
+	; jsr out_dec
+	clc
+	rts
+
+@high:
+	cmp #'a'
+	bmi @bad_char
+	cmp #'g'
+	bpl @bad_char
+	sec
+	sbc #('a' - 10)
+	clc
+	rts
+
+@bad_char:
+	sec
+	rts
+
+error:
+	lda #$55
+	sta IO_GPIO0
+	jmp error
 
