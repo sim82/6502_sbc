@@ -8,11 +8,11 @@
 ; open file on uart channel 1 in block mode (512byte)
 vfs_ide_open:
 	save_regs
-	lda #$01
-	sta oss_ide_lba_low
-	lda #$00
-	sta oss_ide_lba_mid
-	sta oss_ide_lba_high
+	; lda #$01
+	; sta oss_ide_lba_low
+	; lda #$00
+	; sta oss_ide_lba_mid
+	; sta oss_ide_lba_high
 
 	
 	lda #$ff
@@ -21,10 +21,10 @@ vfs_ide_open:
 	sta zp_io_bl_l
 	sta zp_io_bl_h
 	
-	lda #$20
+	lda #$ff
 	sta oss_receive_size
 	; jsr print_hex8
-	lda #$ff
+	lda #$10
 	sta oss_receive_size + 1
 	jmp @no_error
 	; fell through both times -> error
@@ -122,6 +122,9 @@ vfs_ide_set_lba:
 	rts
 
 vfs_ide_write_block:
+	lda oss_ide_lba_low
+	ldx oss_ide_lba_mid
+	ldy oss_ide_lba_high
 	save_regs
 	jsr write_iobuf_to_next_block
 	restore_regs
@@ -142,7 +145,6 @@ write_iobuf_to_next_block:
 	bne @no_carry
 	inc oss_ide_lba_high
 @no_carry:
-	
 	sec
 	rts
 

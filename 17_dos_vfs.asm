@@ -1,7 +1,7 @@
 
-.import putc, fputc, fpurge, open_file_nonpaged, fgetc_nonpaged, getc
+.import putc, fputc, fpurge, open_file_nonpaged, fgetc_nonpaged, getc, get_arg_hex, dbg_byte
 .import vfs_uart_open, vfs_uart_getc, vfs_uart_next_block ; uart driver
-.import vfs_ide_open, vfs_ide_getc
+.import vfs_ide_open, vfs_ide_getc, vfs_ide_set_lba
 .export vfs_open, vfs_getc, vfs_next_block
 .include "17_dos.inc"
 .code
@@ -41,6 +41,15 @@ vfs_open:
 
 
 @open_disk:
+	iny
+	jsr get_arg_hex
+	
+	sta ARG0
+	jsr dbg_byte
+	ldx #$00
+	ldy #$00
+	jsr vfs_ide_set_lba
+
 	jsr vfs_ide_open
 
 	lda #<vfs_ide_getc

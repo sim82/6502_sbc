@@ -56,8 +56,8 @@ lba_low: .res $1
     jsr print_message
 @skip_status_message:
 
-    ; jsr load_uart
-    jsr load_ide
+    jsr load_uart
+    ; jsr load_ide
 ; delete windmill
     lda #$08
     jsr putc

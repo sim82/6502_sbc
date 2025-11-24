@@ -1,6 +1,6 @@
 
 .import putc, fputc, fpurge, open_file_nonpaged, fgetc_nonpaged, getc, fgetc_block, open_file_c1block
-.export print_message, decode_nibble, decode_nibble_high, print_dec, getc_blocking
+.export print_message, decode_nibble, decode_nibble_high, print_dec, getc_blocking, get_arg_hex
 .include "17_dos.inc"
 .code
 
@@ -20,6 +20,20 @@ print_message:
 @end:
 	pla
 	tay
+	rts
+
+get_arg_hex:
+	phx
+	lda (zp_ptr), y
+	jsr decode_nibble_high
+	sta zp_a_temp
+
+	iny
+	lda (zp_ptr), y
+	jsr decode_nibble
+	ora zp_a_temp
+	sta zp_a_temp
+	plx
 	rts
 
 decode_nibble_high:
