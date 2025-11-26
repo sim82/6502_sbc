@@ -39,7 +39,8 @@ DOS_OBJS := $(BUILD_DIR)/17_dos.o $(BUILD_DIR)/17_dos_token.o $(BUILD_DIR)/17_do
             $(BUILD_DIR)/17_dos_baseio.o $(BUILD_DIR)/17_dos_rel.o $(BUILD_DIR)/17_dos_pagetable.o \
             $(BUILD_DIR)/17_dos_builtin.o $(BUILD_DIR)/17_dos_event.o $(BUILD_DIR)/17_dos_zeropage.o \
             $(BUILD_DIR)/17_dos_os_func_table.o ${BUILD_DIR}/17_dos_dbg.o \
-            $(BUILD_DIR)/17_dos_vfs.o $(BUILD_DIR)/17_dos_vfs_uart.o $(BUILD_DIR)/17_dos_vfs_ide.o 
+            $(BUILD_DIR)/17_dos_vfs.o $(BUILD_DIR)/17_dos_vfs_uart.o $(BUILD_DIR)/17_dos_vfs_ide.o \
+			$(BUILD_DIR)/17_dos_cfs1.o
 # --- Target-Specific Variable Definitions (The "Data" Section) ---
 
 # 1. Define Linker Configs

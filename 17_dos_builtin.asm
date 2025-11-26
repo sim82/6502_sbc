@@ -8,7 +8,9 @@
 .import load_relocatable_binary
 .import alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import load_binary, jsr_receive_pos, welcome_message, back_to_dos_message
-.export cmd_help_str, cmd_help, cmd_m_str, cmd_m, cmd_j_str, cmd_j, cmd_alloc_str, cmd_alloc, cmd_ra_str, cmd_ra, cmd_r_str, cmd_r, cmd_fg_str, cmd_fg
+.import dbg_byte
+.import fs_cfs1_find
+.export cmd_help_str, cmd_help, cmd_m_str, cmd_m, cmd_j_str, cmd_j, cmd_alloc_str, cmd_alloc, cmd_ra_str, cmd_ra, cmd_r_str, cmd_r, cmd_fg_str, cmd_fg, cmd_test, cmd_test_str
 .INCLUDE "17_dos.inc"
 
 	
@@ -20,22 +22,22 @@ cmd_help:
 	; jsr print_hex8
 	; jmp cmd_help
 	; lda #00
-	lda #00
-; @loop:
+; 	lda #00
+; ; @loop:
+; ; 	sta IO_GPIO0
+; ; 	inc
+; ; 	jmp @loop
+; 	ldy #0
+; @loop2:
+; 	sty IO_UART2_GPR
+; 	cpy IO_UART2_GPR
+; 	; bne @error
 ; 	sta IO_GPIO0
-; 	inc
-; 	jmp @loop
-	ldy #0
-@loop2:
-	sty IO_UART2_GPR
-	cpy IO_UART2_GPR
-	; bne @error
-	sta IO_GPIO0
-	sty IO_GPIO0
-	iny
-	jmp @loop2
+; 	sty IO_GPIO0
+; 	iny
+; 	jmp @loop2
 	; print_message_from_ptr welcome_message
-	; print_message_from_ptr help_message
+	print_message_from_ptr help_message
 	rts
 @error:
 	lda #%01010101
@@ -268,6 +270,23 @@ cmd_fg:
 @no_background:
 	print_message_from_ptr no_background_message
 	rts
+
+; test
+cmd_test_str:
+	.byte "test", $00
+test1_name:
+	.byte "test1", $00
+cmd_test:
+	lda #<test1_name
+	ldx #>test1_name
+	jsr fs_cfs1_find
+	bcc @error
+
+	sta ARG0
+	jsr dbg_byte
+@error:
+	rts
+
 
 
 

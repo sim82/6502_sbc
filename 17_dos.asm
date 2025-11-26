@@ -7,7 +7,7 @@
 .import print_message, decode_nibble, decode_nibble_high
 .import load_relocatable_binary
 .import init_pagetable, alloc_page, alloc_page_span, free_page_span, free_user_pages
-.import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m, cmd_fg_str, cmd_fg
+.import cmd_help_str, cmd_help, cmd_alloc_str, cmd_alloc, cmd_j_str, cmd_j, cmd_r_str, cmd_r, cmd_ra_str, cmd_ra, cmd_m_str, cmd_m, cmd_fg_str, cmd_fg, cmd_test, cmd_test_str
 .import print_dec
 .export get_argn, get_arg, load_binary, jsr_receive_pos, welcome_message, back_to_dos_message, rand_8, set_direct_timer
 .include "17_dos.inc"
@@ -521,6 +521,7 @@ exec_input_line:
 	dispatch_command cmd_alloc_str, cmd_alloc
 	dispatch_command cmd_ra_str, cmd_ra
 	dispatch_command cmd_fg_str, cmd_fg
+	dispatch_command cmd_test_str, cmd_test
 
 	; fall through. successfull commands jump to @cleanup from macro
 ; @end:

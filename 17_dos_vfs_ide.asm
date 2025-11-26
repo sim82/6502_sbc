@@ -2,7 +2,7 @@
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge, dbg_byte, put_newline
 .import update_fletch16
 .import dbg_byte
-.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block, vfs_ide_set_lba
+.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block, vfs_ide_set_lba, vfs_ide_read_block
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
@@ -146,6 +146,10 @@ write_iobuf_to_next_block:
 	inc oss_ide_lba_high
 @no_carry:
 	sec
+	rts
+
+vfs_ide_read_block:
+	jsr read_next_block_to_iobuf
 	rts
 
 ; read 512 byte block. Treat it as 256 x 16bit words and store 
