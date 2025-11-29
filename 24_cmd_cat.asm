@@ -56,6 +56,7 @@ TMP1 = STR_PTR + 2
 	ldx #>buf1
 @cat_file:
 	jsr os_fopen
+	bcc @file_not_found
 @file_loop:
 	jsr os_fgetc
 	bcc @eof
@@ -81,6 +82,8 @@ TMP1 = STR_PTR + 2
 	
 	rts
 
+@file_not_found:
+	rts
 ; shamelessly exploit the lack of memory protection, and put buffer into code segment *g*
 buf1:
 	.RES $20

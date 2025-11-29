@@ -4,7 +4,7 @@
 .import file_open_raw
 .import reset_tokenize, read_token, retire_token, terminate_token
 .import read_file_paged
-.import print_message, decode_nibble, decode_nibble_high
+.import print_message, decode_nibble, decode_nibble_high, print_dec
 .import load_relocatable_binary
 .import alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import load_binary, jsr_receive_pos, welcome_message, back_to_dos_message
@@ -275,7 +275,7 @@ cmd_fg:
 cmd_test_str:
 	.byte "test", $00
 test1_name:
-	.byte "test1", $00
+	.byte "test2", $00
 cmd_test:
 	lda #<test1_name
 	ldx #>test1_name
@@ -284,6 +284,10 @@ cmd_test:
 
 	sta ARG0
 	jsr dbg_byte
+
+	lda oss_receive_sizel
+	ldx oss_receive_sizeh
+	jsr print_dec
 @error:
 	rts
 

@@ -3,7 +3,7 @@
 .import oss_pagetable
 .import oss_input_line, oss_input_line_ptr 
 .import oss_next_token_ptr, oss_next_token_end
-.import oss_receive_pos, oss_receive_size, oss_io_fun, oss_user_process
+.import oss_receive_pos, oss_receive_sizel, oss_receive_sizeh, oss_receive_size, oss_io_fun, oss_user_process
 .import oss_resident_entrypoint, oss_resident_return, oss_resident_state 
 .import oss_resident_event, oss_resident_eventdata, oss_input_char 
 .import oss_irq_timer, oss_argc, oss_argv, oss_argv_num, oss_rand_seed 

@@ -14,7 +14,7 @@
 .export oss_pagetable
 .export oss_input_line, oss_input_line_ptr
 .export oss_next_token_ptr, oss_next_token_end
-.export oss_receive_pos, oss_receive_size, oss_io_fun, oss_user_process
+.export oss_receive_pos, oss_receive_sizel, oss_receive_sizeh, oss_receive_size, oss_io_fun, oss_user_process
 .export oss_resident_entrypoint, oss_resident_return, oss_resident_state
 .export oss_resident_event, oss_resident_eventdata, oss_input_char
 .export oss_irq_timer, oss_argc, oss_argv, oss_rand_seed
@@ -68,7 +68,9 @@ oss_input_line_ptr: .res $1
 oss_next_token_ptr: .res $1
 oss_next_token_end: .res $1
 oss_receive_pos: .res $2
-oss_receive_size: .res $2
+oss_receive_size:
+oss_receive_sizel: .res $1
+oss_receive_sizeh: .res $1
 oss_io_fun: .res $2
 oss_user_process: .res $1
 oss_resident_entrypoint: .res $2

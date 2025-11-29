@@ -2,7 +2,7 @@
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge, dbg_byte, put_newline
 .import update_fletch16
 .import dbg_byte
-.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block, vfs_ide_set_lba, vfs_ide_read_block
+.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block, vfs_ide_set_lba, vfs_ide_read_block, vfs_ide_read_block_linear
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
@@ -148,14 +148,11 @@ write_iobuf_to_next_block:
 	sec
 	rts
 
-vfs_ide_read_block:
-	jsr read_next_block_to_iobuf
-	rts
-
 ; read 512 byte block. Treat it as 256 x 16bit words and store 
 ; low/high bytes in separate buffers to simplify indexing
 ; NOTE: this is an intermediate step to make the 'IO' layer ready for the common 512byte block size
 ; used by IDE and others.
+vfs_ide_read_block:
 read_next_block_to_iobuf:
 	jsr set_size
 	jsr set_low
@@ -174,6 +171,23 @@ read_next_block_to_iobuf:
 	sec
 	rts
 
+vfs_ide_read_block_linear:
+	jsr set_size
+	jsr set_low
+	jsr set_mid
+	jsr set_high
+	jsr send_read
+	jsr read_block_linear
+
+	inc oss_ide_lba_low
+	bne @no_carry
+	inc oss_ide_lba_mid
+	bne @no_carry
+	inc oss_ide_lba_high
+@no_carry:
+	
+	sec
+	rts
 ; ==================
 set_size:
 	lda #$01
@@ -307,6 +321,42 @@ read_block:
 	; jsr os_putnl
 	rts
 
+; ==================
+
+read_block_linear:
+	ldx #$0
+	jsr check_error
+	jsr wait_ready_int
+@loop:
+	jsr check_drq
+	bcc @end
+	lda IO_IDE_DATA_LOW
+	sta IO_BUFFER_L, x
+	inx
+	; get high byte from latch
+	lda IO_IDE_DATA_HIGH
+	sta IO_BUFFER_L, x
+	inx
+	bne @loop
+
+	ldx #$0
+@loop2:
+	jsr check_drq
+	bcc @end
+	lda IO_IDE_DATA_LOW
+	sta IO_BUFFER_H, x
+	inx
+	; get high byte from latch
+	lda IO_IDE_DATA_HIGH
+	sta IO_BUFFER_H, x
+	inx
+	bne @loop2
+@end:
+
+	; stx ARG0
+	; jsr os_dbg_byte
+	; jsr os_putnl
+	rts
 ; ==================
 write_block:
 	ldx #$0
