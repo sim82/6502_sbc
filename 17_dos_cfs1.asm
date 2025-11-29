@@ -1,5 +1,5 @@
 .import dbg_byte
-.import vfs_ide_set_lba, vfs_ide_read_block_linear
+.import vfs_ide_set_lba, vfs_ide_read_block
 .import putc
 .export fs_cfs1_find
 .include "17_dos.inc"
@@ -12,7 +12,7 @@ fs_cfs1_find:
 	ldx #$00
 	ldy #$00
 	jsr vfs_ide_set_lba
-	jsr vfs_ide_read_block_linear
+	jsr vfs_ide_read_block
 	lda #<IO_BUFFER_L
 	sta zp_al
 	lda #>IO_BUFFER_L

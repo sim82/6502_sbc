@@ -158,12 +158,12 @@ vfs_uart_next_block:
 	restore_xy
 	rts
 
+; outdated: keep for reference
 ; read 512 byte block. Treat it as 256 x 16bit words and store 
 ; low/high bytes in separate buffers to simplify indexing
 ; NOTE: this is an intermediate step to make the 'IO' layer ready for the common 512byte block size
 ; used by IDE and others.
-load_block_to_iobuf:
-read_next_block_to_iobuf:
+read_next_block_to_iobuf_interleaved:
 	lda #'b'
 	jsr fputc
 	ldy #$00
@@ -181,6 +181,35 @@ read_next_block_to_iobuf:
 	sta IO_GPIO0
 	sec
 	rts
+@end:
+	rts
+
+; read 512 byte block from uart, put sequentially into IO_BUFFER_L / IO_BUFFER_H
+load_block_to_iobuf:
+read_next_block_to_iobuf:
+	lda #'b'
+	jsr fputc
+	ldy #$00
+@loop_full_block:
+	jsr fgetc
+	sta IO_BUFFER_L, y
+	jsr update_fletch16
+	iny
+	bne @loop_full_block
+	ldy #$00
+
+@loop_full_block2:
+	jsr fgetc
+	sta IO_BUFFER_H, y
+	jsr update_fletch16
+	iny
+	bne @loop_full_block2
+
+	jsr check_extra
+	lda #%0000000
+	sta IO_GPIO0
+	sec
+	rts
 
 
 check_extra:
@@ -193,7 +222,6 @@ check_extra:
 
 @end:
 	rts
-
 
 msg_read_full_block:
 	.byte "read full page", $0A, $0D, $00

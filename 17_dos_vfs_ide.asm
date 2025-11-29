@@ -2,7 +2,7 @@
 .import fgetc, fputc, putc, print_message, print_hex8, print_hex16, fpurge, dbg_byte, put_newline
 .import update_fletch16
 .import dbg_byte
-.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block, vfs_ide_set_lba, vfs_ide_read_block, vfs_ide_read_block_linear
+.export vfs_ide_open, vfs_ide_getc, vfs_ide_write_block, vfs_ide_set_lba, vfs_ide_read_block
 .include "17_dos.inc"
 
 ; open file on uart channel 1 in block mode (512byte)
@@ -57,13 +57,11 @@ vfs_ide_getc:
 	beq @eof
 
 @no_eof:
+	; low byte of io ptr -> y (index inside page)
+	ldy zp_io_bl_l
+	; high byte of io ptr -> lowest bit determines low / high page of current 512 byte buffer
 	lda zp_io_bl_h
-	lsr 
-	lda zp_io_bl_l
 	ror
-	tay
-	; y contains the 'word index' (the upper 8bit of the read ptr, i.e. the index into either the high or low io buffer page)
-	; the carry flag contains the lowest bit, 0 means read from low op buffer, 1 from high
 		
 	bcs @high_byte
 	lda IO_BUFFER_L, y
@@ -171,23 +169,6 @@ read_next_block_to_iobuf:
 	sec
 	rts
 
-vfs_ide_read_block_linear:
-	jsr set_size
-	jsr set_low
-	jsr set_mid
-	jsr set_high
-	jsr send_read
-	jsr read_block_linear
-
-	inc oss_ide_lba_low
-	bne @no_carry
-	inc oss_ide_lba_mid
-	bne @no_carry
-	inc oss_ide_lba_high
-@no_carry:
-	
-	sec
-	rts
 ; ==================
 set_size:
 	lda #$01
@@ -300,7 +281,8 @@ check_error:
 	rts
 
 ; ==================
-read_block:
+; keep for reference: old 'word based' block handling: store low/high byte in different pages
+read_block_interleaved:
 	ldx #$0
 	jsr check_error
 	jsr wait_ready_int
@@ -323,7 +305,7 @@ read_block:
 
 ; ==================
 
-read_block_linear:
+read_block:
 	ldx #$0
 	jsr check_error
 	jsr wait_ready_int
@@ -352,13 +334,10 @@ read_block_linear:
 	inx
 	bne @loop2
 @end:
-
-	; stx ARG0
-	; jsr os_dbg_byte
-	; jsr os_putnl
 	rts
 ; ==================
-write_block:
+; WARNING: write stuff still uses interleaved word storage
+write_block_interleaved:
 	ldx #$0
 @loop:
 	jsr check_error
@@ -375,6 +354,44 @@ write_block:
 	sta IO_IDE_DATA_LOW
 	inx
 	jmp @loop
+@end:
+	; stx ARG0
+	; jsr os_dbg_byte
+	; jsr os_putnl
+	rts
+
+
+write_block:
+	ldx #$0
+@loop:
+	jsr check_error
+	jsr wait_ready_int
+	jsr check_drq
+	bcc @end
+	; write high byte to latch first
+	lda IO_BUFFER_L, x
+	inx
+	ldy IO_BUFFER_L, x
+	sty IO_IDE_DATA_HIGH
+	sta IO_IDE_DATA_LOW
+	inx
+	bne @loop
+	ldx #00
+@loop2:
+
+	jsr check_error
+	jsr wait_ready_int
+	jsr check_drq
+	bcc @end
+	; write high byte to latch first
+	lda IO_BUFFER_H, x
+	inx
+	ldy IO_BUFFER_H, x
+	sty IO_IDE_DATA_HIGH
+	sta IO_IDE_DATA_LOW
+	inx
+	bne @loop2
+
 @end:
 	; stx ARG0
 	; jsr os_dbg_byte
