@@ -64,14 +64,10 @@ vfs_uart_getc:
 	; beq @eof
 
 @no_eof:
+	ldy zp_io_bl_l
+	; high byte of io ptr -> lowest bit determines low / high page of current 512 byte buffer
 	lda zp_io_bl_h
-	lsr 
-	lda zp_io_bl_l
 	ror
-	tay
-	; y contains the 'word index' (the upper 8bit of the read ptr, i.e. the index into either the high or low io buffer page)
-	; the carry flag contains the lowest bit, 0 means read from low op buffer, 1 from high
-		
 	bcs @high_byte
 	lda IO_BUFFER_L, y
 	bcc @end_read ; opt: known carry state, rel. jump
