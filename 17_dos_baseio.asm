@@ -48,6 +48,8 @@ decode_nibble_high:
 	rts
 
 print_dec:
+	pha
+	phx
 	sta NUM1
 	stx NUM1 + 1
 	lda #$0
@@ -78,6 +80,8 @@ print_dec:
 	; lda #$20
 	; jsr putc
 	
+	plx
+	pla
 	rts
 
 div16:

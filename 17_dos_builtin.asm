@@ -1,5 +1,5 @@
 
-.IMPORT put_newline, uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, fpurge, print_hex16, print_hex8
+.IMPORT put_newline, uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, fpurge, print_hex16, print_hex8, put_space
 .import fgetc_buf, open_file_nonpaged
 .import file_open_raw
 .import reset_tokenize, read_token, retire_token, terminate_token
@@ -9,7 +9,7 @@
 .import alloc_page, alloc_page_span, free_page_span, free_user_pages
 .import load_binary, jsr_receive_pos, welcome_message, back_to_dos_message
 .import dbg_byte
-.import fs_cfs1_find
+.import fs_cfs1_find, fs_cfs1_next_link, fs_cfs1_set_link
 .export cmd_help_str, cmd_help, cmd_m_str, cmd_m, cmd_j_str, cmd_j, cmd_alloc_str, cmd_alloc, cmd_ra_str, cmd_ra, cmd_r_str, cmd_r, cmd_fg_str, cmd_fg, cmd_test, cmd_test_str
 .INCLUDE "17_dos.inc"
 
@@ -272,11 +272,12 @@ cmd_fg:
 	rts
 
 ; test
-cmd_test_str:
+; directory lookup test (disabled for now)
+xcmd_test_str:
 	.byte "test", $00
 test1_name:
 	.byte "test2", $00
-cmd_test:
+xcmd_test:
 	lda #<test1_name
 	ldx #>test1_name
 	jsr fs_cfs1_find
@@ -291,6 +292,35 @@ cmd_test:
 @error:
 	rts
 
+cmd_test_str:
+	.byte "test", $00
+cmd_test:
+	lda #$01
+	ldx #$02
+	jsr fs_cfs1_set_link
+	ldy #$00
+@loop:
+	jsr print_dec
+	jsr put_space
+	iny
+	cpy #40
+	bne @no_newline
+	jsr put_newline
+	ldy #$00
+
+@no_newline:
+	jsr fs_cfs1_next_link
+
+	lda oss_cfs1_linkl
+	ldx oss_cfs1_linkh
+	; loop until a == x == 0 (end of list)
+	cmp #$00
+	bne @loop
+	cpx #$00
+	bne @loop
+	
+@error:
+	rts
 
 
 

@@ -1,6 +1,6 @@
 
 .INCLUDE "std.inc"
-.EXPORT uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, print_hex16, print_hex8, put_newline, fpurge
+.EXPORT uart_init, putc, getc, fputc, fgetc, fgetc_nonblocking, print_hex16, print_hex8, put_newline, fpurge, put_space
 .CODE
 
 uart_init:
@@ -173,14 +173,22 @@ fpurge:
 	rts
 
 
-
+; quick helpers that preserve registers
 put_newline:
+	pha
 	lda #$0a
 	jsr putc
 	lda #$0d
 	jsr putc
+	pla
 	rts
 
+put_space:
+	pha
+	lda #' '
+	jsr putc
+	pla
+	rts
 
 ; low in a, high in x
 print_hex16:

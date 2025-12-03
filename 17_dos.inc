@@ -9,6 +9,7 @@
 .import oss_irq_timer, oss_argc, oss_argv, oss_argv_num, oss_rand_seed 
 .import oss_dt_div16 
 .import oss_ide_lba_low, oss_ide_lba_mid, oss_ide_lba_high
+.import oss_cfs1_link, oss_cfs1_linkl, oss_cfs1_linkh
 
 PAGETABLE = $0200
 .assert PAGETABLE = oss_pagetable, error, "PAGETABLE mismatch"

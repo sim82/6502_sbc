@@ -6,7 +6,7 @@ use std::{
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 type Result<T> = anyhow::Result<T>;
-const NUM_LINKS: usize = 256 * 2;
+const NUM_LINKS: usize = 256 * 256;
 
 struct Cfs1 {
     links: [usize; NUM_LINKS],
@@ -87,8 +87,8 @@ impl Cfs1 {
 }
 fn main() -> anyhow::Result<()> {
     let mut fs = Cfs1::default();
-    let b1 = fs.alloc(10)?;
-    let b2 = fs.alloc(5)?;
+    let b1 = fs.alloc(512)?;
+    let b2 = fs.alloc(256)?;
     println!("{:?} {:?}", b1, b2);
     fs.print_chain(b1);
     fs.print_chain(b2);
@@ -96,11 +96,16 @@ fn main() -> anyhow::Result<()> {
 
     fs.free(b1);
     fs.free(b2);
-    let b3 = fs.alloc(10)?;
-    let b4 = fs.alloc(5)?;
+    let b3 = fs.alloc(512)?;
+    let b4 = fs.alloc(256)?;
+    let b5 = fs.alloc(10)?;
+    let b6 = fs.alloc(5)?;
+
     fs.print_chain(b3);
     fs.print_chain(b4);
     fs.print_chain(0);
+    fs.print_chain(b5);
+    fs.print_chain(b6);
 
     let mut f = BufWriter::new(std::fs::File::create("cfs1.bin")?);
     fs.write(&mut f)?;

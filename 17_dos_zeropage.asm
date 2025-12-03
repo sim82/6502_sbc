@@ -20,6 +20,7 @@
 .export oss_irq_timer, oss_argc, oss_argv, oss_rand_seed
 .export oss_dt_div16
 .export oss_ide_lba_low, oss_ide_lba_mid, oss_ide_lba_high
+.export oss_cfs1_link, oss_cfs1_linkl, oss_cfs1_linkh
 
 
 .ZEROPAGE
@@ -87,3 +88,6 @@ oss_dt_div16: .res $1
 oss_ide_lba_low: .res $1
 oss_ide_lba_mid: .res $1
 oss_ide_lba_high: .res $1
+oss_cfs1_link:
+oss_cfs1_linkl: .res $1
+oss_cfs1_linkh: .res $1

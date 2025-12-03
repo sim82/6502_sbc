@@ -1,7 +1,7 @@
 .import dbg_byte
 .import vfs_ide_set_lba, vfs_ide_read_block
 .import putc
-.export fs_cfs1_find
+.export fs_cfs1_find, fs_cfs1_next_link, fs_cfs1_set_link
 .include "17_dos.inc"
 .code
 
@@ -75,3 +75,27 @@ lookup_name:
 	sec
 	rts
 
+fs_cfs1_set_link:
+	sta oss_cfs1_linkl
+	stx oss_cfs1_linkh
+	rts
+
+fs_cfs1_next_link:
+	save_regs
+	; link number stored in linkl:linkh
+	; there are 256 links per block -> linkh == index of link-table block == lba low (becaus link table starts at 0 0 0)
+	; linkl is the offset of the entry inside the link-table block
+	lda oss_cfs1_linkh
+	ldx #$00
+	ldy #$00
+	jsr vfs_ide_set_lba
+	jsr vfs_ide_read_block
+
+	ldy oss_cfs1_linkl
+	ldx IO_BUFFER_H, y ; high / low are stored separately
+	lda IO_BUFFER_L, y
+	stx oss_cfs1_linkh
+	sta oss_cfs1_linkl
+	
+	restore_regs
+	rts
