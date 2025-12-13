@@ -295,8 +295,8 @@ xcmd_test:
 cmd_test_str:
 	.byte "test", $00
 cmd_test:
-	lda #$01
-	ldx #$02
+	lda #$21
+	ldx #$00
 	jsr fs_cfs1_set_link
 	ldy #$00
 @loop:
