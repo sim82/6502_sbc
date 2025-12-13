@@ -2,7 +2,8 @@
 .import putc, fputc, fpurge, open_file_nonpaged, fgetc_nonpaged, getc, get_arg_hex, dbg_byte
 .import vfs_uart_open, vfs_uart_getc, vfs_uart_next_block ; uart driver
 .import vfs_ide_open, vfs_ide_getc, vfs_ide_set_lba, vfs_ide_read_block
-.import fs_cfs1_find
+.import fs_cfs1_find, fs_cfs1_open
+
 .export vfs_open, vfs_getc, vfs_next_block
 .include "17_dos.inc"
 .code
@@ -21,6 +22,9 @@ vfs_open:
 	; / prefix: filesystem
 	cmp #'/'
 	beq @open_cfs1
+
+	cmp #'@'
+	beq @open_cfs1_link
 
 	; no prefix: load from uart
 	jsr fpurge
@@ -65,6 +69,24 @@ vfs_open:
 
         ply
         rts
+
+@open_cfs1_link:
+	iny
+	jsr get_arg_hex
+	sta ARG0
+	jsr dbg_byte
+	sta oss_cfs1_linkl
+	lda #$00
+	sta oss_cfs1_linkh
+	lda #$00
+	ldx #$10
+	jsr fs_cfs1_open
+	lda #<vfs_ide_getc
+	sta zp_fgetc_l
+	lda #>vfs_ide_getc
+	sta zp_fgetc_h
+	ply
+	rts
 
 @open_cfs1:
 	lda zp_ptr

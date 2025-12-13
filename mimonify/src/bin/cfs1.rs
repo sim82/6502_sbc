@@ -8,6 +8,7 @@ use std::{
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 type Result<T> = anyhow::Result<T>;
 const NUM_LINKS: usize = 256 * 256;
+const BLOCK_SIZE: usize = 512;
 
 struct Cfs1Alloc {
     links: [usize; NUM_LINKS],
@@ -103,23 +104,23 @@ impl Cfs1Alloc {
 struct Cfs1Builder {
     alloc: Cfs1Alloc,
     files: Vec<(PathBuf, usize)>,
-    pages: Vec<[u8; 256]>,
+    blocks: Vec<[u8; BLOCK_SIZE]>,
 }
 
 impl Cfs1Builder {
     fn add_file(&mut self, filename: impl AsRef<Path>) -> Result<()> {
         let data = std::fs::read(&filename)?;
-        let chunks = data.chunks(256);
+        let chunks = data.chunks(BLOCK_SIZE);
         let num_pages = chunks.len();
         let start_page = self.alloc.alloc(num_pages)?;
         let chain = self.alloc.get_chain(start_page)?;
         assert!(chain.len() == num_pages);
 
         for (page, chunk) in chain.iter().zip(chunks) {
-            if *page >= self.pages.len() {
-                self.pages.resize(page + 1, [0u8; 256]);
+            if *page >= self.blocks.len() {
+                self.blocks.resize(page + 1, [0u8; BLOCK_SIZE]);
             }
-            self.pages[*page][0..chunk.len()].copy_from_slice(chunk);
+            self.blocks[*page][0..chunk.len()].copy_from_slice(chunk);
         }
         self.files
             .push((filename.as_ref().to_path_buf(), start_page));
@@ -128,7 +129,7 @@ impl Cfs1Builder {
     pub fn write<T: std::io::Write + std::io::Seek>(&self, w: &mut T) -> Result<()> {
         self.alloc.write(w)?;
         w.seek(SeekFrom::Start(256 * 256 * 2))?;
-        for page in &self.pages {
+        for page in &self.blocks {
             w.write_all(page)?;
         }
 

@@ -1,7 +1,7 @@
 .import dbg_byte
 .import vfs_ide_set_lba, vfs_ide_read_block
 .import putc
-.export fs_cfs1_find, fs_cfs1_next_link, fs_cfs1_set_link
+.export fs_cfs1_find, fs_cfs1_next_link, fs_cfs1_set_link, fs_cfs1_open
 .include "17_dos.inc"
 .code
 
@@ -73,6 +73,27 @@ lookup_name:
 	plx
 	pla
 	sec
+	rts
+
+fs_cfs1_open:
+	sta oss_receive_size
+	stx oss_receive_size + 1
+
+	lda #$ff
+	sta zp_io_bw_eof
+	lda #$00
+	sta zp_io_bl_l
+	sta zp_io_bl_h
+	lda oss_cfs1_linkl
+	sta oss_ide_lba_low
+	lda oss_cfs1_linkh
+	clc
+	adc #$01 ; add 256 blocks of link list
+	sta oss_ide_lba_mid
+	lda #$00
+	sta oss_ide_lba_high
+	
+	jsr vfs_ide_read_block
 	rts
 
 fs_cfs1_set_link:
