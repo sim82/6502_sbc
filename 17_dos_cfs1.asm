@@ -203,15 +203,7 @@ fs_cfs1_getc:
 	sta oss_ide_lba_high
 	
 	jsr vfs_ide_read_block
-	bcs @skip_fill_buffer
-
-@eof_link:
-	; jump here if eof or any error is encountered while reading the next link / block
-	; NOTE: expecting that temp A value is on the stack!
-	pla ; repair stack (still contains temp A value)
-	ldy #$FF
-	sty zp_io_bw_eof
-	jmp @eof
+	bcc @eof_link
 
 @skip_fill_buffer:
 	; exit getc normally: pull temp A from stack and set carry
@@ -219,6 +211,14 @@ fs_cfs1_getc:
 	sec
 	restore_xy
 	rts
+
+@eof_link:
+	; jump here if eof or any error is encountered while reading the next link / block
+	; NOTE: expecting that temp A value is on the stack!
+	pla ; repair stack (still contains temp A value)
+	ldy #$FF
+	sty zp_io_bw_eof
+
 @eof:
 	lda #%01010101
 	sta IO_GPIO0
