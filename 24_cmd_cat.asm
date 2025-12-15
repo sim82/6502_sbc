@@ -60,6 +60,7 @@ TMP1 = STR_PTR + 2
 @file_loop:
 	jsr os_fgetc
 	bcc @eof
+	; jmp @skip_output
 	cmp #$0a
 	bne @no_lf
 	lda #$0d ; pure hate....
@@ -67,6 +68,8 @@ TMP1 = STR_PTR + 2
 	lda #$0a
 @no_lf:
 	jsr os_putc
+
+@skip_output:
 	jmp @file_loop
 
 @eof:

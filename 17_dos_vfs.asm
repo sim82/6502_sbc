@@ -2,7 +2,7 @@
 .import putc, fputc, fpurge, open_file_nonpaged, fgetc_nonpaged, getc, get_arg_hex, dbg_byte
 .import vfs_uart_open, vfs_uart_getc, vfs_uart_next_block ; uart driver
 .import vfs_ide_open, vfs_ide_getc, vfs_ide_set_lba, vfs_ide_read_block
-.import fs_cfs1_find, fs_cfs1_open
+.import fs_cfs1_find, fs_cfs1_open, fs_cfs1_getc
 
 .export vfs_open, vfs_getc, vfs_next_block
 .include "17_dos.inc"
@@ -78,12 +78,12 @@ vfs_open:
 	sta oss_cfs1_linkl
 	lda #$00
 	sta oss_cfs1_linkh
-	lda #$00
-	ldx #$10
+	lda #$ff
+	ldx #$ff
 	jsr fs_cfs1_open
-	lda #<vfs_ide_getc
+	lda #<fs_cfs1_getc
 	sta zp_fgetc_l
-	lda #>vfs_ide_getc
+	lda #>fs_cfs1_getc
 	sta zp_fgetc_h
 	ply
 	rts
